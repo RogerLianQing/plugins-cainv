@@ -176,7 +176,9 @@ function pms_get_subscription_plan_upgrades( $subscription_plan_id, $only_active
 	
 	// Roger Custom
 	$user_roles = wp_get_current_user() -> roles;
-	if(in_array('subscriber', $user_roles) or in_array('pms_subscription_plan_890', $user_roles) or in_array('unpaid_business_member', $user_roles)){
+	um_fetch_user(wp_get_current_user() -> ID );
+	$app_status = um_user('app_status'); 
+	if((in_array('subscriber', $user_roles) or in_array('pms_subscription_plan_890', $user_roles) or in_array('unpaid_business_member', $user_roles) and $app_status != 'Approved')){
 		$include = array(0=>924, 1=> 890, 2=> 806);
 		if (($key = array_search($subscription_plan_id, $include)) !== false) {
 		unset($include[$key]);
