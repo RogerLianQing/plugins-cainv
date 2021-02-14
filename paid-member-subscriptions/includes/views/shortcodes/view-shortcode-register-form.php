@@ -47,8 +47,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         // Display subscription plans at the bottom
         if( $atts['plans_position'] == 'top' )
-           // echo $subscription_plans_field;
-			echo '1232';
+            echo $subscription_plans_field;
+
         ?>
 
 
