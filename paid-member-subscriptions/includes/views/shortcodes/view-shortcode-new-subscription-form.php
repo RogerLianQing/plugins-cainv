@@ -29,8 +29,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		$user_roles = wp_get_current_user() -> roles;
 		um_fetch_user(wp_get_current_user() -> ID );
 		$chosen_role = um_user('testtt'); 
+		$app_status = um_user('app_status'); 
 			// Roger Custom
-			if(in_array('subscriber', $user_roles) or in_array('pms_subscription_plan_890', $user_roles) or in_array('unpaid_business_member', $user_roles) ){
+			if((in_array('subscriber', $user_roles) or in_array('pms_subscription_plan_890', $user_roles) or in_array('unpaid_business_member', $user_roles) and $app_status != 'Approved')){
 				$include = array(0=>890, 1=> 924, 2=> 806);
 				$exclude = array();
 			}else{
