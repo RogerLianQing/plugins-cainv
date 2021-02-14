@@ -1,0 +1,169 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: File Upload Types 1.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/file-upload-types\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-09-10T09:04:49+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: file-upload-types\n"
+
+#. Plugin Name of the plugin
+#: src/Settings.php:100
+#: src/Settings.php:114
+#: src/Settings.php:115
+msgid "File Upload Types"
+msgstr ""
+
+#. Description of the plugin
+msgid "Easily allow WordPress to accept and upload any file type extension or MIME type, including custom file types."
+msgstr ""
+
+#. Author of the plugin
+#: src/Settings.php:561
+msgid "WPForms"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://wpforms.com"
+msgstr ""
+
+#: file-upload-types.php:44
+msgid "The File Upload Types plugin has been deactivated. Your site is running an outdated version of PHP that is no longer supported and is not compatible with the File Upload Types plugin."
+msgstr ""
+
+#: src/Plugin.php:87
+msgid "File Upload Types Settings"
+msgstr ""
+
+#: src/Plugin.php:87
+#: src/Settings.php:140
+msgid "Settings"
+msgstr ""
+
+#: src/Settings.php:81
+msgid "Default section can not be deleted."
+msgstr ""
+
+#: src/Settings.php:145
+msgid "Need some help?"
+msgstr ""
+
+#: src/Settings.php:148
+msgid "View Documentation"
+msgstr ""
+
+#: src/Settings.php:172
+msgid "Save Settings"
+msgstr ""
+
+#: src/Settings.php:192
+msgid "Add File Upload Types"
+msgstr ""
+
+#. translators: %1$s - URL to WordPress Codex page, %2$s - anchor link.
+#: src/Settings.php:197
+msgid "Below is the list of files types that can be enabled, not including the <a href=\"%1$s\" rel=\"noopener\" target=\"_blank\">files WordPress allows by default</a>. <br>Don't see what you need? No problem, <a href=\"%2$s\" id=\"add-custom-file-types\" rel=\"noopener noreferrer\">add your custom file types</a>."
+msgstr ""
+
+#: src/Settings.php:215
+msgid "Search File Types"
+msgstr ""
+
+#: src/Settings.php:222
+msgid "Description"
+msgstr ""
+
+#: src/Settings.php:223
+#: src/Settings.php:324
+msgid "MIME Type"
+msgstr ""
+
+#: src/Settings.php:224
+#: src/Settings.php:326
+msgid "Extension"
+msgstr ""
+
+#: src/Settings.php:244
+msgid "ENABLED"
+msgstr ""
+
+#: src/Settings.php:271
+msgid "AVAILABLE"
+msgstr ""
+
+#: src/Settings.php:314
+msgid "ADD CUSTOM FILE TYPES"
+msgstr ""
+
+#: src/Settings.php:317
+msgid "Enter the description, MIME type and extension of the file. Multiple MIME types for a single extension can be separated by a comma."
+msgstr ""
+
+#: src/Settings.php:323
+msgid "File Description"
+msgstr ""
+
+#: src/Settings.php:346
+msgid "You might like our other products"
+msgstr ""
+
+#. translators: %s - wpforms.com link.
+#: src/Settings.php:352
+msgid "File Upload Types is built by the team behind the most popular WordPress form plugin, <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">WPForms</a>. Check out some of our other plugins."
+msgstr ""
+
+#. translators: %1$s - Plugin URL; %2$s - Plugin Name; %3$s - Image source.
+#: src/Settings.php:383
+msgid "<strong><a href=\"%1$s\" class=\"external-link\" target=\"_blank\" rel=\"noopener noreferrer\">Get %2$s</a></strong>"
+msgstr ""
+
+#: src/Settings.php:478
+msgid "Your settings have been saved."
+msgstr ""
+
+#. translators: %1$s - Same page; %2$s - Documentation link for multiple types support.
+#: src/Settings.php:502
+msgid "File Upload Types now supports multiple MIME types for each file extension to improve file upload compatibility! <br/> <strong><a href=\"%1$s\">Enable multiple MIME types support</a> | <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Learn More</a></strong>"
+msgstr ""
+
+#: src/Settings.php:542
+msgid "Support for multiple MIME types has been enabled."
+msgstr ""
+
+#: src/Settings.php:562
+msgid "The most beginner friendly WordPress contact form plugin."
+msgstr ""
+
+#: src/Settings.php:567
+msgid "MonsterInsights"
+msgstr ""
+
+#: src/Settings.php:568
+msgid "Effortlessly connect your WP site with Google Analytics."
+msgstr ""
+
+#: src/Settings.php:573
+msgid "OptinMonster"
+msgstr ""
+
+#: src/Settings.php:574
+msgid "Turn your traffic into leads, conversions and sales."
+msgstr ""
+
+#: src/Settings.php:579
+msgid "SeedProd"
+msgstr ""
+
+#: src/Settings.php:580
+msgid "Create beautiful coming soon pages, skyrocket your email list."
+msgstr ""
+
+#. translators: %1$s - WP.org link; %2$s - same WP.org link.
+#: src/Settings.php:605
+msgid "Please rate <strong>File Upload Types</strong> <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">&#9733;&#9733;&#9733;&#9733;&#9733;</a> on <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">WordPress.org</a> to help us spread the word. Thank you from the File Upload Types team!"
+msgstr ""
