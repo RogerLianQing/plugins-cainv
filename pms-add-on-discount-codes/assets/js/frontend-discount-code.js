@@ -189,9 +189,67 @@ jQuery(document).ready(function($) {
                         $('#pms-subscription-plans-discount-messages').html(text).fadeIn(350);
                     })
 					   }
+					
+					// If there is discount
 					else{
-						    $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
-                        $('#pms-subscription-plans-discount-messages').html(response.success.message).fadeIn(350);
+						var aftertax = 0;
+						var string = response.success.message;
+						var amount = string.replace('Discount successfully applied! Amount to be charged now is', '').replace('then', '').replace('every year', '').replace('&#36;', '');
+						var amount = (amount + ' ').replace('. ', '').replace(',', '')
+						var numbers = amount.split("&#36;");
+						//var jk = parseFloat(amount);
+
+						var beforetax = 0;
+						var plan = '';
+						var tax = 0;
+						switch ( $subscription_plan.val().toString()) {
+							  case '416':
+								plan = "ACI VIP Membership";
+								beforetax = 1099;
+								tax = (1099 * 0.13).toFixed(2);
+								aftertax = (1099 * 1.13).toFixed(2);
+								break;
+							  case '561':
+								plan = "Premium Membership";
+								beforetax = 149.99;
+								tax = (149.99 * 0.13).toFixed(2);
+								aftertax = (149.99 * 1.13).toFixed(2);
+								break;
+							  case '890':
+								plan = "Business Membership";
+								beforetax = 149.99;
+								tax = (149.99 * 0.13).toFixed(2);
+								aftertax = (149.99 * 1.13).toFixed(2);
+								break;
+							  case '563':
+								plan = "Regular Membership";
+								beforetax = 48.99;
+								tax = (48.99 * 0.13).toFixed(2);
+								aftertax = (48.99 * 1.13).toFixed(2);
+								break;
+							  case '806':
+								plan = "Test Membership";
+								beforetax = 0.5;
+								tax = (0.5 * 0.13).toFixed(2);
+								aftertax = (0.5 * 1.13).toFixed(2);
+								break;
+							  
+
+							}
+
+						var discount = (aftertax - numbers[0]).toFixed(2);
+						
+						var text ='<p> Summary' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'You have Chosen: ' +  ' </span>' +  plan + ' </p> ' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'Price: ' +  ' </span>'+ ' &#36; ' +  beforetax.toString() + ' </p> ' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'Tax (HST): ' +  ' </span>'+ ' &#36; ' +  tax.toString() + ' </p> ' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'Subtotal: ' +  ' </span>'+ ' &#36; ' +  aftertax.toString() + ' </p> ' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'Discount: ' +  ' </span>'+ ' &#36; ' +  discount.toString() + ' </p> ' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'Total Now: ' +  ' </span>'+ ' &#36; ' +  numbers[0].toString() + ' </p> ' + 
+							'<p style="text-align:right"> <span style="float:left">'+ 'Annual Charge next year: ' +  ' </span>'+ ' &#36; ' +  numbers[1].toString() + ' </p> ' + 
+							'<p> Please proceed to payment at the bottom. '
+					   $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
+                        $('#pms-subscription-plans-discount-messages').html(text).fadeIn(350);
                     });
 
 					   }
