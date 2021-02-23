@@ -177,7 +177,7 @@ jQuery(document).ready(function($) {
 							}
 						
 						var tax = (aftertax - closest).toFixed(2);
-						var text = '<P> Summary <p> You have chosen: ' + plan + '&nbsp; &nbsp;' +  closest.toString() + '<p> Tax (HST): &nbsp; &nbsp; &#36;' + tax.toString() + ' <p> Subtotal: &nbsp; &nbsp; &#36;' + aftertax.toString()+ '<p> Please proceed to payment at the bottom. ';
+						var text = '<P> Summary <p> You have chosen: ' + plan + '&#09; &#09; &#36;' +  closest.toString() + '<p> Tax (HST): &#09; &#09; &#36;' + tax.toString() + ' <p> Subtotal: &#09; &#09; &#36;' + aftertax.toString()+ '<p> Please proceed to payment at the bottom. ';
 					   $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
                         $('#pms-subscription-plans-discount-messages').html(text).fadeIn(350);
                     })
