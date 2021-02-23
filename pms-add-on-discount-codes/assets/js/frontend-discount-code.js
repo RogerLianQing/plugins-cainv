@@ -140,7 +140,7 @@ jQuery(document).ready(function($) {
 						var aftertax = parseFloat(number).toFixed(2);
 
 						var beforetax = (aftertax / 1.13).toFixed(2);
-						var counts = [0, 1099, 149.99, 48.99, 0.5],
+						var counts = [0, 1099.00, 149.99, 48.99, 0.5],
 							  goal = beforetax;
 
 						var closest = counts.reduce(function(prev, curr) {
