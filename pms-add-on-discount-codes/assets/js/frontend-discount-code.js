@@ -118,6 +118,8 @@ jQuery(document).ready(function($) {
                     $('#pms-subscription-plans-discount-messages').removeClass('pms-discount-error');
                     $('#pms-subscription-plans-discount-messages').addClass('pms-discount-success');
 
+					
+					
                     $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
                         $('#pms-subscription-plans-discount-messages').html(response.success.message).fadeIn(350);
                     });
@@ -142,6 +144,12 @@ jQuery(document).ready(function($) {
                     $('#pms-subscription-plans-discount-messages').removeClass('pms-discount-success');
                     $('#pms-subscription-plans-discount-messages').addClass('pms-discount-error');
 
+					// Roger Custom
+					var first_char = ["P", "p"];
+					if( first_char.includes(data['code'].charAt(0)) ){
+						response.error.message =  'Oops, you might have used a promotional code from another website. Try to use it on https://patentk.com';
+					}
+					
                     $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
                         $('#pms-subscription-plans-discount-messages').html(response.error.message).fadeIn(350);
                     });

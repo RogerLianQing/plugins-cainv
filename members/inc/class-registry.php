@@ -63,7 +63,7 @@ class Registry {
 	 * @access private
 	 * @return void
 	 */
-	private function __wakeup() {}
+	public function __wakeup() {}
 
 	/**
 	 * Register an item.
