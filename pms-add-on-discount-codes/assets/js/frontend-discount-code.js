@@ -156,8 +156,28 @@ jQuery(document).ready(function($) {
 							  return (Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev);
 							});
 						
+						var plan = ''
+						switch ( $subscription_plan.val().toString()) {
+							  case '416':
+								plan = "ACI VIP Membership";
+								break;
+							  case '561':
+								plan = "Premium Membership";
+								break;
+							  case '890':
+								 plan = "Business Membership";
+								break;
+							  case '563':
+								plan = "Regular Membership";
+								break;
+							  case '806':
+								plan = "Test Membership";
+								break;
+
+							}
+						
 						var tax = (aftertax - closest).toFixed(2);
-						var text = '<P> Receipt <p> The price for your plan is: &#36;' + closest.toString() + '<p> The Tax (HST) would be: &#36;' + tax.toString() + ' <p> So your annual subtotal would be: &#36;' + aftertax.toString()+ '<p> Please proceed to payment at the bottom. ';
+						var text = '<P> Summary <p> You have chosen: ' + plan + '&nbsp; &nbsp;' +  closest.toString() + '<p> Tax (HST): &nbsp; &nbsp; &#36;' + tax.toString() + ' <p> Subtotal: &nbsp; &nbsp; &#36;' + aftertax.toString()+ '<p> Please proceed to payment at the bottom. ';
 					   $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
                         $('#pms-subscription-plans-discount-messages').html(text).fadeIn(350);
                     })
