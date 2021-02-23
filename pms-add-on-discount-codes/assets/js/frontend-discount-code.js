@@ -15,26 +15,36 @@ jQuery(document).ready(function($) {
      * This will update the discount message shown below the field.
      *
      */
+	
+	var discount_length = $('#pms_subscription_plans_discount_code').length;
+	var disscount_val = $('#pms_subscription_plans_discount_code').val();
+	
+	if ( discount_length == 0){
+		discount_length = 4
+	}
+	if(disscount_val == ''){
+		disscount_val = 'ShowtheReceipt'
+	}
     $('.pms-subscription-plan input[type="radio"][name="subscription_plans"]').click(function(){
 
         // If subscription is not free and discount code field is not empty
-        if (  ( $(this).attr("data-price") > 0) && ( $('#pms_subscription_plans_discount_code').length > 0 ) ){
+        if (  (( $(this).attr("data-price") > 0) && ( discount_length > 0 )) || disscount_val == 'ShowtheReceipt' ){
 
             $('#pms-apply-discount').trigger('click');
 
         } else {
-
             $('#pms-subscription-plans-discount-messages-wrapper').hide();
             $('#pms-subscription-plans-discount-messages').hide();
-
         }
 
     });
+	
+	
 
     $('.pms-subscription-plan-auto-renew input[type="checkbox"][name="pms_recurring"]').click(function(){
 
         // If discount code field is not empty
-        if ( $('#pms_subscription_plans_discount_code').length > 0 ){
+        if ( discount_length > 0 ){
 
             $('#pms-apply-discount').trigger('click');
 
@@ -72,7 +82,9 @@ jQuery(document).ready(function($) {
             $subscription_plan = $('input[type=hidden][name=subscription_plans]');
         }
 
-        if( $('#pms_subscription_plans_discount_code').val() == '' ) {
+		
+		
+        if( disscount_val == '' ) {
             $('#pms-subscription-plans-discount-messages-wrapper').fadeOut( 350 );
             $('#pms-subscription-plans-discount-messages').fadeOut( 350 )
 
@@ -83,7 +95,7 @@ jQuery(document).ready(function($) {
         }
 
         // Cache the discount code
-        last_checked_discount_code = $('#pms_subscription_plans_discount_code').val();
+        last_checked_discount_code = disscount_val;
 
         pwyw_price = '';
 
@@ -92,7 +104,7 @@ jQuery(document).ready(function($) {
 
         var data = {
             'action'      : 'pms_discount_code',
-            'code'        : $.trim( $('#pms_subscription_plans_discount_code').val()),
+            'code'        : $.trim( disscount_val),
             'subscription': $subscription_plan.val(),
             'recurring'   : $('input[name="pms_recurring"]:checked').val(),
             'pwyw_price'  : pwyw_price,
@@ -119,11 +131,36 @@ jQuery(document).ready(function($) {
                     $('#pms-subscription-plans-discount-messages').addClass('pms-discount-success');
 
 					
-					
-                    $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
+					//Roger Custom
+					if(disscount_val == 'ShowtheReceipt'){
+
+						var string = response.success.message;
+						var number = string.replace('Discount successfully applied! Amount to be charged is','')+ ' ';
+						var number = number.replace('. ', '').replace('&#36;', '').replace(',', '');
+						var aftertax = parseFloat(number).toFixed(2);
+
+						var beforetax = (aftertax / 1.13).toFixed(2);
+						var counts = [0, 1099, 149.99, 48.99, 0.5],
+							  goal = beforetax;
+
+						var closest = counts.reduce(function(prev, curr) {
+							  return (Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev);
+							});
+						
+						var tax = (aftertax - closest).toFixed(2);
+						var text = '<P> Receipt <p> The price for you plan is: &#36;' + closest.toString() + '<p> The Tax (HST) would be: &#36;' + tax.toString() + ' <p> So your annual subtotal would be: &#36;' + aftertax.toString();
+					   $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
+                        $('#pms-subscription-plans-discount-messages').html(text).fadeIn(350);
+                    })
+					   }
+					else{
+						    $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
                         $('#pms-subscription-plans-discount-messages').html(response.success.message).fadeIn(350);
                     });
 
+					   }
+					
+                   
                     // Hide payment fields
                     if (response.is_full_discount)
                         hide_payment_fields($pms_form);
@@ -145,9 +182,12 @@ jQuery(document).ready(function($) {
                     $('#pms-subscription-plans-discount-messages').addClass('pms-discount-error');
 
 					// Roger Custom
-					var first_char = ["P", "p"];
+					var first_char = ["A", "B", "a", "b"];
 					if( first_char.includes(data['code'].charAt(0)) ){
-						response.error.message =  'Oops, you might have used a promotional code from another website. Try to use it on https://patentk.com';
+						response.error.message =  "Oops, you might have used a promotional code from another website. Try to use it on https://canadianinventorsassociation.com/";
+					}
+					if( data['code'] == 'ShowtheReceipt'){
+						response.error.message =  "This subscription is free!";
 					}
 					
                     $('#pms-subscription-plans-discount-messages-loading').fadeOut(350, function () {
@@ -166,7 +206,7 @@ jQuery(document).ready(function($) {
 
             });
         } else {
-
+			
             $subscription_plan.data( 'price', $subscription_plan.data('price-original') )
             $subscription_plan.data( 'discounted-price', false )
 
