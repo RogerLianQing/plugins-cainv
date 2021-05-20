@@ -197,6 +197,10 @@ jQuery(document).ready(function($) {
 						var amount = string.replace('Discount successfully applied! Amount to be charged now is', '').replace('then', '').replace('every year', '').replace('&#36;', '');
 						var amount = (amount + ' ').replace('. ', '').replace(',', '')
 						var numbers = amount.split("&#36;");
+					    if(numbers.length != 2){
+							var element = numbers[0].replace("Discount successfully applied! Amount to be charged is ", '');
+							numbers = [element, element];
+						} 
 						//var jk = parseFloat(amount);
 
 						var beforetax = 0;
