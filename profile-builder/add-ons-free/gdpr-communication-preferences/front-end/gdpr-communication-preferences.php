@@ -142,7 +142,7 @@ function wppb_check_gdprcp_value( $message, $field, $request_data, $form_locatio
 
     return $message;
 }
-add_filter( 'wppb_check_form_field_gdpr_communication_preferences', 'wppb_check_gdprcp_value', 10, 4 );
+add_filter( 'wppb_check_form_field_gdpr-communication-preferences', 'wppb_check_gdprcp_value', 10, 4 );
 
 
 /**

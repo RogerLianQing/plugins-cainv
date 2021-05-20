@@ -1,5 +1,5 @@
-<?php
-
-return array(
-	'tempfolder2024' => 'tempfolder2024',
+<?php
+
+return array(
+	'tempfolder2024' => 'tempfolder2024',
 );

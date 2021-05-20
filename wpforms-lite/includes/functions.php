@@ -16,11 +16,18 @@ function wpforms_display( $form_id = false, $title = false, $desc = false ) {
 /**
  * Perform json_decode and unslash.
  *
+ * IMPORTANT: This function decodes the result of wpforms_encode() properly only if
+ * wp_insert_post() or wp_update_post() were used after the data is encoded.
+ * Both wp_insert_post() and wp_update_post() remove excessive slashes added by wpforms_encode().
+ *
+ * Using wpforms_decode() on wpforms_encode() result directly
+ * (without using wp_insert_post() or wp_update_post() first) always returns null or false.
+ *
  * @since 1.0.0
  *
  * @param string $data Data to decode.
  *
- * @return array|bool
+ * @return array|false|null
  */
 function wpforms_decode( $data ) {
 
@@ -34,11 +41,17 @@ function wpforms_decode( $data ) {
 /**
  * Perform json_encode and wp_slash.
  *
+ * IMPORTANT: This function adds excessive slashes to prevent data damage
+ * by wp_insert_post() or wp_update_post() that use wp_unslash() on all the incoming data.
+ *
+ * Decoding the result of this function by wpforms_decode() directly
+ * (without using wp_insert_post() or wp_update_post() first) always returns null or false.
+ *
  * @since 1.3.1.3
  *
  * @param mixed $data Data to encode.
  *
- * @return string
+ * @return string|false
  */
 function wpforms_encode( $data = false ) {
 
@@ -126,6 +139,43 @@ function wpforms_setting( $key, $default = false, $option = 'wpforms_settings' )
 	$value   = is_array( $options ) && ! empty( $options[ $key ] ) ? wp_unslash( $options[ $key ] ) : $default;
 
 	return $value;
+}
+
+/**
+ * Update plugin settings option and allow it to be filterable.
+ *
+ * @since 1.6.6
+ *
+ * @param array $settings A plugin settings array that is saved into options table.
+ *
+ * @return bool
+ */
+function wpforms_update_settings( $settings ) {
+
+	/**
+	 * Allows plugin settings to be modified before persisting in the database.
+	 *
+	 * @since 1.6.6
+	 *
+	 * @param array $settings An array of plugin settings to modify.
+	 */
+	$settings = (array) apply_filters( 'wpforms_update_settings', $settings );
+
+	$updated = update_option( 'wpforms_settings', $settings );
+
+	/**
+	 * Fires after the plugin settings were persisted in the database.
+	 *
+	 * The `$updated` parameter allows to check whether the update was actually successful.
+	 *
+	 * @since 1.6.1
+	 *
+	 * @param array  $settings An array of plugin settings.
+	 * @param bool   $updated  Whether an option was updated or not.
+	 */
+	do_action( 'wpforms_settings_updated', $settings, $updated );
+
+	return $updated;
 }
 
 /**
@@ -790,6 +840,7 @@ function wpforms_countries() {
 		'BM' => esc_html__( 'Bermuda', 'wpforms-lite' ),
 		'BT' => esc_html__( 'Bhutan', 'wpforms-lite' ),
 		'BO' => esc_html__( 'Bolivia (Plurinational State of)', 'wpforms-lite' ),
+		'BQ' => esc_html__( 'Bonaire, Saint Eustatius and Saba', 'wpforms-lite' ),
 		'BA' => esc_html__( 'Bosnia and Herzegovina', 'wpforms-lite' ),
 		'BW' => esc_html__( 'Botswana', 'wpforms-lite' ),
 		'BV' => esc_html__( 'Bouvet Island', 'wpforms-lite' ),
@@ -1254,24 +1305,24 @@ function wpforms_light_or_dark( $color, $dark = '#000000', $light = '#FFFFFF' ) 
  *
  * @return array
  */
-function wpforms_get_hierarchical_object( $args = array(), $flat = false ) {
+function wpforms_get_hierarchical_object( $args = [], $flat = false ) { // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
 
 	if ( empty( $args['taxonomy'] ) && empty( $args['post_type'] ) ) {
-		return array();
+		return [];
 	}
 
-	$children   = array();
-	$parents    = array();
+	$children   = [];
+	$parents    = [];
 	$ref_parent = '';
 	$ref_name   = '';
 
 	if ( ! empty( $args['post_type'] ) ) {
 
-		$defaults   = array(
+		$defaults   = [
 			'posts_per_page' => - 1,
 			'orderby'        => 'title',
 			'order'          => 'ASC',
-		);
+		];
 		$args       = wp_parse_args( $args, $defaults );
 		$items      = get_posts( $args );
 		$ref_parent = 'post_parent';
@@ -1280,9 +1331,11 @@ function wpforms_get_hierarchical_object( $args = array(), $flat = false ) {
 
 	} elseif ( ! empty( $args['taxonomy'] ) ) {
 
-		$defaults   = array(
+		$defaults   = [
 			'hide_empty' => false,
-		);
+			'orderby'    => 'name',
+			'order'      => 'ASC',
+		];
 		$args       = wp_parse_args( $args, $defaults );
 		$items      = get_terms( $args );
 		$ref_parent = 'parent';
@@ -1291,7 +1344,7 @@ function wpforms_get_hierarchical_object( $args = array(), $flat = false ) {
 	}
 
 	if ( empty( $items ) || is_wp_error( $items ) ) {
-		return array();
+		return [];
 	}
 
 	foreach ( $items as $item ) {
@@ -1305,22 +1358,74 @@ function wpforms_get_hierarchical_object( $args = array(), $flat = false ) {
 	}
 
 	$children_count = count( $children );
+
 	while ( $children_count >= 1 ) {
 		foreach ( $children as $child ) {
 			_wpforms_get_hierarchical_object_search( $child, $parents, $children, $ref_parent );
+
 			// $children is modified by reference, so we need to recount to make sure we met the limits.
 			$children_count = count( $children );
 		}
 	}
 
+	// Sort nested child objects alphabetically using natural order, applies only
+	// to ordering by entry title or term name.
+	if ( in_array( $args['orderby'], [ 'title', 'name' ], true ) ) {
+		_wpforms_sort_hierarchical_object( $parents, $args['orderby'], $args['order'] );
+	}
+
 	if ( $flat ) {
-		$parents_flat = array();
+		$parents_flat = [];
+
 		_wpforms_get_hierarchical_object_flatten( $parents, $parents_flat, $ref_name );
 
 		return $parents_flat;
 	}
 
 	return $parents;
+}
+
+/**
+ * Sort a nested array of objects.
+ *
+ * @since 1.6.5
+ *
+ * @param array  $objects An array of objects to sort.
+ * @param string $orderby The object field to order by.
+ * @param string $order   Order direction.
+ */
+function _wpforms_sort_hierarchical_object( &$objects, $orderby, $order ) {
+
+	// Map WP_Query/WP_Term_Query orderby to WP_Post/WP_Term property.
+	$map = [
+		'title' => 'post_title',
+		'name'  => 'name',
+	];
+
+	foreach ( $objects as $object ) {
+		if ( ! isset( $object->children ) ) {
+			continue;
+		}
+
+		uasort(
+			$object->children,
+			static function ( $a, $b ) use ( $map, $orderby, $order ) {
+
+				/**
+				 * This covers most cases and works for most languages. For some – e.g. European languages
+				 * that use extended latin charset (Polish, German etc) it will sort the objects into 2
+				 * groups – base and extended, properly sorted within each group. Making it even more
+				 * robust requires either additional PHP extensions to be installed on the server
+				 * or using heavy (and slow) conversions and computations.
+				 */
+				return $order === 'ASC' ?
+					strnatcasecmp( $a->{$map[ $orderby ]}, $b->{$map[ $orderby ]} ) :
+					strnatcasecmp( $b->{$map[ $orderby ]}, $a->{$map[ $orderby ]} );
+			}
+		);
+
+		_wpforms_sort_hierarchical_object( $object->children, $orderby, $order );
+	}
 }
 
 /**
@@ -1781,9 +1886,15 @@ function wpforms_get_capability_manage_options() {
  *
  * @return bool
  */
-function wpforms_current_user_can( $caps = array(), $id = 0 ) {
+function wpforms_current_user_can( $caps = [], $id = 0 ) {
 
-	$user_can = wpforms()->get( 'access' )->current_user_can( $caps , $id );
+	$access = wpforms()->get( 'access' );
+
+	if ( ! method_exists( $access, 'current_user_can' ) ) {
+		return false;
+	}
+
+	$user_can = $access->current_user_can( $caps , $id );
 
 	return apply_filters( 'wpforms_current_user_can', $user_can, $caps, $id );
 }
@@ -1810,7 +1921,7 @@ function wpforms_datetime_format( $date, $format = '', $gmt_offset = false ) {
 	}
 
 	if ( $gmt_offset ) {
-		$date += intval( get_option( 'gmt_offset' ) ) * 3600;
+		$date += (int) ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
 	}
 
 	return date_i18n( $format, $date );
@@ -2243,6 +2354,7 @@ function wpforms_get_activated_timestamp( $type = '' ) {
  * Detect if AJAX frontend form submit is being processed.
  *
  * @since 1.5.8.2
+ * @since 1.6.5 Added filterable frontend ajax actions list as a fallback to missing referer cases.
  *
  * @return bool
  */
@@ -2254,14 +2366,35 @@ function wpforms_is_frontend_ajax() {
 	}
 
 	// It targets admin-ajax.php.
-	if ( isset( $_SERVER['SCRIPT_FILENAME'] ) && basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_FILENAME'] ) ) ) !== 'admin-ajax.php' ) {
+	if (
+		isset( $_SERVER['SCRIPT_FILENAME'] ) &&
+		basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_FILENAME'] ) ) ) !== 'admin-ajax.php'
+	) {
 		return false;
 	}
 
-	$ref = wp_get_raw_referer();
+	$ref    = wp_get_raw_referer();
+	$action = isset( $_POST['action'] ) ? sanitize_key( $_POST['action'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
+	// It has a frontend AJAX action name if there's no referer.
 	if ( ! $ref ) {
-		return false;
+
+		$frontend_actions = [
+			'wpforms_submit',
+			'wpforms_file_upload_speed_test',
+			'wpforms_upload_chunk_init',
+			'wpforms_upload_chunk',
+			'wpforms_file_chunks_uploaded',
+			'wpforms_remove_file',
+			'wpforms_restricted_email',
+			'wpforms_form_locker_unique_answer',
+			'wpforms_form_abandonment',
+		];
+
+		// This hook is running on "plugins_loaded", mind the hooks order when using it.
+		$frontend_actions = (array) apply_filters( 'wpforms_is_frontend_ajax_frontend_actions', $frontend_actions );
+
+		return in_array( $action, $frontend_actions, true );
 	}
 
 	$path       = wp_parse_url( $ref, PHP_URL_PATH );
@@ -2271,8 +2404,6 @@ function wpforms_is_frontend_ajax() {
 	if ( strpos( $path, $admin_path ) !== false ) {
 		return false;
 	}
-
-	$action = isset( $_POST['action'] ) ? sanitize_key( $_POST['action'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 	// It's a WPForms request.
 	if ( strpos( $action, 'wpforms' ) !== 0 ) {
@@ -2440,7 +2571,7 @@ function wpforms_create_index_html_file( $path ) {
  *
  * @since 1.6.1
  *
- * @return bool True on write success, false on failure.
+ * @return bool True when the .htaccess file exists, false on failure.
  */
 function wpforms_create_upload_dir_htaccess_file() {
 
@@ -2455,8 +2586,23 @@ function wpforms_create_upload_dir_htaccess_file() {
 	}
 
 	$htaccess_file = wp_normalize_path( trailingslashit( $upload_dir['path'] ) . '.htaccess' );
+	$cache_key     = 'wpforms_htaccess_file';
 
-	if ( file_exists( $htaccess_file ) ) {
+	if ( is_file( $htaccess_file ) ) {
+		$cached_stat = get_transient( $cache_key );
+		$stat        = array_intersect_key(
+			stat( $htaccess_file ),
+			[
+				'size'  => 0,
+				'mtime' => 0,
+				'ctime' => 0,
+			]
+		);
+
+		if ( $cached_stat === $stat ) {
+			return true;
+		}
+
 		@unlink( $htaccess_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 
@@ -2479,12 +2625,31 @@ function wpforms_create_upload_dir_htaccess_file() {
 <IfModule mod_php7.c>
   php_flag engine off
 </IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
 <IfModule headers_module>
   Header set X-Robots-Tag "noindex"
 </IfModule>'
 	);
 
-	return insert_with_markers( $htaccess_file, 'WPForms', $contents );
+	$created = insert_with_markers( $htaccess_file, 'WPForms', $contents );
+
+	if ( $created ) {
+		clearstatcache( true, $htaccess_file );
+		$stat = array_intersect_key(
+			stat( $htaccess_file ),
+			[
+				'size'  => 0,
+				'mtime' => 0,
+				'ctime' => 0,
+			]
+		);
+
+		set_transient( $cache_key, $stat );
+	}
+
+	return $created;
 }
 
 /**
@@ -2602,4 +2767,65 @@ function wpforms_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.safe_modeDeprecatedRemoved
 		@set_time_limit( $limit ); // @codingStandardsIgnoreLine
 	}
+}
+
+/**
+ * Determine if collecting user's IP is allowed by GDPR setting (globally or per form).
+ * Majority of our users have GDPR disabled.
+ * So we remove this data from the request only when it's not needed:
+ * 1) when GDPR is enabled AND globally disabled user details storage;
+ * 2) when GDPR is enabled AND IP address processing is disabled on per form basis.
+ *
+ * @since 1.6.6
+ *
+ * @param array $form_data Form settings.
+ *
+ * @return bool
+ */
+function wpforms_is_collecting_ip_allowed( $form_data = [] ) {
+
+	if (
+		wpforms_setting( 'gdpr', false ) &&
+		(
+			wpforms_setting( 'gdpr-disable-details', false ) ||
+			( ! empty( $form_data ) && ! empty( $form_data['settings']['disable_ip'] ) )
+		)
+	) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Retrieve a timezone from the site settings as a `DateTimeZone` object.
+ *
+ * Timezone can be based on a PHP timezone string or a ±HH:MM offset.
+ *
+ * @since 1.6.6
+ *
+ * @return DateTimeZone Timezone object.
+ */
+function wpforms_get_timezone() {
+
+	if ( function_exists( 'wp_timezone' ) ) {
+		return wp_timezone();
+	}
+
+	// Fallback for WordPress version < 5.3.
+	$timezone_string = get_option( 'timezone_string' );
+
+	if ( ! $timezone_string ) {
+		$offset  = (float) get_option( 'gmt_offset' );
+		$hours   = (int) $offset;
+		$minutes = ( $offset - $hours );
+
+		$sign     = ( $offset < 0 ) ? '-' : '+';
+		$abs_hour = abs( $hours );
+		$abs_mins = abs( $minutes * 60 );
+
+		$timezone_string = sprintf( '%s%02d:%02d', $sign, $abs_hour, $abs_mins );
+	}
+
+	return timezone_open( $timezone_string );
 }

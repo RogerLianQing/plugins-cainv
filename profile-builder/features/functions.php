@@ -102,9 +102,14 @@ if(!function_exists('wppb_curpageurl')){
 if(!function_exists('wppb_get_abs_home')) {
     function wppb_get_abs_home(){
         global $wpdb;
+        global $wppb_absolute_home;
+
+        if( isset($wppb_absolute_home) ) {
+            return $wppb_absolute_home;
+        }
 
         // returns the unfiltered home_url by directly retrieving it from wp_options.
-        $absolute_home = (!is_multisite() && defined('WP_HOME')
+        $wppb_absolute_home = (!is_multisite() && defined('WP_HOME')
             ? WP_HOME
             : (is_multisite() && !is_main_site()
                 ? (preg_match('/^(https)/', get_option('home')) === 1 ? 'https://'
@@ -119,18 +124,18 @@ if(!function_exists('wppb_get_abs_home')) {
                                                 LIMIT 1"))
         );
 
-        if (empty($absolute_home)) {
-            $absolute_home = get_option("siteurl");
+        if (empty($wppb_absolute_home)) {
+            $wppb_absolute_home = get_option("siteurl");
         }
 
         // always return absolute_home based on the http or https version of the current page request. This means no more redirects.
         if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
-            $absolute_home = str_replace('http://', 'https://', $absolute_home);
+            $wppb_absolute_home = str_replace('http://', 'https://', $wppb_absolute_home);
         } else {
-            $absolute_home = str_replace('https://', 'http://', $absolute_home);
+            $wppb_absolute_home = str_replace('https://', 'http://', $wppb_absolute_home);
         }
 
-        return $absolute_home;
+        return $wppb_absolute_home;
     }
 }
 
@@ -1097,6 +1102,11 @@ add_filter( 'wppb_woo_extra_attribute', 'wppb_add_html_tag_required_to_woo_field
 function wppb_manage_required_attribute() {
 	global $wppb_shortcode_on_front;
 	if ($wppb_shortcode_on_front) {
+	    //check if jquery has been loaded yet because we need it at this point
+        // we're checking if it's not admin because it brakes elementor otherwise.
+        if( !wp_script_is('jquery', 'done') && !is_admin() ){
+            wp_print_scripts('jquery');
+        }
 		?>
 		<script type="text/javascript">
 			jQuery(document).on( "wppbAddRequiredAttributeEvent", wppbAddRequired );
@@ -1210,7 +1220,11 @@ function wppb_can_users_signup_blog(){
  *
  * @return	null|string	$redirect_url
  */
-function wppb_get_redirect_url( $redirect_priority = 'normal', $redirect_type, $redirect_url = NULL, $user = NULL, $user_role = NULL ) {
+function wppb_get_redirect_url( $redirect_priority, $redirect_type, $redirect_url = NULL, $user = NULL, $user_role = NULL ) {
+    if( empty($redirect_priority) ) {
+        $redirect_priority = 'normal';
+    }
+
 	if( PROFILE_BUILDER == 'Profile Builder Pro' ) {
 		$wppb_module_settings = get_option( 'wppb_module_settings' );
 
@@ -1358,7 +1372,7 @@ function wppb_private_website_functionality(){
 
                 if( ( !in_array( $post_id, $allowed_pages ) && $redirect_url !== strtok( wppb_curpageurl(), '?' ) ) || is_search() ){
                     nocache_headers();
-                    if( current_filter() == 'template_redirect' ) {
+                    if( apply_filters( 'wppb_private_website_redirect_add_query_args', true ) && current_filter() == 'template_redirect' ) {
                         $redirect_url = add_query_arg( 'wppb_referer_url', urlencode( esc_url( wppb_curpageurl() ) ), $redirect_url );
                     }
                     wp_safe_redirect( $redirect_url );

@@ -3,7 +3,7 @@
  * Plugin Name: Paid Member Subscriptions - Stripe Payment Gateway
  * Plugin URI: https://www.cozmoslabs.com/
  * Description: Accept credit and debit card payments through Stripe
- * Version: 1.4.1
+ * Version: 1.4.4
  * Author: Cozmoslabs, Mihai Iova
  * Author URI: https://www.cozmoslabs.com/
  * Text Domain: paid-member-subscriptions
@@ -39,7 +39,7 @@ Class PMS_Stripe {
      */
     public function __construct() {
 
-        define( 'PMS_STRIPE_VERSION', '1.4.1' );
+        define( 'PMS_STRIPE_VERSION', '1.4.4' );
         define( 'PMS_STRIPE_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
         define( 'PMS_STRIPE_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 

@@ -181,7 +181,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		$file_abspath = wfu_path_rel2abs($filerec->filepath);
 		$file_relpath = ( substr($filerec->filepath, 0, 4) == 'abs:' ? substr($filerec->filepath, 4) : $filerec->filepath );
 		$displayed_data = array(
-			"file"			=> $file_relpath,
+			"file"			=> wfu_hide_credentials_from_ftpurl($file_relpath),
 			"date"			=> get_date_from_gmt($initialrec->date_from),
 			"user"			=> wfu_get_username_by_id($filerec->uploaduserid),
 			"properties"	=> '',
@@ -196,7 +196,7 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 		//check if file resides inside WP root
 		$file_in_root = ( !$file_in_ftp && substr($file_abspath, 0, strlen($abspath_notrailing_slash)) == $abspath_notrailing_slash );
 		//check if file exists for non-ftp uploads
-		$file_exists = ( $file_in_ftp ? true : file_exists($file_abspath) );
+		$file_exists = wfu_file_exists($file_abspath, "wfu_uploadedfiles_manager");
 		//check if record is obsolete
 		$obsolete = ( $filerec->date_to != "0000-00-00 00:00:00" );
 		//check if file is associated with Media item
@@ -250,12 +250,12 @@ function wfu_uploadedfiles_manager($page = 1, $only_table_rows = false) {
 			$actions['historylog']['href'] = $historylog_href;
 		}
 		$link_href = ( $file_in_root ? site_url().( substr($file_relpath, 0, 1) == '/' ? '' : '/' ) : '' ).$file_relpath;
-		if ( ( $file_in_ftp || $file_in_root ) && $file_exists && !$obsolete && $actions['link']['allowed'] ) {
+		if ( $file_in_root && $file_exists && !$obsolete && $actions['link']['allowed'] ) {
 			$actions['link']['visible'] = true;
 			$actions['link']['href'] = $link_href;
 		}
 		$download_href = false;
-		if ( !$file_in_ftp && $file_exists && !$obsolete && $actions['download']['allowed'] ) {
+		if ( $file_exists && !$obsolete && $actions['download']['allowed'] ) {
 			$file_code = wfu_prepare_to_batch_safe_store_filepath(wfu_path_abs2rel($file_abspath));
 			$download_href = 'javascript:wfu_download_file(\''.$file_code.'\', '.$i.');';
 			$actions['download']['visible'] = true;
@@ -397,7 +397,7 @@ function wfu_uploadedfiles_get_filerecs($page) {
 			//check if file is stored in FTP location
 			$file_in_ftp = ( substr($file_abspath, 0, 6) == 'ftp://' || substr($file_abspath, 0, 7) == 'ftps://' || substr($file_abspath, 0, 7) == 'sftp://' );
 			//check if file exists for non-ftp uploads
-			$file_exists = ( $file_in_ftp ? true : file_exists($file_abspath) );
+			$file_exists = ( $file_in_ftp ? true : wfu_file_exists($file_abspath, "wfu_uploadedfiles_get_filerecs") );
 			//check if record is obsolete
 			$obsolete = ( $filerec->date_to != "0000-00-00 00:00:00" );
 			if ( !$file_exists || $obsolete ) unset($filerecs[$ind]);

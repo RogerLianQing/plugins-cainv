@@ -169,9 +169,9 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 	$ret_array["uploaded"] = false;
 	$ret_array["admin_message"] = "";
 	$ret_message = "";
-	$target_perms = substr(sprintf('%o', fileperms(dirname($target))), -4);
-	$target_perms = octdec($target_perms);
-	$target_perms = (int)$target_perms;
+	//$target_perms = substr(sprintf('%o', fileperms(dirname($target))), -4);
+	//$target_perms = octdec($target_perms);
+	//$target_perms = (int)$target_perms;
 	if ( $method == "" || $method == "normal" ) {
 		$ret_array["uploaded"] = move_uploaded_file($source, $target);
 		if ( !$ret_array["uploaded"] && !is_writable(dirname($target)) ) {
@@ -193,7 +193,7 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 				if ( $data["sftp"] ) {
 					$ret_message = wfu_upload_file_sftp($data["ftpdomain"], $ftp_port, $data["username"], $data["password"], $source, $target, $fileperms);
 					$ret_array["uploaded"] = ( $ret_message == "" );
-					unlink($source);
+					wfu_unlink($source, "wfu_upload_file:1");
 				}
 				else {
 					if ( $ftp_port != "" ) $conn_id = ftp_connect($data["ftpdomain"], $ftp_port);
@@ -214,7 +214,7 @@ function wfu_upload_file($source, $target, $method, $ftpdata, $passive, $fileper
 						}
 //						ftp_chmod($conn_id, 0755, $target);
 //						ftp_chmod($conn_id, $target_perms, dirname($target));
-						unlink($source);
+						wfu_unlink($source, "wfu_upload_file:2");
 						if ( !$ret_array["uploaded"] ) {
 							$ret_message = WFU_ERROR_ADMIN_DIR_PERMISSION;
 						}
@@ -337,4 +337,227 @@ function wfu_create_dir_deep_sftp($ftp_host, $ftp_port, $ftp_username, $ftp_pass
 	}
 	
 	return $ret_message;
+}
+
+/**
+ * Check If SFTP File Exists.
+ *
+ * This function checks whether a file stored in an SFTP location exists.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return boolean True if the file is a valid SFTP path and exists, false
+ *         otherwise.
+ */
+function wfu_file_exists_sftp($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			$ret = ( $sftp && @file_exists("ssh2.sftp://".intval($sftp).$data["filepath"]) );
+		}
+	}
+	
+	return $ret;
+}
+
+/**
+ * Get SFTP File Info.
+ *
+ * This function returns stat information for files stored in an SFTP location.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return array|false The stat array or false on error.
+ */
+function wfu_stat_sftp($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) $ret = ssh2_sftp_stat($data["filepath"]);
+		}
+	}
+	
+	return $ret;
+}
+
+/**
+ * Get SFTP File Size.
+ *
+ * This function returns file size for files stored in an SFTP location.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return int|false The file size or false on error.
+ */
+function wfu_filesize_sftp($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) $ret = @filesize("ssh2.sftp://".intval($sftp).$data["filepath"]);
+		}
+	}
+	
+	return $ret;
+}
+
+/**
+ * Get SFTP File Stream Handle.
+ *
+ * This function returns a file stream handle for files stored in an SFTP
+ * location.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ * @param string $mode The file access mode.
+ *
+ * @return resource|false The file stream handle or false on error.
+ */
+function wfu_fopen_sftp($filepath, $mode) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) {
+				//$ret = @fopen("ssh2.sftp://".intval($sftp).$data["filepath"], $mode);
+				$contents = @file_get_contents("ssh2.sftp://".intval($sftp).$data["filepath"]);
+				$stream = fopen('php://memory', 'r+');
+				fwrite($stream, $contents);
+				rewind($stream);
+				$ret = $stream;
+			}
+		}
+	}
+	
+	return $ret;
+}
+
+/**
+ * Get SFTP File Contents.
+ *
+ * This function returns the file contents for files stored in an SFTP location.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return string|false The file contents as string or false on error.
+ */
+function wfu_file_get_contents_sftp($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) $ret = @file_get_contents("ssh2.sftp://".intval($sftp).$data["filepath"]);
+		}
+	}
+	
+	return $ret;
+}
+
+/**
+ * Get MD5 of File.
+ *
+ * This function returns the md5 string of a file stored in an SFTP location.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return string|false The md5 string of the file or false on error.
+ */
+function wfu_md5_file_sftp($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) {
+				$contents = @file_get_contents("ssh2.sftp://".intval($sftp).$data["filepath"], $mode);
+				$ret = md5($contents);
+			}
+		}
+	}
+	
+	return $ret;
+}
+
+/**
+ * Delete a File.
+ *
+ * This function deletes a file stored in an SFTP location.
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $filepath The path of the file.
+ *
+ * @return boolean True on success, false on error.
+ */
+function wfu_unlink_sftp($filepath) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) $ret = @unlink("ssh2.sftp://".intval($sftp).$data["filepath"]);
+		}
+	}
+	
+	return $ret;
 }

@@ -363,6 +363,9 @@ function um_user_edit_profile( $args ) {
 
 				}
 
+				// use this filter after all validations has been completed and we can extends data based on key
+				$to_update = apply_filters( 'um_change_usermeta_for_update', $to_update, $args, $fields, $key );
+
 			}
 		}
 	}
@@ -680,20 +683,22 @@ function um_profile_dynamic_meta_desc() {
 
 		$user_id = um_get_requested_user();
 
-		$privacy = get_user_meta( $user_id, 'profile_privacy', true );
-		if ( $privacy == __( 'Only me', 'ultimate-member' ) || $privacy == 'Only me' ) {
+		if ( $user_id !== um_user('ID') ) {
+			um_fetch_user( $user_id );
+		}
+
+		/**
+		 * Settings by the priority:
+		 *  "Search engine visibility" in [wp-admin > Settings > Reading]
+		 *  "Profile Privacy" in [Account > Privacy]
+		 *  "Avoid indexing my profile by search engines in [Account > Privacy]
+		 *  "Avoid indexing profile by search engines" in [wp-admin > Ultimate Member > User Roles > Edit Role]
+		 *  "Avoid indexing profile by search engines" in [wp-admin > Ultimate Member > Settings > General > Users]
+		 */
+		if ( UM()->user()->is_profile_noindex( $user_id ) ) {
+			echo '<meta name="robots" content="noindex, nofollow" />';
 			return;
 		}
-
-		$noindex = get_user_meta( $user_id, 'profile_noindex', true );
-		if ( ! empty( $noindex ) ) { ?>
-
-			<meta name="robots" content="noindex, nofollow" />
-
-			<?php return;
-		}
-
-		um_fetch_user( $user_id );
 
 		$locale = get_user_locale( $user_id );
 		$site_name = get_bloginfo( 'name' );
@@ -765,7 +770,14 @@ function um_profile_header_cover_area( $args ) {
 
 		$default_cover = UM()->options()->get( 'default_cover' );
 
-
+		$overlay = '<span class="um-cover-overlay">
+				<span class="um-cover-overlay-s">
+					<ins>
+						<i class="um-faicon-picture-o"></i>
+						<span class="um-cover-overlay-t">' . __( 'Change your cover photo', 'ultimate-member' ) . '</span>
+					</ins>
+				</span>
+			</span>';
 
 		?>
 
@@ -793,7 +805,37 @@ function um_profile_header_cover_area( $args ) {
 			 * ?>
 			 */
 			do_action( 'um_cover_area_content', um_profile_id() );
+			if ( UM()->fields()->editing ) {
 
+				$hide_remove = um_user( 'cover_photo' ) ? false : ' style="display:none;"';
+
+				$text = ! um_user( 'cover_photo' ) ? __( 'Upload a cover photo', 'ultimate-member' ) : __( 'Change cover photo', 'ultimate-member' ) ;
+
+				$items = array(
+					'<a href="javascript:void(0);" class="um-manual-trigger" data-parent=".um-cover" data-child=".um-btn-auto-width">' . $text . '</a>',
+					'<a href="javascript:void(0);" class="um-reset-cover-photo" data-user_id="' . um_profile_id() . '" ' . $hide_remove . '>' . __( 'Remove', 'ultimate-member' ) . '</a>',
+					'<a href="javascript:void(0);" class="um-dropdown-hide">' . __( 'Cancel', 'ultimate-member' ) . '</a>',
+				);
+
+				$items = apply_filters( 'um_cover_area_content_dropdown_items', $items, um_profile_id() );
+
+				UM()->profile()->new_ui( 'bc', 'div.um-cover', 'click', $items );
+			} else {
+
+				if ( ! isset( UM()->user()->cannot_edit ) && ! um_user( 'cover_photo' ) ) {
+
+					$items = array(
+						'<a href="javascript:void(0);" class="um-manual-trigger" data-parent=".um-cover" data-child=".um-btn-auto-width">' . __( 'Upload a cover photo', 'ultimate-member' ) . '</a>',
+						'<a href="javascript:void(0);" class="um-dropdown-hide">' . __( 'Cancel', 'ultimate-member' ) . '</a>',
+					);
+
+					$items = apply_filters( 'um_cover_area_content_dropdown_items', $items, um_profile_id() );
+
+					UM()->profile()->new_ui( 'bc', 'div.um-cover', 'click', $items );
+
+				}
+
+			}
 
 			UM()->fields()->add_hidden_field( 'cover_photo' ); ?>
 
@@ -1255,42 +1297,38 @@ function um_pre_profile_shortcode( $args ) {
 	 */
 	extract( $args );
 
-	if ( $mode == 'profile' && UM()->fields()->editing == false ) {
-		UM()->fields()->viewing = 1;
-
-		if ( um_get_requested_user() ) {
-			if ( ! um_can_view_profile( um_get_requested_user() ) && ! um_is_myprofile() ) {
-				um_redirect_home( um_get_requested_user(), um_is_myprofile() );
+	if ( $mode == 'profile' ) {
+		if ( UM()->fields()->editing ) {
+			if ( um_get_requested_user() ) {
+				if ( ! UM()->roles()->um_current_user_can( 'edit', um_get_requested_user() ) ) {
+					um_redirect_home( um_get_requested_user(), um_is_myprofile() );
+				}
+				um_fetch_user( um_get_requested_user() );
 			}
-
-			if ( ! UM()->roles()->um_current_user_can( 'edit', um_get_requested_user() ) ) {
-				UM()->user()->cannot_edit = 1;
-			}
-
-			um_fetch_user( um_get_requested_user() );
 		} else {
-			if ( ! is_user_logged_in() ) {
-				um_redirect_home( um_get_requested_user(), um_is_myprofile() );
-			}
+			UM()->fields()->viewing = 1;
 
-			if ( ! um_user( 'can_edit_profile' ) ) {
-				UM()->user()->cannot_edit = 1;
+			if ( um_get_requested_user() ) {
+				if ( ! um_can_view_profile( um_get_requested_user() ) && ! um_is_myprofile() ) {
+					um_redirect_home( um_get_requested_user(), um_is_myprofile() );
+				}
+
+				if ( ! UM()->roles()->um_current_user_can( 'edit', um_get_requested_user() ) ) {
+					UM()->user()->cannot_edit = 1;
+				}
+
+				um_fetch_user( um_get_requested_user() );
+			} else {
+				if ( ! is_user_logged_in() ) {
+					um_redirect_home( um_get_requested_user(), um_is_myprofile() );
+				}
+
+				if ( ! um_user( 'can_edit_profile' ) ) {
+					UM()->user()->cannot_edit = 1;
+				}
 			}
 		}
 	}
-
-	if ( $mode == 'profile' && UM()->fields()->editing == true ) {
-		UM()->fields()->editing = 1;
-
-		if ( um_get_requested_user() ) {
-			if ( ! UM()->roles()->um_current_user_can( 'edit', um_get_requested_user() ) ) {
-				um_redirect_home( um_get_requested_user(), um_is_myprofile() );
-			}
-			um_fetch_user( um_get_requested_user() );
-		}
-
-	}
-
 }
 add_action( 'um_pre_profile_shortcode', 'um_pre_profile_shortcode' );
 

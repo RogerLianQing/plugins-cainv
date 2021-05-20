@@ -193,22 +193,6 @@ function wppb_change_add_entry_button( $string, $meta ){
     return $string;
 }
 
-/* Add admin footer text for encouraging users to leave a review of the plugin on wordpress.org */
-function wppb_admin_rate_us( $footer_text ) {
-    global $current_screen;
-
-    if ($current_screen->parent_base == 'profile-builder'){
-        $rate_text = sprintf( __( 'If you enjoy using <strong> %1$s </strong> please <a href="%2$s" target="_blank">rate us on WordPress.org</a>. More happy users means more features, less bugs and better support for everyone. ', 'profile-builder' ),
-            PROFILE_BUILDER,
-            'https://wordpress.org/support/view/plugin-reviews/profile-builder?filter=5#postform'
-        );
-        return '<span id="footer-thankyou">' .$rate_text . '</span>';
-    } else {
-        return $footer_text;
-    }
-}
-add_filter('admin_footer_text','wppb_admin_rate_us');
-
 /**
  * add links on plugin page
  */
@@ -257,12 +241,26 @@ function wppb_add_plugin_notifications() {
     /* this must be unique */
     $notification_id = 'wppb_migrated_free_add_ons';
 
-	$message = '<p style="margin-top: 16px;">' . __( 'All the free add-ons have been migrated to the main plugin. Their old individual plugins have been disabled and you can delete them from your site if you were using them: <ul><li>Profile Builder - Custom CSS Classes on fields</li><li>Profile Builder - Customization Toolbox Add-On</li><li>Profile Builder - Email Confirmation Field</li><li>Profile Builder - GDPR Communication Preferences</li><li>Profile Builder - Import and Export Add-On</li><li>Profile Builder - Labels Edit Add-On</li><li>Profile Builder - Maximum Character Length Add-On</li><li>Profile Builder - Multiple Admin E-mails Add-On</li><li>Profile Builder - Placeholder Labels Add-On</li></ul>', 'profile-builder' ) . '</p>';
+	$message = '<p style="margin-top: 16px; font-size: 15px;">' . __( 'All the free add-ons have been migrated to the main plugin. Their old individual plugins have been disabled and you can delete them from your site if you were using them: <ul><li>Profile Builder - Custom CSS Classes on fields</li><li>Profile Builder - Customization Toolbox Add-On</li><li>Profile Builder - Email Confirmation Field</li><li>Profile Builder - GDPR Communication Preferences</li><li>Profile Builder - Import and Export Add-On</li><li>Profile Builder - Labels Edit Add-On</li><li>Profile Builder - Maximum Character Length Add-On</li><li>Profile Builder - Multiple Admin E-mails Add-On</li><li>Profile Builder - Placeholder Labels Add-On</li></ul>', 'profile-builder' ) . '</p>';
     // be careful to use wppb_dismiss_admin_notification as query arg
     $message .= '<p><a href="https://www.cozmoslabs.com/277540-profile-builder-enhancements-free-addons-now-part-of-main-plugin/" target="_blank" class="button-primary">' . __( 'See details', 'profile-builder' ) . '</a></p>';
     $message .= '<a href="' . add_query_arg( array( 'wppb_dismiss_admin_notification' => $notification_id ) ) . '" type="button" class="notice-dismiss"><span class="screen-reader-text">' . __( 'Dismiss this notice.', 'profile-builder' ) . '</span></a>';
 
     $notifications->add_notification( $notification_id, $message, 'wppb-notice notice notice-info', false );
+
+	if ( did_action( 'elementor/loaded' ) ) {
+
+		$notification_id = 'wppb_elementor_styling_notice';
+
+		$message  = '<img style="float: left; margin: 10px 12px 10px 0; max-width: 100px;" src="'.WPPB_PLUGIN_URL.'assets/images/elementor_logo.png" alt="Elementor Logo"/>';
+		$message .= '<p style="margin-top: 16px; font-size: 15px;">' . sprintf( __( 'You can now style %s forms from the %s interface. To get started, add a form widget to a page through %s and go to the <strong>Style</strong> tab.', 'profile-builder' ), '<strong>Profile Builder</strong>', '<strong>Elementor</strong>', '<strong>Elementor</strong>') . '</p>';
+		// be careful to use wppb_dismiss_admin_notification as query arg
+		$message .= '<p><a href="https://www.cozmoslabs.com/docs/profile-builder-2/integration-with-elementor/" target="_blank" class="button-primary">' . __( 'See details', 'profile-builder' ) . '</a></p>';
+		$message .= '<a href="' . add_query_arg( array( 'wppb_dismiss_admin_notification' => $notification_id ) ) . '" type="button" class="notice-dismiss"><span class="screen-reader-text">' . __( 'Dismiss this notice.', 'profile-builder' ) . '</span></a>';
+
+		$notifications->add_notification( $notification_id, $message, 'wppb-notice notice notice-info', false );
+
+	}
 }
 
 

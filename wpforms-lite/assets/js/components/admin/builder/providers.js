@@ -528,7 +528,7 @@ WPForms.Admin.Builder.Providers = WPForms.Admin.Builder.Providers || ( function(
 					return parseInt( id, 10 );
 				} );
 
-			// Determine deleted field IDs - it's a diff between previous and current for field IDs.
+			// Determine deleted field IDs - it's a diff between previous and current form state.
 			var deleted = Object.keys( prevSaveFields )
 				.map( function( id ) {
 
@@ -569,7 +569,7 @@ WPForms.Admin.Builder.Providers = WPForms.Admin.Builder.Providers || ( function(
 				}
 			}
 
-			// If selects for mapping was changed, that all form state was changed as well.
+			// If selects for mapping was changed, that whole form state was changed as well.
 			// That's why we need to re-save it.
 			if ( wpf.savedState !== wpf.getFormState( '#wpforms-builder-form' ) ) {
 				wpf.savedState = wpf.getFormState( '#wpforms-builder-form' );
@@ -651,6 +651,12 @@ WPForms.Admin.Builder.Providers = WPForms.Admin.Builder.Providers || ( function(
 
 						$row.remove();
 					} );
+
+				// CONNECTION: Generated.
+				$( '#wpforms-panel-providers' ).on( 'connectionGenerated', function() {
+
+					wpf.initTooltips();
+				} );
 
 				// CONNECTION: Rendered.
 				$( '#wpforms-panel-providers' ).on( 'connectionRendered', function( e, provider, connectionId ) {

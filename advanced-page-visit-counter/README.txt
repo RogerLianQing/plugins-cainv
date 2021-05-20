@@ -8,7 +8,7 @@ Stable tag: 4.3
 Tags: page counter,page visit, post counter, post visit, wordpress post view, wordpress page view, page visit graph, post visit graph, 
 Requires at least: 3.9
 Requires PHP: 5.6
-Tested up to: 5.5.1
+Tested up to: 5.6
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -241,3 +241,6 @@ Automatic updates should work extra ordinary for you. As usual, however, We sugg
 
 = 4.2.0. - 06.09.2020 =
 * New Feature: IP Range support to exclude ip addresses, Minor Bug Fixes & Speed Improvements 
+
+= 4.4.0. - 18.04.2020 =
+* Minor Bug Fixes & Speed Improvements 

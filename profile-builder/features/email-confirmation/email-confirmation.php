@@ -310,8 +310,8 @@ function wppb_add_meta_to_user_on_activation( $user_id, $password, $meta ){
 
                     $selected_values = '';
                     if (!empty($meta[wppb_handle_meta_name($value['meta-name'])]) && is_array($meta[wppb_handle_meta_name($value['meta-name'])])) {
-                        foreach ($meta[wppb_handle_meta_name($value['meta-name'])] as $key => $value)
-                            $selected_values .= sanitize_text_field($value) . ',';
+                        foreach ($meta[wppb_handle_meta_name($value['meta-name'])] as $selected_key => $selected_value)
+                            $selected_values .= sanitize_text_field($selected_value) . ',';
                     }
 
                     update_user_meta( $user_id, $value['meta-name'], trim( $selected_values, ',' ) );
@@ -340,7 +340,7 @@ function wppb_signup_user( $username, $user_email, $meta = '' ) {
 
 	$user_email = sanitize_email( $user_email );
 	$activation_key = substr( md5( time() . rand() . $user_email ), 0, 16 );
-	$meta = serialize( $meta );
+    $meta = serialize( $meta );
 
 	// change User Registered date and time according to timezone selected in WordPress settings
 	$wppb_get_date = wppb_get_register_date();
@@ -599,7 +599,7 @@ function wppb_notify_user_registration_email( $bloginfo, $user_name, $email, $se
 		if( !$send_password )
 			$user_message_content = sprintf( __( 'Welcome to %1$s!<br/><br/><br/>Your username is: %2$s and your password is the one that you have selected during registration.<br/><br/>Access your account: %3$s ', 'profile-builder' ), $user_message_from, $user_name, $site_url );
 		else
-			$user_message_content = sprintf( __( 'Welcome to %1$s!<br/><br/><br/>Your username is: %2$s and the password: %3$s.<br/><br/>Access your account: %4$s ', 'profile-builder' ), $user_message_from, $user_name, $password, $site_url );
+			$user_message_content = sprintf( __( 'Welcome to %1$s!<br/><br/><br/>Your username is: %2$s and the password: %3$s<br/><br/>Access your account: %4$s ', 'profile-builder' ), $user_message_from, $user_name, $password, $site_url );
 
         if ( $password === __( 'Your selected password at signup', 'profile-builder' ) ) {
             $password = NULL;

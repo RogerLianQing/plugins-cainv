@@ -1752,7 +1752,7 @@ function wfu_delete_file_execute($filepath, $userid, $filerec = null) {
 	else $filedata = wfu_get_filedata_from_rec($filerec, true, false, false);
 	$delete_rec = true;
 	if ( $delete_rec ) $retid = wfu_log_action('delete', $filepath, $userid, '', 0, 0, '', null, $filerec);
-	$result = unlink($filepath);
+	$result = wfu_unlink($filepath, "wfu_delete_file_execute");
 	if ( !$result ) wfu_revert_log_action($retid);
 	elseif ( $delete_rec ) {
 		//delete linked attachment if exists and it is allowed to be deleted
@@ -1844,6 +1844,80 @@ function wfu_decode_ftpinfo($ftpdata) {
 }
 
 /**
+ * Extract FTP Information From FTP URL.
+ *
+ * This function extracts FTP information from an FTP URL.
+ *
+ * @since 4.15.0
+ *
+ * @param string $url The FTP URL.
+ *
+ * @return array {
+ *         An array of extracted FTP information.
+ *
+ *         @type bool $error Defines whether there was an error during
+ *               extraction of FTP information.
+ *         @type array $data {
+ *               The extracted FTP information.
+ *
+ *               @type string $username The FTP login username.
+ *               @type string $password The FTP login password.
+ *               @type string $ftpdomain The FTP domain.
+ *               @type string $port The FTP port.
+ *               @type bool $sftp Defines whether sFTP connection will be used.
+ *               @type string $filepath The local path to the file.
+ *         }
+ * }
+ */
+function wfu_decode_ftpurl($url) {
+	$ftpinfo = array(
+		"error" => true,
+		"data" => array(
+			"username" => "",
+			"password" => "",
+			"ftpdomain" => "",
+			"port" => "",
+			"sftp" => false,
+			"filepath" => ""
+		)
+	);	
+	if ( substr($url, 0, 6) != "ftp://" && substr($url, 0, 7) != "sftp://" ) return $ftpinfo;
+	$issftp = ( substr($url, 0, 7) == "sftp://" );
+	$filepath = ( $issftp ? substr($url, 7) : substr($url, 6) );
+	$pos = strpos($filepath, '/');
+	if ( $pos === false ) return $ftpinfo;
+	//separate sftp info
+	$ftpdata = substr($filepath, 0, $pos);
+	$filepath = substr($filepath, $pos);
+	$ftpinfo = wfu_decode_ftpinfo($ftpdata);
+	if ( $ftpinfo["error"] ) return $ftpinfo;
+	$data = $ftpinfo["data"];
+	//decode encoded characters in username and password
+	$data["username"] = str_replace(array('%40', '%3A', '%2F'), array('@', ':', '/'), $data["username"]);
+	$data["password"] = str_replace(array('%40', '%3A', '%2F'), array('@', ':', '/'), $data["password"]);
+	$data["sftp"] = $issftp;
+	if ( $data["port"] == "" ) $data["port"] = ( $issftp ? "22" : "80" );
+	$data["filepath"] = $filepath;
+	$ftpinfo["data"] = $data;
+	return $ftpinfo;
+}
+
+/**
+ * Hide Credentials From FTP URL.
+ *
+ * This function hides strips username and password information from an FTP URL.
+ *
+ * @since 4.15.0
+ *
+ * @param string $url The file URL.
+ *
+ * @return string The stripped URL.
+ */
+function wfu_hide_credentials_from_ftpurl($url) {
+	return preg_replace("/^(ftp|sftp)(:\/\/)([^@]*@)(.*$)/", "$1$2$4", $url);
+}
+
+/**
  * Get Full Upload Path.
  *
  * This function calculates the full upload path of an uploader shortcode from
@@ -1867,8 +1941,8 @@ function wfu_upload_plugin_full_path( $params ) {
 			$ftp_port = $data["port"];
 			if ( $data["sftp"] && $ftp_port == "" ) $ftp_port = "22";
 			$ftp_host = $data["ftpdomain"].( $ftp_port != "" ? ":".$ftp_port : "" );
-			$ftp_username = str_replace('@', '%40', $data["username"]);   //if username contains @ character then convert it to %40
-			$ftp_password = str_replace('@', '%40', $data["password"]);   //if password contains @ character then convert it to %40
+			$ftp_username = str_replace(array('@', ':', '/'), array('%40', '%3A', '%2F'), $data["username"]);   //if username contains @, :, / characters then encode them
+			$ftp_password = str_replace(array('@', ':', '/'), array('%40', '%3A', '%2F'), $data["password"]);   //if username contains @, :, / characters then encode them
 			$start_folder = ( $data["sftp"] ? 's' : '' ).'ftp://'.$ftp_username.':'.$ftp_password."@".$ftp_host.'/';
 		}
 		else $start_folder = 'ftp://'.$params["ftpinfo"].'/';
@@ -2109,7 +2183,7 @@ function wfu_parse_folderlist($subfoldertree) {
 }
 
 /**
- * Calculate Size of File.
+ * Calculate Size of Big File.
  *
  * This function calculates the size of a file. It uses a complex approach for
  * calculating very big files (over 2GB) even in 32bit server environments.
@@ -2120,7 +2194,7 @@ function wfu_parse_folderlist($subfoldertree) {
  *
  * @return The file size.
  */
-function wfu_filesize($filepath) {
+function wfu_bigfilesize($filepath) {
 	$fp = fopen($filepath, 'r');
 	$pos = 0;
 	if ($fp) {
@@ -2145,7 +2219,7 @@ function wfu_filesize($filepath) {
 }
 
 /**
- * Alternative Calculate Size of File.
+ * Alternative Calculate Size of Big File.
  *
  * This function calculates the size of a file following an alternative method.
  * Again, it uses a complex approach for calculating very big files (over 2GB)
@@ -2157,7 +2231,7 @@ function wfu_filesize($filepath) {
  *
  * @return The file size.
  */
-function wfu_filesize2($filepath) {
+function wfu_bigfilesize2($filepath) {
     $fp = fopen($filepath, 'r');
     $return = false;
     if (is_resource($fp)) {
@@ -2235,7 +2309,7 @@ function wfu_fseek2($fp, $pos) {
 		return fseek($fp, $pos, SEEK_SET);
 	}
 	else {
-		$fsize = wfu_filesize2($filepath);
+		$fsize = wfu_bigfilesize2($filepath);
 		$opp = $fsize - $pos;
 		if ( 0 === ($ans = fseek($fp, 0, SEEK_END)) ) {
 			$maxstep = 0x7FFFFFFF;
@@ -2463,7 +2537,7 @@ function wfu_human_filesize($size, $unit = "") {
  *
  * @since 4.12.0
  *
- * @param int $path The file path to check.
+ * @param string $path The file path to check.
  *
  * @return bool True if file exists, false otherwise.
  */
@@ -2481,28 +2555,273 @@ function wfu_file_exists_extended($path) {
  * is stored in an sFTP location or perhaps in other external locations (cloud
  * services, WebDAV etc.).
  *
- * For the moment this functions will return false for a file stored in sFTP. In
- * a future release file_exists will be implemented for sFTP connections,
- * together with other relevant file functions, like filesize, fileperms, stat,
- * md5_file, mime_content_type, is_dir, pathinfo, unlink, getimagesize, unset.
- *
  * @since 3.9.3
  *
- * @param int $path The file path to check.
+ * @redeclarable
+ *
+ * @param string $path The file path to check.
+ * @param string $caller The name of the function that called this one.
  *
  * @return bool True if file exists, false otherwise.
  */
-function wfu_file_exists($path) {
-	//sftp will return false; in a future release file_exists will be
-	//implemented for sftp connections, together with other relevant file
-	//functions, like filesize, fileperms, stat, md5_file, mime_content_type,
-	//is_dir, pathinfo, unlink, getimagesize, unset.
-	if ( substr($path, 0, 7) == "sftp://" ) {
-		return false;
+function wfu_file_exists($path, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	//For FTP and SFTP paths this function will be executed only under certain
+	//conditions, because it may take a long time.
+	//For FTP paths, execution is determined by 2 variables:
+	// - WFU_FILEOPERATION_IGNOREFTP: This is a general flag to ignore
+	//                                calculation for all file function.
+	// - WFU_FTPFILEEXISTS_DEFVALUE: This is the value returned in case the
+	//                               previous flag is true.
+	//If WFU_FTPFILEEXISTS_DEFVALUE starts with an asterisk (*) then it
+	//preceeds over the general flag.
+	//For SFTP paths there are similar variables.
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPFILEEXISTS_DEFVALUE");
+		if ( substr($def, 0, 1) == "*" ) {
+			switch ( $def ) {
+				case "*true": $ret = true; break;
+				case "*false": $ret = false; break;
+				case "*calc": $ret = file_exists($path); break;
+			}
+		}
+		else $ret = ( WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") == "true" ? ( $def == "true" ) : file_exists($path) );
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_SFTPFILEEXISTS_DEFVALUE");
+		if ( substr($def, 0, 1) == "*" ) {
+			switch ( $def ) {
+				case "*true": $ret = true; break;
+				case "*false": $ret = false; break;
+				case "*calc": $ret = wfu_file_exists_sftp($path); break;
+			}
+		}
+		else $ret = ( WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") == "true" ? ( $def == "true" ) : wfu_file_exists_sftp($path) );
+		return $ret;
 	}
 	elseif ( file_exists($path) ) return true;
 	
 	return false;
+}
+
+/**
+ * Get Info About File.
+ *
+ * This function gets file info. It is an extension to the original PHP stat()
+ * function to take special actions in cases where the file is stored in an sFTP
+ * location or perhaps in other external locations (cloud services, WebDAV
+ * etc.).
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $path The file path to check.
+ * @param string $caller The name of the function that called this one.
+ *
+ * @return array|false Information about the file, or false on error.
+ */
+function wfu_stat($path, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = array( "mtime" => 0, "size" => 0 );
+		$def = WFU_VAR("WFU_FTPSTAT_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") != "true" ) )
+			$ret = stat($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = array( "mtime" => 0, "size" => 0 );
+		$def = WFU_VAR("WFU_SFTPSTAT_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
+			$ret = wfu_stat_sftp($path);
+		return $ret;
+	}
+	else return stat($path);
+}
+
+/**
+ * Get Size of File.
+ *
+ * This function gets file size. It is an extension to the original PHP
+ * filesize() function to take special actions in cases where the file is stored
+ * in an sFTP location or perhaps in other external locations (cloud services,
+ * WebDAV etc.).
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $path The file path to check.
+ * @param string $caller The name of the function that called this one.
+ *
+ * @return int|false The file size or false on error.
+ */
+function wfu_filesize($path, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPFILESIZE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") != "true" ) )
+			$ret = filesize($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_SFTPFILESIZE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
+			$ret = wfu_filesize_sftp($path);
+		return $ret;
+	}
+	else return filesize($path);
+}
+
+/**
+ * Get File Stream Handle.
+ *
+ * This function gets a file stream handle. It is an extension to the original
+ * PHP fopen() function to take special actions in cases where the file is
+ * stored in an sFTP location or perhaps in other external locations (cloud
+ * services, WebDAV etc.).
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $path The file path to check.
+ * @param string $mode The file access mode.
+ * @param string $caller The name of the function that called this one.
+ *
+ * @return resource|false The file stream handle or false on error.
+ */
+function wfu_fopen($path, $mode, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPFOPEN_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") != "true" ) )
+			$ret = fopen($path, $mode);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_SFTPFOPEN_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
+			$ret = wfu_fopen_sftp($path, $mode);
+		return $ret;
+	}
+	else return fopen($path, $mode);
+}
+
+/**
+ * Get File Contents.
+ *
+ * This function gets the contents of a file. It is an extension to the original
+ * PHP file_get_contents() function to take special actions in cases where the
+ * file is stored in an sFTP location or perhaps in other external locations
+ * (cloud services, WebDAV etc.).
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $path The file path.
+ * @param string $caller The name of the function that called this one.
+ *
+ * @return string|false The file contents as a string or false on error.
+ */
+function wfu_file_get_contents($path, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPFILEGETCONTENTS_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") != "true" ) )
+			$ret = file_get_contents($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_SFTPFILEGETCONTENTS_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
+			$ret = wfu_file_get_contents_sftp($path);
+		return $ret;
+	}
+	else return file_get_contents($path);
+}
+
+/**
+ * Get MD5 of File.
+ *
+ * This function gets the md5 signature of a file. It is an extension to the
+ * original PHP md5_file() function to take special actions in cases where the
+ * file is stored in an sFTP location or perhaps in other external locations
+ * (cloud services, WebDAV etc.).
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $path The file path.
+ * @param string $caller The name of the function that called this one.
+ *
+ * @return string|false The md5  of the file or false on error.
+ */
+function wfu_md5_file($path, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPMD5FILE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") != "true" ) )
+			$ret = md5_file($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_SFTPMD5FILE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
+			$ret = wfu_md5_file_sftp($path);
+		return $ret;
+	}
+	else return md5_file($path);
+}
+
+/**
+ * Delete a File.
+ *
+ * This function deletes a file. It is an extension to the original PHP unlink()
+ * function to take special actions in cases where the file is stored in an sFTP
+ * location or perhaps in other external locations (cloud services, WebDAV
+ * etc.).
+ *
+ * @since 4.15.0
+ *
+ * @redeclarable
+ *
+ * @param string $path The file path.
+ * @param string $caller The name of the function that called this one.
+ *
+ * @return boolean True on success, false on error.
+ */
+function wfu_unlink($path, $caller = null) {
+	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
+	if ( substr($path, 0, 6) == "ftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_FTPUNLINK_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNOREFTP") != "true" ) )
+			$ret = unlink($path);
+		return $ret;
+	}
+	elseif ( substr($path, 0, 7) == "sftp://" ) {
+		$ret = false;
+		$def = WFU_VAR("WFU_SFTPMD5FILE_DEFVALUE");
+		if ( $def == "*calc" || ( substr($def, 0, 1) != "*" && WFU_VAR("WFU_FILEOPERATION_IGNORESFTP") != "true" ) )
+			$ret = wfu_unlink_sftp($path);
+		return $ret;
+	}
+	else return unlink($path);
 }
 
 /**
@@ -2587,6 +2906,36 @@ function wfu_mime_content_type($path) {
 			return $mime_types[$ext];
 		else return 'application/octet-stream';
 	}
+}
+
+/**
+ * Custom Attempt to determine the real file type of a file.
+ *
+ * This is a wrapper function of Wordpress wp_check_filetype_and_ext(), which
+ * also takes into account sftp:// filepaths.
+ *
+ * @since 4.15.0
+ *
+ * @param string $file Full path to the file.
+ * @param string $filename The name of the file.
+ *
+ * @return array {
+ *     Values for the extension, mime type, and corrected filename.
+ *
+ *     @type string|false $ext File extension, or false if the file doesn't
+ *                        match a mime type.
+ *     @type string|false $type File mime type, or false if the file doesn't
+ *                        match a mime type.
+ *     @type string|false $proper_filename File name with its correct extension,
+ *                        or false if it cannot be determined.
+ * }
+ */
+function wfu_wp_check_filetype_and_ext( $file, $filename ) {
+	//ignore check for sftp files
+	if ( substr($file, 0, 7) == "sftp://" ) {
+		return array( "proper_filename" => false );
+	}
+	else return wp_check_filetype_and_ext( $file, $filename );
 }
 
 //********************* User Functions *****************************************
@@ -2709,9 +3058,9 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 	
 	$check_file_existence = true;
 	if ( $action == 'datasubmit' || substr($action, 0, 5) == 'other' ) $check_file_existence = false;
-	if ( $check_file_existence && !file_exists($filepath) ) return;
+	if ( $check_file_existence && !wfu_file_exists($filepath, "wfu_log_action") ) return;
 	
-	$parts = pathinfo($filepath);
+	//$parts = pathinfo($filepath);
 	$relativepath = wfu_path_abs2rel($filepath);
 //	if ( substr($relativepath, 0, 1) != '/' ) $relativepath = '/'.$relativepath;
 	
@@ -2720,9 +3069,9 @@ function wfu_log_action($action, $filepath, $userid, $uploadid, $pageid, $blogid
 		if ( $action == 'upload' || $action == 'include' ) {
 			// calculate and store file hash if this setting is enabled from Settings
 			$filehash = '';
-			if ( $plugin_options['hashfiles'] == '1' ) $filehash = md5_file($filepath);
+			if ( $plugin_options['hashfiles'] == '1' ) $filehash = wfu_md5_file($filepath, "wfu_log_action");
 			// calculate file size
-			$filesize = filesize($filepath);
+			$filesize = wfu_filesize($filepath, "wfu_log_action");
 			// first make obsolete records having the same file path because the old file has been replaced
 			$oldrecs = $wpdb->get_results('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND date_to = 0');
 			if ( $oldrecs ) {
@@ -3175,17 +3524,17 @@ function wfu_get_file_rec($filepath, $include_userdata) {
 	$table_name2 = $wpdb->prefix . "wfu_userdata";
 	$plugin_options = wfu_decode_plugin_options(get_option( "wordpress_file_upload_options" ));
 
-	if ( !file_exists($filepath) ) return null;
+	if ( !wfu_file_exists($filepath, "wfu_get_file_rec") ) return null;
 
 	$relativepath = wfu_path_abs2rel($filepath);
 //	if ( substr($relativepath, 0, 1) != '/' ) $relativepath = '/'.$relativepath;
 	//if file hash is enabled, then search file based on its path and hash, otherwise find file based on its path and size
 	if ( isset($plugin_options['hashfiles']) && $plugin_options['hashfiles'] == '1' ) {
-		$filehash = md5_file($filepath);
+		$filehash = wfu_md5_file($filepath, "wfu_get_file_rec");
 		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND filehash = \''.$filehash.'\' AND date_to = 0 ORDER BY date_from DESC');
 	}
 	else {
-		$stat = stat($filepath);
+		$stat = wfu_stat($filepath, "wfu_get_file_rec");
 		$filerec = $wpdb->get_row('SELECT * FROM '.$table_name1.' WHERE filepath = \''.esc_sql($relativepath).'\' AND filesize = '.$stat['size'].' AND date_to = 0 ORDER BY date_from DESC');
 	}
 	//get user data
@@ -3217,7 +3566,7 @@ function wfu_get_valid_affected_files($recs) {
 		if ( $latestrec = wfu_get_latest_rec_from_id($rec->idlog) ) {
 			$file = wfu_path_rel2abs($latestrec->filepath);
 			if ( !in_array($file, $files_checked) ) {
-				if ( file_exists($file) ) array_push($valid_affected_files, $file);
+				if ( wfu_file_exists($file, "wfu_get_valid_affected_files") ) array_push($valid_affected_files, $file);
 				array_push($files_checked, $file);
 			}
 		}
@@ -3604,8 +3953,8 @@ function wfu_reassign_hashes() {
 		foreach( $filerecs as $filerec ) {
 			//calculate full file path
 			$filepath = wfu_path_rel2abs($filerec->filepath);
-			if ( file_exists($filepath) ) {
-				$filehash = md5_file($filepath);
+			if ( wfu_file_exists($filepath, "wfu_reassign_hashes") ) {
+				$filehash = wfu_md5_file($filepath, "wfu_reassign_hashes");
 				$wpdb->update($table_name1,
 					array( 'filehash' => $filehash ),
 					array( 'idlog' => $filerec->idlog ),
@@ -3674,13 +4023,13 @@ function wfu_sync_database() {
 		$obsolete = true;
 		//calculate full file path
 		$filepath = wfu_path_rel2abs($filerec->filepath);
-		if ( file_exists($filepath) ) {
+		if ( wfu_file_exists($filepath, "wfu_sync_database") ) {
 			if ( $plugin_options['hashfiles'] == '1' ) {
-				$filehash = md5_file($filepath);
+				$filehash = wfu_md5_file($filepath, "wfu_sync_database");
 				if ( $filehash == $filerec->filehash ) $obsolete = false;
 			}
 			else {
-				$filesize = filesize($filepath);
+				$filesize = wfu_filesize($filepath, "wfu_sync_database");
 				if ( $filesize == $filerec->filesize ) $obsolete = false;
 			}
 		}
@@ -3728,13 +4077,13 @@ function wfu_get_recs_of_user($userid) {
 		$obsolete = true;
 		//calculate full file path
 		$filepath = wfu_path_rel2abs($filerec->filepath);
-		if ( file_exists($filepath) ) {
+		if ( wfu_file_exists($filepath, "wfu_get_recs_of_user") ) {
 			if ( $plugin_options['hashfiles'] == '1' ) {
-				$filehash = md5_file($filepath);
+				$filehash = wfu_md5_file($filepath, "wfu_get_recs_of_user");
 				if ( $filehash == $filerec->filehash ) $obsolete = false;
 			}
 			else {
-				$filesize = filesize($filepath);
+				$filesize = wfu_filesize($filepath, "wfu_get_recs_of_user");
 				if ( $filesize == $filerec->filesize ) $obsolete = false;
 			}
 		}
@@ -3871,13 +4220,13 @@ function wfu_get_filtered_recs($filter) {
 		$obsolete = true;
 		//calculate full file path
 		$filepath = wfu_path_rel2abs($filerec->filepath);
-		if ( file_exists($filepath) ) {
+		if ( wfu_file_exists($filepath, "wfu_get_filtered_recs") ) {
 			if ( $plugin_options['hashfiles'] == '1' ) {
-				$filehash = md5_file($filepath);
+				$filehash = wfu_md5_file($filepath, "wfu_get_filtered_recs");
 				if ( $filehash == $filerec->filehash ) $obsolete = false;
 			}
 			else {
-				$filesize = filesize($filepath);
+				$filesize = wfu_filesize($filepath, "wfu_get_filtered_recs");
 				if ( $filesize == $filerec->filesize ) $obsolete = false;
 			}
 		}
@@ -4364,23 +4713,24 @@ function wfu_export_uploaded_files($params) {
 			$obsolete = true;
 			//calculate full file path
 			$filepath = wfu_path_rel2abs($filerec->filepath);
-			if ( file_exists($filepath) ) {
+			if ( wfu_file_exists($filepath, "wfu_export_uploaded_files") ) {
 				if ( $plugin_options['hashfiles'] == '1' ) {
-					$filehash = md5_file($filepath);
+					$filehash = wfu_md5_file($filepath, "wfu_export_uploaded_files");
 					if ( $filehash == $filerec->filehash ) $obsolete = false;
 				}
 				else {
-					$filesize = filesize($filepath);
+					$filesize = wfu_filesize($filepath, "wfu_export_uploaded_files");
 					if ( $filesize == $filerec->filesize ) $obsolete = false;
 				}
 			}
 		}
 		//export file data if file is not obsolete
 		if ( !$obsolete || $includeall ) {
+			$filepath = wfu_hide_credentials_from_ftpurl($filerec->filepath);
 			$username = wfu_get_username_by_id($filerec->uploaduserid);
 			$filerec->userdata = $wpdb->get_results('SELECT * FROM '.$table_name2.' WHERE uploadid = \''.$filerec->uploadid.'\' AND date_to = 0 ORDER BY propkey');
-			$line = ( $filerec->action == 'datasubmit' ? 'datasubmit' : wfu_basename($filerec->filepath) );
-			$line .= $sep.( $filerec->action == 'datasubmit' ? '' :  wfu_basedir($filerec->filepath) );
+			$line = ( $filerec->action == 'datasubmit' ? 'datasubmit' : wfu_basename($filepath) );
+			$line .= $sep.( $filerec->action == 'datasubmit' ? '' :  wfu_basedir($filepath) );
 			$line .= $sep.$username;
 			$line .= $sep.( $filerec->uploadtime == null ? "" : date("Y-m-d H:i:s", $filerec->uploadtime) );
 			$line .= $sep.( $filerec->action == 'datasubmit' ? '0' : $filerec->filesize );
@@ -4977,7 +5327,7 @@ function wfu_read_template_output($blockname, $data) {
 	$str_output = str_replace('$ID', $sid, $str_output);
 	//extract css, javascript and HTML from output
 	$match = array();
-	preg_match("/<style>(.*)<\/style><script.*?>(.*)<\/script>(.*)/s", $str_output, $match);
+	preg_match("/<style>(.*)<\/style>.*?<script.*?>(.*)<\/script>(.*)/s", $str_output, $match);
 	if ( count($match) == 4 ) {
 		$output["css"] = trim($match[1]);
 		$output["js"] = trim($match[2]);
@@ -5312,7 +5662,7 @@ function wfu_send_notification_email($user, $uploaded_file_paths, $userdata_fiel
 		}
 		//delete files if it is required by consent policy
 		if ( $consent_revoked && $not_store_files ) {
-			foreach ( $uploaded_file_paths as $file ) unlink($file);
+			foreach ( $uploaded_file_paths as $file ) wfu_unlink($file, "wfu_send_notification_email");
 		}
 		return ( $notify_sent ? "" : WFU_WARNING_NOTIFY_NOTSENT_UNKNOWNERROR );
 	}

@@ -137,13 +137,14 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 			$filerec->filepath = '';
 			$remarks = "\n\t\t\t\t\t\t".'<textarea style="width:100%; resize:vertical; background:none;" readonly="readonly">'.$info.'</textarea>';
 		}
+		$displayed_path = wfu_hide_credentials_from_ftpurl($filerec->filepath);
 		$i ++;
 		$echo_str .= "\n\t\t\t\t".'<tr'.( $located_rec > 0 && $filerec->idlog == $located_rec ? ' class="wfu-highlighted"' : '' ).'>';
 		$echo_str .= "\n\t\t\t\t\t".'<th style="word-wrap: break-word;">'.$i.'</th>';
 		$echo_str .= "\n\t\t\t\t\t".'<td class="column-primary" data-colname="File">';
 		if ( $filerec->action == 'other' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>Other action not related to file</span>';
 		elseif ( $filerec->action == 'datasubmit' ) $echo_str .= "\n\t\t\t\t\t\t".'<span>Submission of data without file</span>';
-		elseif ( in_array($filerec->linkedto, $deletedfiles) || in_array($filerec->idlog, $deletedfiles) ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
+		elseif ( in_array($filerec->linkedto, $deletedfiles) || in_array($filerec->idlog, $deletedfiles) ) $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$displayed_path.'</span>';
 		else {
 			//find newest linked record
 			$newestidlog = $filerec->idlog;
@@ -171,11 +172,11 @@ function wfu_view_log($page = 1, $only_table_rows = false, $located_rec = -1) {
 			//make the file linkable only if the record is still valid, the
 			//filename has not changed (due to a rename action) and the file
 			//exists
-			if ( $filerecs[$newestind]->date_to == "0000-00-00 00:00:00" && $filerec->filepath == $filerecs[$newestind]->filepath && file_exists(wfu_path_rel2abs($filerec->filepath)) ) {
+			if ( $filerecs[$newestind]->date_to == "0000-00-00 00:00:00" && $filerec->filepath == $filerecs[$newestind]->filepath && wfu_file_exists(wfu_path_rel2abs($filerec->filepath), "wfu_view_log") ) {
 				if ( !isset($filecodes[$lid]) ) $filecodes[$lid] = wfu_safe_store_filepath($filerec->filepath);
-				$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'" title="View and edit file details" style="font-weight:normal;">'.$filerec->filepath.'</a>';
+				$echo_str .= "\n\t\t\t\t\t\t".'<a class="row-title" href="'.$siteurl.'/wp-admin/options-general.php?page=wordpress_file_upload&action=file_details&file='.$filecodes[$lid].'&invoker='.$logpagecode.'" title="View and edit file details" style="font-weight:normal;">'.$displayed_path.'</a>';
 			}
-			else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$filerec->filepath.'</span>';
+			else $echo_str .= "\n\t\t\t\t\t\t".'<span>'.$displayed_path.'</span>';
 		}
 		$echo_str .= "\n\t\t\t\t\t\t".'<button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button>';
 		$echo_str .= "\n\t\t\t\t\t".'</td>';

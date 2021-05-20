@@ -3,7 +3,7 @@
  * Plugin Name: Paid Member Subscriptions - Recurring Payments for PayPal Standard
  * Plugin URI: http://www.cozmoslabs.com/
  * Description: Allows recurring payments through PayPal Standard
- * Version: 1.2.6
+ * Version: 1.2.7
  * Author: Cozmoslabs, Mihai Iova
  * Author URI: http://www.cozmoslabs.com/
  * Text Domain: paid-member-subscriptions
@@ -36,7 +36,7 @@ Class PMS_PayPal_Standard_Recurring_Payments {
     public function __construct() {
 
         // Define global constants
-        define( 'PMS_PPSRP_VERSION', '1.2.6' );
+        define( 'PMS_PPSRP_VERSION', '1.2.7' );
         define( 'PMS_PPSRP_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
         define( 'PMS_PPSRP_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 

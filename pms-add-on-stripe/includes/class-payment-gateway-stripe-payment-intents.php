@@ -267,8 +267,8 @@ Class PMS_Payment_Gateway_Stripe_Payment_Intents extends PMS_Payment_Gateway_Str
 
                 //check if this payment method is already attached to the customer, if not, add it
                 $customer_payment_methods = \Stripe\PaymentMethod::all( array( 'customer' => $this->customer_id, 'type' => 'card' ) );
-
-                $attach_card = true;
+                $customer                 = \Stripe\Customer::retrieve( $this->customer_id );
+                $attach_card              = true;
 
                 if( !empty( $customer_payment_methods['data'] ) ){
                     foreach( $customer_payment_methods['data'] as $existing_payment_method ){
@@ -279,7 +279,9 @@ Class PMS_Payment_Gateway_Stripe_Payment_Intents extends PMS_Payment_Gateway_Str
                     }
                 }
 
-                if( $attach_card ) {
+                // Add the card if the Customer does not have it already or does not have a Default Payment Method
+                if( $attach_card || empty( $customer->invoice_settings->default_payment_method ) ) {
+
                     $payment_method->attach( ['customer' => $this->customer_id ] );
 
                     \Stripe\Customer::update(
@@ -290,6 +292,12 @@ Class PMS_Payment_Gateway_Stripe_Payment_Intents extends PMS_Payment_Gateway_Str
                             )
                         )
                     );
+
+                } else {
+
+                    // If we don't add the new card, make sure we use and save the existing one
+                    $this->stripe_token = $customer->invoice_settings->default_payment_method;
+
                 }
 
                 // If subscription had a trial, save card fingerprint
@@ -375,11 +383,32 @@ Class PMS_Payment_Gateway_Stripe_Payment_Intents extends PMS_Payment_Gateway_Str
         if ( empty( $form_location ) )
             $form_location = 'psp';
 
+        $customer = \Stripe\Customer::retrieve( $this->customer_id );
+
+        // @NOTE:
+        // If the payment method we have on file is different than the payment method saved as default on the Customer
+        // we need to use the one from the Customer
+        //
+        // This is because of an inconsistency on how we handle cards, where on renew/upgrade a new card is requested and
+        // a new PaymentMethod is generated, but if it's the same as an existing card on the Customer, it doesn't get
+        // added to the Customer so it can't be used for payments but we were saving it as the Card ID on the website
+        //
+        // This is now fixed and we save the correct card even if we don't add it to the Customer (in the future, we shouldn't
+        // request the card details all the time, only when the user wants to update the card on file)
+        //
+        // We also want to start using the saved token for payments instead of the default payment method found on the Customer
+        //
+        // So this simply updates the card on the website if we notice that what we have on file is different than the Customers
+        // default payment method
+        if( !empty( $customer->invoice_settings->default_payment_method ) && $customer->invoice_settings->default_payment_method != $this->stripe_token && !empty( $subscription_id ) ){
+            $this->stripe_token = $customer->invoice_settings->default_payment_method;
+
+            pms_update_member_subscription_meta( $subscription_id, '_stripe_card_id', $this->stripe_token );
+        }
+
         if( !empty( $payment->amount ) ) {
             // create payment intent
             try {
-                $customer = \Stripe\Customer::retrieve( $this->customer_id );
-
                 $metadata = apply_filters( 'pms_stripe_transaction_metadata', array(
                     'payment_id'           => $this->payment_id,
                     'request_location'     => $form_location,
@@ -389,7 +418,7 @@ Class PMS_Payment_Gateway_Stripe_Payment_Intents extends PMS_Payment_Gateway_Str
                 ), $payment, $form_location );
 
                 $args = array(
-                    'payment_method'      => $customer->invoice_settings->default_payment_method,
+                    'payment_method'      => $this->stripe_token,
                     'customer'            => $this->customer_id,
                     'amount'              => $this->process_amount( $payment->amount ),
                     'currency'            => $this->currency,

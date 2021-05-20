@@ -3,7 +3,7 @@ Contributors: nickboss
 Donate link: http://www.iptanus.com/support/wordpress-file-upload
 Tags: file, upload, ajax, form, page, post, sidebar, responsive, widget, webcam, ftp
 Requires at least: 2.9.2
-Tested up to: 5.5
+Tested up to: 5.7.1
 Stable tag: "trunk"
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -148,6 +148,13 @@ There is an option in plugin's settings in Dashboard to relax the CSS rules, so 
 8. A screenshot of the file browser.
 
 == Changelog ==
+
+= 4.15.0 =
+* COOKIEHASH bug corrected
+* credentials in FTP paths are stripped from the paths
+* corrected File Detais to File Details
+* regex "/<style>(.*)<\/style><script.*?>(.*)<\/script>(.*)/s" changed to "/<style>(.*)<\/style>.*?<script.*?>(.*)<\/script>(.*)/s" in functions.php
+* corrected notice: Undefined index: post in wfu_admin.php when the website has no posts
 
 = 4.14.4 =
 * restored .po files in languages so that users can change translations

@@ -106,7 +106,7 @@ if( !class_exists('WPPB_toolbox') ){
             //this is for the migration of Multiple Admin Emails Add-on
             $wppb_toolbox_admin_settings = get_option('wppb_toolbox_admin_settings', array() );
             //make sure it's an array
-            if( empty($wppb_toolbox_admin_settings) )
+            if( empty($wppb_toolbox_admin_settings) || !is_array($wppb_toolbox_admin_settings) )
                 $wppb_toolbox_admin_settings = array();
 
             if( !isset( $wppb_toolbox_admin_settings['multiple-admin-emails'] ) || !isset( $wppb_toolbox_admin_settings['admin-emails'] ) ){

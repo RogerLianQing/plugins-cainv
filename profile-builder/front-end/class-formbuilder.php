@@ -484,7 +484,7 @@ class Profile_Builder_Form_Creator{
 		echo apply_filters( 'wppb_' . $this->args['form_type'] . '_form_content', $form_content );
 	}
 
-	function wppb_output_form_fields( $global_request, $field_check_errors, $form_fields, $called_from = NULL ){
+	function wppb_output_form_fields( $global_request, $field_check_errors, $form_fields, $called_from = NULL, $is_repeater_group = false ){
 		$wppb_generalSettings = get_option( 'wppb_general_settings' );
 		$output_fields = '';
 
@@ -517,7 +517,9 @@ class Profile_Builder_Form_Creator{
 				$output_fields .= apply_filters( 'wppb_output_after_form_field', '</li>', $field, $this->args['ID'], $this->args['form_type'], $called_from );
 			}
 
-			$output_fields .= apply_filters( 'wppb_output_after_last_form_field', '', $this->args['ID'], $this->args['form_type'], $called_from );
+			if ( !$is_repeater_group ) {
+                $output_fields .= apply_filters('wppb_output_after_last_form_field', '', $this->args['ID'], $this->args['form_type'], $called_from);
+            }
 		}
 
 		return apply_filters( 'wppb_output_fields_filter', $output_fields );
@@ -702,7 +704,7 @@ class Profile_Builder_Form_Creator{
 
     static function wppb_edit_profile_select_user_to_edit( $form_name, $id, $form_type, $is_elementor_edit_mode ){
 
-        $display_edit_users_dropdown = apply_filters( 'wppb_display_edit_other_users_dropdown', true );
+        $display_edit_users_dropdown = apply_filters( 'wppb_display_edit_other_users_dropdown', true, $form_name );
         if( !$display_edit_users_dropdown || $is_elementor_edit_mode )
             return;
 
@@ -717,7 +719,7 @@ class Profile_Builder_Form_Creator{
             $selected = get_current_user_id();
 
         $query_args['fields'] = array( 'ID', 'user_login', 'display_name' );
-        $query_args['role'] = apply_filters( 'wppb_edit_profile_user_dropdown_role', '' );
+        $query_args['role'] = apply_filters( 'wppb_edit_profile_user_dropdown_role', '', $form_name );
         $users = get_users( apply_filters( 'wppb_edit_other_users_dropdown_query_args', $query_args ) );
         if( !empty( $users ) ) {
 
@@ -726,7 +728,7 @@ class Profile_Builder_Form_Creator{
             wp_enqueue_style( 'wppb_select2_css', WPPB_PLUGIN_URL .'assets/css/select2/select2.min.css', array(), PROFILE_BUILDER_VERSION );
             wp_add_inline_script( 'wppb_select2_js', '
             jQuery("select").filter(function() {
-                if ( this.id.startsWith( "wppb-" ) && this.id.endsWith( "user-to-edit" ) ) {                
+                if ( this.id.startsWith( "wppb-" ) && this.id.endsWith( "user-to-edit" ) ) {
                     return this;
                 }
             }).on("change", function () {
@@ -734,7 +736,7 @@ class Profile_Builder_Form_Creator{
             });
             jQuery(function(){
                 jQuery("select").filter(function() {
-                    if ( this.id.startsWith( "wppb-" ) && this.id.endsWith( "user-to-edit" ) ) {                
+                    if ( this.id.startsWith( "wppb-" ) && this.id.endsWith( "user-to-edit" ) ) {
                         return this;
                     }
                 }).select2().on("select2:open", function(){
@@ -769,8 +771,11 @@ class Profile_Builder_Form_Creator{
     }
 
     static function wppb_frontend_scripts(){
-        wp_enqueue_script( 'wppb_front_end_script', WPPB_PLUGIN_URL.'assets/js/script-front-end.js', array('jquery'), PROFILE_BUILDER_VERSION, true );
-        wp_print_scripts( 'wppb_front_end_script' );
+        $wppb_toolbox_forms_settings = get_option( 'wppb_toolbox_forms_settings' );
+	    if( !isset( $wppb_toolbox_forms_settings[ 'disable-automatic-scrolling' ] ) ){
+            wp_enqueue_script( 'wppb_front_end_script', WPPB_PLUGIN_URL. 'assets/js/script-front-end.js', array('jquery'), PROFILE_BUILDER_VERSION, true );
+            wp_print_scripts( 'wppb_front_end_script' );
+        }
     }
 
     /**

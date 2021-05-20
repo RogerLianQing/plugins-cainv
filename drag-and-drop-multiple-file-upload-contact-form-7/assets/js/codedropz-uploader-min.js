@@ -1,8 +1,8 @@
 /**
- * CodeDropz Uploader v1.3.5.8
+ * CodeDropz Uploader v1.3.5.9
  * Copyright 2018 Glen Mongaya
  * CodeDrop Drag&Drop Uploader
- * @version 1.3.5.8
+ * @version 1.3.5.9
  * @author CodeDropz, Glen Don L. Mongaya
  * @license The MIT License (MIT)
  */

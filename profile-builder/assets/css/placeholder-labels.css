@@ -1,6 +1,7 @@
 #wppb-recover-password ul li.wppb-form-field label,
 .wppb-user-forms #wppb-loginform .login-username label,
 .wppb-user-forms #wppb-loginform .login-password label,
+.wppb-user-forms #wppb-loginform .wppb-recaptcha label,
 .wppb-form-field.pbpl-class label {
     text-indent: -99999px;
     position: absolute;
@@ -15,7 +16,8 @@
 .wppb-form-field.wppb-upload.pbpl-class label,
 .wppb-form-field.wppb-select-multiple.pbpl-class label,
 .wppb-form-field.wppb-timepicker.pbpl-class label,
-.wppb-form-field.wppb-avatar.pbpl-class label {
+.wppb-form-field.wppb-avatar.pbpl-class label,
+.wppb-form-field.wppb-gdpr-communication-preferences.pbpl-class label{
     text-indent: 0;
     position: relative;
     left: 0;

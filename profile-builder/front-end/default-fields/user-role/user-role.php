@@ -89,7 +89,7 @@ function wppb_user_role_handler( $output, $form_location, $field, $user_id, $fie
                             $output .= selected( $input_value, $user_role['slug'], false );
                         }
 
-                        $output .= '>'. $user_role['name'] .'</option>';
+                        $output .= '>'. translate_user_role( $user_role['name'] ) .'</option>';
                     }
                 }
 

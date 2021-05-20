@@ -662,7 +662,7 @@ class Wordpress_Creation_Kit_PB{
 			}
 		}
 		elseif( $this->args['context'] == 'option' ){
-			if( $pb_wck_pages_hooknames[$this->args['post_type']] == $hook ){
+			if( !empty( $pb_wck_pages_hooknames ) && isset( $this->args[ 'post_type' ] ) && isset( $pb_wck_pages_hooknames[ $this->args[ 'post_type' ] ] ) && $pb_wck_pages_hooknames[$this->args['post_type']] == $hook ){
 				self::wck_enqueue( 'options' );
 			}
 		}

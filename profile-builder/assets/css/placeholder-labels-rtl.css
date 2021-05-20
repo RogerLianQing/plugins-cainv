@@ -17,7 +17,8 @@
 .wppb-form-field.wppb-upload.pbpl-class label,
 .wppb-form-field.wppb-select-multiple.pbpl-class label,
 .wppb-form-field.wppb-timepicker.pbpl-class label,
-.wppb-form-field.wppb-avatar.pbpl-class label {
+.wppb-form-field.wppb-avatar.pbpl-class label,
+.wppb-form-field.wppb-gdpr-communication-preferences.pbpl-class label {
     right: 0;
 }
 

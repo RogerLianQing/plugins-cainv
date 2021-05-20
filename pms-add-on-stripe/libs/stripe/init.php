@@ -2,7 +2,7 @@
 
 if( class_exists( 'Stripe\Stripe' ) && !empty( Stripe\Stripe::VERSION ) &&
     version_compare( Stripe\Stripe::VERSION, '6.40.0' ) >= 0 &&
-    version_compare( Stripe\Stripe::VERSION, '7.67.0', '<=' ) ){
+    version_compare( Stripe\Stripe::VERSION, '7.77.0', '<=' ) ){
     // using already existing class
 } else {
 
@@ -84,6 +84,7 @@ if( class_exists( 'Stripe\Stripe' ) && !empty( Stripe\Stripe::VERSION ) &&
     require __DIR__ . '/lib/Balance.php';
     require __DIR__ . '/lib/BalanceTransaction.php';
     require __DIR__ . '/lib/BankAccount.php';
+    require __DIR__ . '/lib/BillingPortal/Configuration.php';
     require __DIR__ . '/lib/BillingPortal/Session.php';
     require __DIR__ . '/lib/BitcoinReceiver.php';
     require __DIR__ . '/lib/BitcoinTransaction.php';
@@ -168,6 +169,7 @@ if( class_exists( 'Stripe\Stripe' ) && !empty( Stripe\Stripe::VERSION ) &&
     require __DIR__ . '/lib/Service/ApplicationFeeService.php';
     require __DIR__ . '/lib/Service/BalanceService.php';
     require __DIR__ . '/lib/Service/BalanceTransactionService.php';
+    require __DIR__ . '/lib/Service/BillingPortal/ConfigurationService.php';
     require __DIR__ . '/lib/Service/BillingPortal/SessionService.php';
     require __DIR__ . '/lib/Service/ChargeService.php';
     require __DIR__ . '/lib/Service/Checkout/SessionService.php';

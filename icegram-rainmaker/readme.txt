@@ -3,8 +3,8 @@ Contributors: icegram, storeapps, niravmehta, sandhyam, malayladu, asmipatel, ki
 Donate link: http://www.icegram.com/
 Tags:  subscription form, contact form, lead capture, mailchimp, wpforms, blog post, builder, CRM, CSS, custom form, custom forms, database, email, email services, free WordPress plugin, form, form maker, forms, forms plugin, HTML, JavaScript, Mailpoet, landing page, list, lead, leads, list builder, MailChimp, mailing list, marketing, plugins, webhooks, WordPress, WordPress database, forms, Icegram, form builder,subscription
 Requires at least: 4.0
-Tested up to: 5.6
-Stable tag: 1.2.6
+Tested up to: 5.7
+Stable tag: 1.2.8.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -98,6 +98,19 @@ Yes, Rainmaker is compatible with Email Subscribers.
 7. Collect leads on your WordPress site
 
 == Upgrade Notice ==
+
+= 1.2.8.1 =
+
+Fix: Fixed - PHP Fatal error: Uncaught Error: Using $this when not in object context
+
+= 1.2.8 =
+
+Update: WordPress 5.7 compatibility test
+Update: UI improvements
+
+= 1.2.7 =
+
+New: Send subscription notification to multiple email addresses
 
 = 1.2.6 =
 
@@ -250,6 +263,19 @@ Initial Release
 
 
 == Changelog ==
+
+= 1.2.8.1 =
+
+Fix: Fixed - PHP Fatal error: Uncaught Error: Using $this when not in object context
+
+= 1.2.8 =
+
+Update: WordPress 5.7 compatibility check
+Update: UI improvements
+
+= 1.2.7 =
+
+New: Send subscription notification to multiple email addresses
 
 = 1.2.6 =
 

@@ -100,7 +100,7 @@ if ( ! class_exists( 'Rainmaker' ) ) {
 
 			add_action( 'admin_notices', array( &$this, 'rm_add_admin_notices' ) );
 			add_action( 'admin_init', array( &$this, 'rm_dismiss_admin_notice' ) );
-
+			add_action( 'add_meta_boxes', array( &$this, 'add_metaboxes' ) );
 			add_action( 'wp_ajax_ig_rm_klawoo_subscribe', array( &$this, 'klawoo_subscribe' ) );
 		}
 
@@ -191,6 +191,23 @@ if ( ! class_exists( 'Rainmaker' ) ) {
 				include_once( 'rm-offer.php' );
 				include_once( 'rm-pro-features.php' );
 			}
+		}
+
+		/**
+		 * Add metaboxes for upsale
+		 *
+		 * @since 1.2.8
+		 */
+		public function add_metaboxes() {
+			if ( ! $this->is_premium_installed() ) {
+				add_meta_box( 'rm_upsale_premium_metabox', __( 'Upgrade to Rainmaker Premium', 'icegram-rainmaker' ), array( &$this,'rm_upsale_premium'), 'rainmaker_form', 'side', 'default' ); 
+			}
+		}
+
+		public function rm_upsale_premium() {
+				$pricing_url = "https://www.icegram.com/rainmaker-pricing-table/?utm_source=in_app&utm_medium=rm_upgrade_notice&utm_campaign=rm_upsell";
+
+				echo "<div style='font-size:14px'><p class='ig_message_upsale'>Get more features and integration options with <a style='font-weight:500;' href='" . $pricing_url . "' target='_blank' >Rainmaker Premium</a>!</p>Upgrade now & get <b>10% discount!</b><br/><br/>Use code <b class='ig_upsale_premium_code'>PREMIUM10</b></div>";
 		}
 
 		public function rm_dismiss_admin_notice() {
@@ -1282,9 +1299,15 @@ if ( ! class_exists( 'Rainmaker' ) ) {
                             </div>
                         </li>
                         <li class="rm-field-row">
-                            <div class="rm-form-field-set">
-                                <label class="rm-bold-text"><input id='rm_mail_send' class="rm_checkbox" type="checkbox" name="form_data[rm_mail_send]" value="yes" <?php ( ! empty( $form_data['rm_mail_send'] ) ) ? checked( $form_data['rm_mail_send'], 'yes' ) : ''; ?>/><?php _e( 'Email form data to', 'icegram-rainmaker' ); ?></label>
-                                <input type="email" name="form_data[rm_mail_to]" value="<?php echo ( ! empty( $form_data['rm_mail_to'] ) ) ? esc_attr( $form_data['rm_mail_to'] ) : '' ?>" placeholder='<?php _e( 'Enter Email Id', 'icegram-rainmaker' ); ?>'/>
+	                            <div class="rm-form-field-set" style="display: flex">
+	                            	<div style="width:29.5%">
+	                                <label style="width:96%" class="rm-bold-text"><input id='rm_mail_send' class="rm_checkbox" type="checkbox" name="form_data[rm_mail_send]" value="yes" <?php ( ! empty( $form_data['rm_mail_send'] ) ) ? checked( $form_data['rm_mail_send'], 'yes' ) : ''; ?>/><?php _e( 'Email form data to', 'icegram-rainmaker' ); ?></label>
+	                                
+	                            </div>
+	                            <div style="width:65%;">
+	                                <input class="rm-mail-to-input" type="text" name="form_data[rm_mail_to]" value="<?php echo ( ! empty( $form_data['rm_mail_to'] ) ) ? esc_attr( $form_data['rm_mail_to'] ) : '' ?>" placeholder='<?php _e( 'Enter Email Id', 'icegram-rainmaker' ); ?>'/>
+	                                <p class="rm-helper-text"><?php esc_html_e('Enter the email addresses that should receive form data (separated by comma).', 'icegram-rainmaker' ); ?></p>
+	                            </div> 
                             </div>
                         </li>
                         <li class="rm-field-row">
@@ -1446,7 +1469,13 @@ if ( ! class_exists( 'Rainmaker' ) ) {
 				$headers    = 'Content-Type: text/html; charset=UTF-8';
 				$form_title = get_the_title( $rm_form_settings['form_id'] );
 				$subject    = __( 'Lead added from: ', 'icegram-rainmaker' ) . $form_title;
-				wp_mail( $rm_form_settings['rm_mail_to'], $subject, $html, $headers );
+				$rm_mail_to = explode( ',', $rm_form_settings['rm_mail_to'] );
+				if( ! empty( $rm_mail_to ) && is_array( $rm_mail_to ) && count( $rm_mail_to ) > 0 ) {
+					foreach ( $rm_mail_to as $email ) {
+					    $email = trim($email);
+						wp_mail( $email, $subject, $html, $headers );
+					}
+				}
 			}
 
 			return true;

@@ -387,8 +387,8 @@ function wfu_clean_log() {
 			//delete affected files
 			$files_count = 0;
 			foreach( $affected_files as $file ) {
-				unlink($file);
-				if ( !file_exists($file) ) $files_count ++;
+				wfu_unlink($file, "wfu_clean_log");
+				if ( !wfu_file_exists($file, "wfu_clean_log") ) $files_count ++;
 			}
 		}
 	}

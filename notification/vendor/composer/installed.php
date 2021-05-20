@@ -1,24 +1,24 @@
 <?php return array (
   'root' => 
   array (
-    'pretty_version' => '7.2.2',
-    'version' => '7.2.2.0',
+    'pretty_version' => '7.2.4',
+    'version' => '7.2.4.0',
     'aliases' => 
     array (
     ),
-    'reference' => '411b5e9b68578c6a77d5bdca8a93c2adc2a9b311',
+    'reference' => 'a24094c19ca118a628e30803d1d1a545e50c1bd3',
     'name' => 'bracketspace/notification',
   ),
   'versions' => 
   array (
     'bracketspace/notification' => 
     array (
-      'pretty_version' => '7.2.2',
-      'version' => '7.2.2.0',
+      'pretty_version' => '7.2.4',
+      'version' => '7.2.4.0',
       'aliases' => 
       array (
       ),
-      'reference' => '411b5e9b68578c6a77d5bdca8a93c2adc2a9b311',
+      'reference' => 'a24094c19ca118a628e30803d1d1a545e50c1bd3',
     ),
     'micropackage/ajax' => 
     array (

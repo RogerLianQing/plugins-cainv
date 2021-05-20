@@ -125,17 +125,21 @@ jQuery( function( $ ) {
         current_button.attr( 'disabled', true );
 
         stripe.handleCardSetup( clientSecret, card, { payment_method_data : { billing_details : pms_stripe_get_billing_details() } } ).then(function(result) {
-            //console.log( result )
-
             let token
 
-            if( result.error && result.error.type && result.error.type == 'validation_error' )
+            if( result.error && result.error.decline_code && result.error.decline_code == 'live_mode_test_card' ){
+                let errors = { 'credit_card' : result.error.message }
+
+                addValidationErrors( errors, current_button )
+            } else if( result.error && result.error.type && result.error.type == 'validation_error' )
                 stripeResetSubmitButton( current_button )
             else {
-                if ( result.error )
+                if ( result.error && result.error.setup_intent )
                     token = { id : result.error.setup_intent.id }
-                else
+                else if( result.setupIntent )
                     token = { id : result.setupIntent.payment_method }
+                else
+                    token = ''
 
                 stripeTokenHandler( token )
             }
@@ -304,6 +308,11 @@ jQuery( function( $ ) {
 
                 if( scrollLocation == '' )
                     scrollLocation = '.pms-field-subscriptions'
+            } else if( index == 'credit_card' ){
+                $.pms_stripe_add_credit_card_error( value )
+
+                if( scrollLocation == '' )
+                    scrollLocation = '.pms-paygates-wrapper'
             } else {
                 $.pms_add_field_error( value, index )
 
@@ -325,6 +334,11 @@ jQuery( function( $ ) {
     function scrollTo( scrollLocation, payment_button ){
         var form = $(scrollLocation)[0]
 
+        if( typeof form == 'undefined' ){
+            stripeResetSubmitButton( payment_button )
+            return
+        }
+
         var coord  = form.getBoundingClientRect().top + window.pageYOffset
         var offset = -170
 
@@ -334,6 +348,7 @@ jQuery( function( $ ) {
         })
 
         stripeResetSubmitButton( payment_button )
+
     }
 
     function getAutoRenewalStatus(){
@@ -384,8 +399,8 @@ jQuery( function( $ ) {
 
         var email = jQuery( '.pms-form input[name="user_email"], .wppb-user-forms input[name="email"]' ).val()
 
-        if( typeof email != 'undefined' )
-            data.email = email
+        if( typeof email != 'undefined' && email != '' )
+            data.email = email.replace(/\s+/g, '') // remove any whitespace that might be present in the email
 
         var name = ''
 
@@ -399,7 +414,7 @@ jQuery( function( $ ) {
         else if( jQuery( '.pms-form input[name="last_name"], .wppb-user-forms input[name="last_name"]' ).length > 0 )
             name = name + jQuery( '.pms-form input[name="last_name"], .wppb-user-forms input[name="last_name"]' ).val()
 
-        if( name.length > 0 )
+        if( name.length > 1 )
             data.name = name
 
         if( jQuery( '.pms-billing-details ').length > 0 ){
@@ -417,4 +432,21 @@ jQuery( function( $ ) {
         return data
 
     }
+
+    $.pms_stripe_add_credit_card_error = function( error ) {
+
+        if( error == '' || error == 'undefined' )
+            return false
+
+        $field_wrapper  = $('#pms-credit-card-information');
+
+        error = '<p>' + error + '</p>'
+
+        if( $field_wrapper.find('.pms_field-errors-wrapper').length > 0 )
+            $field_wrapper.find('.pms_field-errors-wrapper').html( error )
+        else
+            $field_wrapper.append('<div class="pms_field-errors-wrapper pms-is-js">' + error + '</div>')
+
+    };
+
 });

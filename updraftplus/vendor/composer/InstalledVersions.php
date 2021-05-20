@@ -29,7 +29,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'aac6c5b68e6a3907c59c667f2a330f50c7575987',
+    'reference' => '0e226d1d0b3027e276a6a5059de1b4808692bd3d',
     'name' => 'updraftplus/updraftplus',
   ),
   'versions' => 
@@ -344,7 +344,16 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'aac6c5b68e6a3907c59c667f2a330f50c7575987',
+      'reference' => '0e226d1d0b3027e276a6a5059de1b4808692bd3d',
+    ),
+    'vakata/jstree' => 
+    array (
+      'pretty_version' => 'dev-3.3.12-rc.0-distributable',
+      'version' => 'dev-3.3.12-rc.0-distributable',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '9342b0a31b0abd126f2e201a4318328f25673249',
     ),
   ),
 );

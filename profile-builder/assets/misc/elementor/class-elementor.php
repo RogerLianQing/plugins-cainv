@@ -47,10 +47,10 @@ class PB_Elementor {
 	 * Include Widgets files
 	 */
 	private function include_widgets_files() {
-		require_once( __DIR__ . '/widgets/class-widget-edit-profile.php' );
-		require_once( __DIR__ . '/widgets/class-widget-login.php' );
-		require_once( __DIR__ . '/widgets/class-widget-recover-password.php' );
-		require_once( __DIR__ . '/widgets/class-widget-register.php' );
+		require_once(__DIR__ . '/widgets/class-pb-widget-epf.php');
+		require_once(__DIR__ . '/widgets/class-pb-widget-l.php');
+		require_once(__DIR__ . '/widgets/class-pb-widget-rp.php');
+		require_once(__DIR__ . '/widgets/class-pb-widget-rf.php');
 	}
 
 	/**

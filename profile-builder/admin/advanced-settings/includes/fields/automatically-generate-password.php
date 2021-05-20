@@ -25,7 +25,7 @@ function wppb_toolbox_send_credentials($requestdata, $form){
 	return '<input id="send_credentials_via_email" type="hidden" name="send_credentials_via_email" value="sending" />';
 }
 
-add_action( 'wppb_build_userdata', 'wppb_toolbox_generate_password', 20, 2 );
+add_filter( 'wppb_build_userdata', 'wppb_toolbox_generate_password', 20, 2 );
 function wppb_toolbox_generate_password( $userdata, $global_request ) {
 	if ( $global_request['action'] == 'register' ) {
 		$userdata['user_pass'] = wp_generate_password();

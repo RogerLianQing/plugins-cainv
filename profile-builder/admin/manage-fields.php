@@ -191,12 +191,12 @@ function wppb_populate_manage_fields(){
         array( 'type' => 'text', 'slug' => 'allowed-upload-extensions', 'title' => __( 'Allowed Upload Extensions', 'profile-builder' ), 'default' => '.*', 'description' => __( 'Specify the extension(s) you want to limit to upload<br/>Example: .ext1,.ext2,.ext3<br/>If not specified, defaults to all WordPress allowed file extensions (.*)', 'profile-builder' ) ),
         array( 'type' => 'text', 'slug' => 'avatar-size', 'title' => __( 'Avatar Size', 'profile-builder' ), 'default' => 100, 'description' => __( "Enter a value (between 20 and 200) for the size of the 'Avatar'<br/>If not specified, defaults to 100", 'profile-builder' ) ),
         array( 'type' => 'text', 'slug' => 'date-format', 'title' => __( 'Date-format', 'profile-builder' ), 'default' => 'mm/dd/yy', 'description' => __( 'Specify the format of the date when using Datepicker<br/>Valid options: mm/dd/yy, mm/yy/dd, dd/yy/mm, dd/mm/yy, yy/dd/mm, yy/mm/dd, mm-dd-yy, yy-mm-dd, D, dd M yy, D, d M y, DD, dd-M-y, D, d M yy, mm/yy, mm/dd, dd/mm, @<br/>If not specified, defaults to mm/dd/yy', 'profile-builder' ) ),
-        array( 'type' => 'textarea', 'slug' => 'terms-of-agreement', 'title' => __( 'Terms of Agreement', 'profile-builder' ), 'description' => __( 'Enter a detailed description of the temrs of agreement for the user to read.<br/>Links can be inserted by using standard HTML syntax: &lt;a href="custom_url"&gt;custom_text&lt;/a&gt;', 'profile-builder' ) ),
+        array( 'type' => 'textarea', 'slug' => 'terms-of-agreement', 'title' => __( 'Terms of Agreement', 'profile-builder' ), 'description' => __( 'Enter a detailed description of the terms of agreement for the user to read.<br/>Links can be inserted by using standard HTML syntax: &lt;a href="custom_url"&gt;custom_text&lt;/a&gt;', 'profile-builder' ) ),
         array( 'type' => 'text', 'slug' => 'options', 'title' => __( 'Options', 'profile-builder' ), 'description' => __( "Enter a comma separated list of values<br/>This can be anything, as it is hidden from the user, but should not contain special characters or apostrophes", 'profile-builder' ) ),
         array( 'type' => 'text', 'slug' => 'labels', 'title' => __( 'Labels', 'profile-builder' ), 'description' => __( "Enter a comma separated list of labels<br/>Visible for the user", 'profile-builder' ) ),
-        array( 'type' => 'select', 'slug' => 'recaptcha-type', 'title' => __( 'reCAPTCHA Type', 'profile-builder' ), 'options' => array('%reCAPTCHA V2%v2', '%Invisible reCAPTCHA%invisible'), 'default' => 'v2', 'description' => __( 'Choose the <a href="https://developers.google.com/recaptcha/docs/versions" target="_blank">type of reCAPTCHA</a> you wish to add to this site.', 'profile-builder' ) ),
-        array( 'type' => 'text', 'slug' => 'public-key', 'title' => __( 'Site Key', 'profile-builder' ), 'description' => __( 'The site key from Google, <a href="http://www.google.com/recaptcha" target="_blank">www.google.com/recaptcha</a>', 'profile-builder' ) ),
-        array( 'type' => 'text', 'slug' => 'private-key', 'title' => __( 'Secret Key', 'profile-builder' ), 'description' => __( 'The secret key from Google, <a href="http://www.google.com/recaptcha" target="_blank">www.google.com/recaptcha</a>', 'profile-builder' ) ),
+        array( 'type' => 'select', 'slug' => 'recaptcha-type', 'title' => __( 'reCAPTCHA Type', 'profile-builder' ), 'options' => array('%reCAPTCHA V2%v2', '%Invisible reCAPTCHA%invisible'), 'default' => 'v2', 'description' => __( 'Choose the <a href="https://developers.google.com/recaptcha/docs/versions" target="_blank">type of reCAPTCHA</a> you wish to add to this site.<br/>Please note that the Invisible reCAPTCHA is a type of reCAPTCHA v2.', 'profile-builder' ) ),
+        array( 'type' => 'text', 'slug' => 'public-key', 'title' => __( 'Site Key', 'profile-builder' ), 'description' => __( 'The site key from Google, <a href="https://www.google.com/recaptcha/admin/create" target="_blank">https://www.google.com/recaptcha/admin/create</a>', 'profile-builder' ) ),
+        array( 'type' => 'text', 'slug' => 'private-key', 'title' => __( 'Secret Key', 'profile-builder' ), 'description' => __( 'The secret key from Google, <a href="https://www.google.com/recaptcha/admin/create" target="_blank">https://www.google.com/recaptcha/admin/create</a>', 'profile-builder' ) ),
         array( 'type' => 'checkbox', 'slug' => 'captcha-pb-forms', 'title' => __( 'Display on PB forms', 'profile-builder' ), 'options' => array( '%'.__('PB Login','profile-builder').'%'.'pb_login', '%'.__('PB Register','profile-builder').'%'.'pb_register', '%'.__('PB Recover Password','profile-builder').'%'.'pb_recover_password' ), 'default' => 'pb_register', 'description' => __( "Select on which Profile Builder forms to display reCAPTCHA", 'profile-builder' ) ),
         array( 'type' => 'checkbox', 'slug' => 'captcha-wp-forms', 'title' => __( 'Display on default WP forms', 'profile-builder' ), 'options' => array( '%'.__('Default WP Login', 'profile-builder').'%'.'default_wp_login', '%'.__('Default WP Register', 'profile-builder').'%'.'default_wp_register', '%'.__('Default WP Recover Password', 'profile-builder').'%'.'default_wp_recover_password'), 'default' => 'default_wp_register', 'description' => __( "Select on which default WP forms to display reCAPTCHA", 'profile-builder' ) ),
         array( 'type' => 'checkbox', 'slug' => 'user-roles', 'title' => __( 'User Roles', 'profile-builder' ), 'options' => $user_roles, 'description' => __( "Select which user roles to show to the user ( drag and drop to re-order )", 'profile-builder' ) ),
@@ -1200,6 +1200,14 @@ function wppb_check_field_on_edit_add( $message, $fields, $required_fields, $met
                     $message .= __( "The meta-name cannot be empty\n", 'profile-builder' );
                 }
 
+                //check if the meta-name starts or ends with a space
+                if ( strpos( $posted_values['meta-name'], " " ) === 0 ) {
+                    $message .= __( "The meta-name cannot begin with a space\n", 'profile-builder' );
+                }
+                if ( strpos( $posted_values['meta-name'], " " ) === strlen( $posted_values['meta-name'] ) - 1 ) {
+                    $message .= __( "The meta-name cannot end with a space\n", 'profile-builder' );
+                }
+
                 // meta names that are reserved and cannot be used as part of other meta names
                 $reserved_meta_name_list_strict = apply_filters( 'wppb_unique_meta_name_list_strict', array( 'map' ) );
                 // skip meta name check for these fields
@@ -1525,7 +1533,7 @@ function wppb_get_user_map_markers( $user_id, $meta_name ) {
 	$i = 0;
 
     foreach( $results as $key => $result ) {
-		$pattern = '/^' . $meta_name . '_[0-9]+$/';
+		$pattern = '/^' . $meta_name . '_[0-9]+(_[0-9]+)*$/';
 		preg_match( $pattern, $result[1], $matches );
 		if ( count ($matches) > 0 ) {
 			$markers[$i] = $result[0];

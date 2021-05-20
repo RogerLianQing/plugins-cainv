@@ -378,7 +378,7 @@ class ListTable extends WP_List_Table {
 	 */
 	public function no_items() {
 
-		esc_html_e( 'No logs found', 'wpforms-lite' );
+		esc_html_e( 'No logs found.', 'wpforms-lite' );
 	}
 
 
@@ -506,7 +506,7 @@ class ListTable extends WP_List_Table {
 
 		$this->prepare_column_headers();
 		$this->prepare_items();
-		echo '<div class="wpforms-list-table">';
+		echo '<div class="wpforms-list-table wpforms-list-table--logs">';
 		echo '<form id="' . esc_attr( $this->_args['plural'] ) . '-filter" method="get">';
 		$this->header();
 		parent::display();

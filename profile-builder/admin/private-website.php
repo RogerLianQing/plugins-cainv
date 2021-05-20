@@ -44,6 +44,9 @@ function wppb_private_website_content() {
         'posts_per_page'    => -1
     );
 
+    if( function_exists( 'wc_get_page_id' ) )
+        $args['exclude'] = wc_get_page_id( 'shop' );
+
     $all_pages = get_posts( $args );
     ?>
     <div class="wrap wppb-wrap wppb-private-website">

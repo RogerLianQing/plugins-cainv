@@ -72,7 +72,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		if ( substr($basedir, 0, 1) == '/' ) $basedir = substr($basedir, 1);
 		//calculate the absolute path of basedir knowing that basedir is relative to website root
 		$basedir = wfu_path_rel2abs($basedir);
-		if ( !file_exists($basedir) ) $basedir = false;
+		if ( !wfu_file_exists($basedir, "wfu_browse_files") ) $basedir = false;
 	}
 	//set basedit to default value if empty
 	if ( $basedir === false ) {
@@ -175,7 +175,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		//calculate stat
 		if ( substr($dirsort, 0, 5) == 'mdate' || $located_file != "" ) {
 			foreach ( $dirlist as &$dir ) {
-				$stat = stat($dir['fullpath']);
+				$stat = wfu_stat($dir['fullpath'], "wfu_browse_files:1");
 				$dir['mdate'] = $stat['mtime'];
 			}
 			unset($dir);
@@ -205,7 +205,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		//been done
 		if ( !$dirstat_ok ) {
 			foreach ( $dirlist as &$dir ) {
-				$stat = stat($dir['fullpath']);
+				$stat = wfu_stat($dir['fullpath'], "wfu_browse_files:2");
 				$dir['mdate'] = $stat['mtime'];
 			}
 			unset($dir);
@@ -230,7 +230,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		//if file sort is size or mdate then first calculate stat
 		if ( substr($filesort, 0, 4) == 'size' || substr($filesort, 0, 5) == 'mdate' ) {
 			foreach ( $filelist as &$file ) {
-				$stat = stat($file['fullpath']);
+				$stat = wfu_stat($file['fullpath'], "wfu_browse_files:3");
 				$file['size'] = $stat['size'];
 				$file['mdate'] = $stat['mtime'];
 			}
@@ -281,7 +281,7 @@ function wfu_browse_files($basedir_code, $page = -1, $only_table_rows = false) {
 		if ( !$filestat_ok || !$filerec_ok ) {
 			foreach ( $filelist as &$file ) {
 				if ( !$filestat_ok ) {
-					$stat = stat($file['fullpath']);
+					$stat = wfu_stat($file['fullpath'], "wfu_browse_files:4");
 					$file['size'] = $stat['size'];
 					$file['mdate'] = $stat['mtime'];
 				}
@@ -821,7 +821,7 @@ function wfu_rename_file($file_code, $type) {
 	
 	$dec_file = wfu_path_rel2abs(wfu_flatten_path($dec_file));
 	if ( $type == 'dir' && substr($dec_file, -1) == '/' ) $dec_file = substr($dec_file, 0, -1);
-	if ( !file_exists($dec_file) ) return;
+	if ( !wfu_file_exists($dec_file, "wfu_rename_file:1") ) return;
 
 	//check if user is allowed to perform this action
 	if ( !wfu_current_user_owes_file($dec_file) ) return;
@@ -835,14 +835,14 @@ function wfu_rename_file($file_code, $type) {
 			elseif ( preg_match("/[^A-Za-z0-9_.#\-$]/", $_POST['wfu_newname']) ) $error = 'Error: name contained invalid characters that were stripped off! Please try again.';
 			elseif ( substr($_POST['wfu_newname'], -1 - strlen($parts['extension'])) != '.'.$parts['extension'] ) $error = 'Error: new and old file name extensions must be identical! Please correct.';
 			elseif ( wfu_file_extension_blacklisted($_POST['wfu_newname']) ) $error = 'Error: the new file name has an extension that is forbidden for security reasons. Please correct.';
-			elseif ( file_exists($new_file) ) $error = 'Error: The '.( $type == 'dir' ? 'folder' : 'file' ).' <strong>'.$_POST['wfu_newname'].'</strong> already exists! Please choose another one.';
+			elseif ( wfu_file_exists($new_file, "wfu_rename_file:2") ) $error = 'Error: The '.( $type == 'dir' ? 'folder' : 'file' ).' <strong>'.$_POST['wfu_newname'].'</strong> already exists! Please choose another one.';
 			else {
 				//pre-log rename action
 				if ( $type == 'file' ) $retid = wfu_log_action('rename:'.$new_file, $dec_file, $user->ID, '', 0, 0, '', null);
 				//perform rename action
 				if ( rename($dec_file, $new_file) == false ) $error = 'Error: Rename of '.( $type == 'dir' ? 'folder' : 'file' ).' <strong>'.$parts['basename'].'</strong> failed!';
 				//revert log action if file was not renamed
-				if ( $type == 'file' && !file_exists($new_file) ) wfu_revert_log_action($retid);
+				if ( $type == 'file' && !wfu_file_exists($new_file, "wfu_rename_file:3") ) wfu_revert_log_action($retid);
 			}
 		}
 	}
@@ -898,17 +898,17 @@ function wfu_move_file($file_code) {
 		if ( trim($_POST['wfu_newpath']) == "" ) $error = 'Error: Destination path cannot be empty!';
 		elseif ( $newpath == $oldpath ) $error = 'Error: Destination path is the same as source path!';
 		elseif ( preg_match($regex, $_POST['wfu_newpath']) ) $error = 'Error: path contained invalid characters that were stripped off! Please try again.';
-		elseif ( !file_exists($newpath) ) $error = 'Error: Destination folder <strong>'.$_POST['wfu_newpath'].'</strong> does not exist!';
+		elseif ( !wfu_file_exists($newpath, "wfu_move_file:1") ) $error = 'Error: Destination folder <strong>'.$_POST['wfu_newpath'].'</strong> does not exist!';
 		elseif ( $replacefiles == "" ) $error = 'Error: Invalid selection about replacing files with same filename at destination!';
 		else {
 			foreach ( $dec_files as $dec_file ) {
-				if ( file_exists($dec_file) ) {
+				if ( wfu_file_exists($dec_file, "wfu_move_file:2") ) {
 					$new_file = $newpath.wfu_basename($dec_file);
-					if ( !file_exists($new_file) || $replacefiles == "yes" ) {
+					if ( !wfu_file_exists($new_file, "wfu_move_file:3") || $replacefiles == "yes" ) {
 						//pre-log move action
 						$retid = wfu_log_action('move:'.$new_file, $dec_file, $user->ID, '', 0, 0, '', null);
 						//perform move action
-						if ( @rename($dec_file, $new_file) === false || !file_exists($new_file) ) {
+						if ( @rename($dec_file, $new_file) === false || !wfu_file_exists($new_file, "wfu_move_file:4") ) {
 							wfu_revert_log_action($retid);
 						}
 					}
@@ -1127,14 +1127,14 @@ function wfu_create_dir($dir_code) {
 
 	$dec_dir = wfu_path_rel2abs(wfu_flatten_path($dec_dir));
 	if ( substr($dec_dir, -1) != '/' ) $dec_dir .= '/';
-	if ( !file_exists($dec_dir) ) return;
+	if ( !wfu_file_exists($dec_dir, "wfu_create_dir:1") ) return;
 	$error = "";
 	if ( isset($_POST['wfu_newname'])  && isset($_POST['submit']) ) {
 		if ( $_POST['submit'] == "Create" ) {
 			$new_dir = $dec_dir.$_POST['wfu_newname'];
 			if ( $_POST['wfu_newname'] == "" ) $error = 'Error: New folder name cannot be empty!';
 			elseif ( preg_match("/[^A-Za-z0-9_.#\-$]/", $_POST['wfu_newname']) ) $error = 'Error: name contained invalid characters that were stripped off! Please try again.';
-			elseif ( file_exists($new_dir) ) $error = 'Error: The folder <strong>'.$_POST['wfu_newname'].'</strong> already exists! Please choose another one.';
+			elseif ( wfu_file_exists($new_dir, "wfu_create_dir:2") ) $error = 'Error: The folder <strong>'.$_POST['wfu_newname'].'</strong> already exists! Please choose another one.';
 			elseif ( mkdir($new_dir) == false ) $error = 'Error: Creation of folder <strong>'.$_POST['wfu_newname'].'</strong> failed!';
 		}
 	}
@@ -1314,7 +1314,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 
 		//extract file parts and file properties 
 		$parts = pathinfo($filepath);
-		if ( $file_exists ) $stat = stat($filepath);
+		if ( $file_exists ) $stat = wfu_stat($filepath, "wfu_file_details:1");
 		else $stat['mtime'] = '';
 	}
 	else {
@@ -1337,7 +1337,7 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$parts = pathinfo($filepath);
 		$dir_code = wfu_safe_store_filepath(wfu_path_abs2rel($parts['dirname']).'[['.$ret['sort'].']]');
 
-		$stat = stat($filepath);
+		$stat = wfu_stat($filepath, "wfu_file_details:2");
 	}
 
 	$echo_str = '<div class="regev_wrap">';
@@ -1346,8 +1346,8 @@ function wfu_file_details($file_code, $errorstatus, $invoker = '') {
 		$echo_str .= "\n\t\t".'<p>'.WFU_USVAR('wfu_filedetails_error').'</p>';
 		$echo_str .= "\n\t".'</div>';
 	}
-	//show file detais
-	$echo_str .= "\n\t".'<h2>Detais of File: '.$parts['basename'].'</h2>';
+	//show file details
+	$echo_str .= "\n\t".'<h2>Details of File: '.$parts['basename'].'</h2>';
 	if ( !$file_exists ) {
 		$echo_str .= "\n\t\t".'<div class="notice notice-warning">';
 		$echo_str .= "\n\t\t\t".'<p>File does not exist on the server anymore!</p>';

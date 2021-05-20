@@ -199,7 +199,7 @@ function wfu_file_has_php_tags($file, $ext) {
 	$a = func_get_args(); $a = WFU_FUNCTION_HOOK(__FUNCTION__, $a, $out); if (isset($out['vars'])) foreach($out['vars'] as $p => $v) $$p = $v; switch($a) { case 'R': return $out['output']; break; case 'D': die($out['output']); }
 	if ( WFU_VAR("WFU_CHECKPHPTAGS_FILETYPES") == "none" ) return false;
 	if ( WFU_VAR("WFU_CHECKPHPTAGS_FILETYPES") != "commonimages" || wfu_file_extension_is_common_image($ext) ) {
-		if ( ($data = @file_get_contents($file)) === false ) return true;
+		if ( ($data = wfu_file_get_contents($file, "wfu_file_has_php_tags")) === false ) return true;
 		return preg_match('/<\?(php)/i', $data);
 	}
 	return false;

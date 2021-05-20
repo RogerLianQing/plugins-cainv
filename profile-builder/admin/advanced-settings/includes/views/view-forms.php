@@ -332,6 +332,25 @@
             </td>
         </tr>
 
+        <tr>
+            <th><?php _e( 'Disable automatic scrolling after submit', 'profile-builder' ); ?></th>
+
+            <td>
+                <label><input type="checkbox" name="wppb_toolbox_forms_settings[disable-automatic-scrolling]"<?php echo ( ( isset( $settings['disable-automatic-scrolling'] ) && ( $settings['disable-automatic-scrolling'] == 'yes' ) ) ? ' checked' : '' );?> value="yes">
+                    <?php _e( 'Yes', 'profile-builder' ); ?>
+                </label>
+
+                <ul>
+                    <li class="description">
+                        <?php _e( 'By default, after each form submission the page will automatically scroll to the form message.', 'profile-builder' ); ?>
+                    </li>
+                    <li class="description">
+                        <?php _e( 'If you check this option, automatic scrolling will be disabled.', 'profile-builder' ); ?>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+
     </table>
 
     <?php submit_button( __( 'Save Changes', 'profile-builder' ) ); ?>

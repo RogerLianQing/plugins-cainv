@@ -530,8 +530,12 @@ function wppb_replace_and_save( $content, $option_name ){
  *
  * @return array
  */
-function wppb_add_existing_default_fields ( $backed_up_manage_fields = array(), $field, $meta_name, $required, $description = '', $recaptcha_public_key = '', $recaptcha_private_key = '' ){
-	$local_array = array();
+function wppb_add_existing_default_fields ( $backed_up_manage_fields, $field, $meta_name, $required, $description = '', $recaptcha_public_key = '', $recaptcha_private_key = '' ){
+	if ( !is_array($backed_up_manage_fields) ){
+        $backed_up_manage_fields = empty($backed_up_manage_fields) ? array(): array($backed_up_manage_fields);
+    }
+
+    $local_array = array();
 
 	$local_array['id'] 							= '';
 	$local_array['field']						= $field;

@@ -706,7 +706,7 @@ Class PMS_Payment_Gateway_Stripe_Legacy extends PMS_Payment_Gateway {
                     \Stripe\Customer::update(
                         $customer_stripe_id,
                         array(
-                            'name' => $this->get_user_name( $user_id )
+                            'name' => $name
                         )
                     );
                 }
@@ -913,7 +913,10 @@ Class PMS_Payment_Gateway_Stripe_Legacy extends PMS_Payment_Gateway {
         if( empty( $user ) )
             return '';
 
-        return $user->first_name . ' ' . $user->last_name;
+        $name = !empty( $user->first_name ) ? $user->first_name . ' ' : '';
+        $name .= !empty( $user->last_name ) ? $user->last_name : '';
+
+        return $name;
     }
 
     /**

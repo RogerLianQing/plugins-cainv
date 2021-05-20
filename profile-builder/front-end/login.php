@@ -341,12 +341,13 @@ function wppb_login_redirect( $redirect_to, $requested_redirect_to, $user ){
             }
 
             $error_string = apply_filters('wppb_login_wp_error_message', $error_string, $user);
+            $wppb_error_string_nonce = wp_create_nonce( 'wppb_login_error_'. $error_string );
 
             // encode the error string and send it as a GET parameter
             if ( isset($_POST['wppb_referer_url']) && $_POST['wppb_referer_url'] !== '' ) {
-                $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), 'request_form_location' => $request_form_location, 'wppb_referer_url' => urlencode(esc_url( $_POST['wppb_referer_url'] )));
+                $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), '_wpnonce' => $wppb_error_string_nonce, 'request_form_location' => $request_form_location, 'wppb_referer_url' => urlencode(esc_url( $_POST['wppb_referer_url'] )));
             } else {
-                $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), 'request_form_location' => $request_form_location);
+                $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), '_wpnonce' => $wppb_error_string_nonce, 'request_form_location' => $request_form_location);
             }
 
             $redirect_to = add_query_arg($arr_params, $redirect_to);
@@ -422,14 +423,16 @@ function wppb_front_end_login( $atts ){
 		$login_form = '';
 
 		// display our login errors
-		if( isset( $_GET['loginerror'] ) || isset( $_POST['loginerror'] ) ){
-            $loginerror = '<p class="wppb-error">'. wp_kses_post( urldecode( base64_decode( isset( $_GET['loginerror'] ) ? $_GET['loginerror'] : $_POST['loginerror'] ) ) ) .'</p><!-- .error -->';
-            if( isset( $_GET['request_form_location'] ) ){
-                if( $_GET['request_form_location'] === 'widget' && !in_the_loop() ){
-                    $login_form .= $loginerror;
-                }
-                elseif( $_GET['request_form_location'] === 'page' && in_the_loop() ){
-                    $login_form .= $loginerror;
+		if( ( isset( $_GET['loginerror'] ) || isset( $_POST['loginerror'] ) ) && isset( $_GET['_wpnonce'] ) ){
+		    $error_string = urldecode( base64_decode( isset( $_GET['loginerror'] ) ? $_GET['loginerror'] : $_POST['loginerror'] ) );
+            if( wp_verify_nonce( $_GET['_wpnonce'], 'wppb_login_error_'. $error_string ) ) {
+                $loginerror = '<p class="wppb-error">' . wp_kses_post($error_string) . '</p><!-- .error -->';
+                if (isset($_GET['request_form_location'])) {
+                    if ($_GET['request_form_location'] === 'widget' && !in_the_loop()) {
+                        $login_form .= $loginerror;
+                    } elseif ($_GET['request_form_location'] === 'page' && in_the_loop()) {
+                        $login_form .= $loginerror;
+                    }
                 }
             }
 		}

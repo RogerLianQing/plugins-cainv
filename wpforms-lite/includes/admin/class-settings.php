@@ -117,7 +117,7 @@ class WPForms_Settings {
 			$value_prev = isset( $settings[ $id ] ) ? $settings[ $id ] : false;
 
 			// Custom filter can be provided for sanitizing, otherwise use defaults.
-			if ( ! empty( $field['filter'] ) && function_exists( $field['filter'] ) ) {
+			if ( ! empty( $field['filter'] ) && is_callable( $field['filter'] ) ) {
 
 				$value = call_user_func( $field['filter'], $value, $id, $field, $value_prev );
 
@@ -150,9 +150,7 @@ class WPForms_Settings {
 		}
 
 		// Save settings.
-		update_option( 'wpforms_settings', $settings );
-
-		do_action( 'wpforms_settings_updated', $settings );
+		wpforms_update_settings( $settings );
 
 		WPForms_Admin_Notice::success( esc_html__( 'Settings were successfully saved.', 'wpforms-lite' ) );
 	}
@@ -194,6 +192,11 @@ class WPForms_Settings {
 			],
 			'integrations' => [
 				'name'   => esc_html__( 'Integrations', 'wpforms-lite' ),
+				'form'   => false,
+				'submit' => false,
+			],
+			'geolocation'  => [
+				'name'   => esc_html__( 'Geolocation', 'wpforms-lite' ),
 				'form'   => false,
 				'submit' => false,
 			],
@@ -288,7 +291,7 @@ class WPForms_Settings {
 				'global-assets'   => [
 					'id'   => 'global-assets',
 					'name' => esc_html__( 'Load Assets Globally', 'wpforms-lite' ),
-					'desc' => esc_html__( 'Check this if you would like to load WPForms assets site-wide. Only check if your site is having compatibility issues or instructed to by support.', 'wpforms-lite' ),
+					'desc' => esc_html__( 'Check this option to load WPForms assets site-wide. Only check if your site is having compatibility issues or instructed to by support.', 'wpforms-lite' ),
 					'type' => 'checkbox',
 				],
 				'gdpr-heading'    => [
@@ -302,9 +305,8 @@ class WPForms_Settings {
 					'id'   => 'gdpr',
 					'name' => esc_html__( 'GDPR Enhancements', 'wpforms-lite' ),
 					'desc' => sprintf(
-						wp_kses(
-						/* translators: %s - WPForms.com GDPR documentation URL. */
-							__( 'Check this to enable GDPR related features and enhancements. <a href="%s" target="_blank" rel="noopener noreferrer">Read our GDPR documentation</a> to learn more.', 'wpforms-lite' ),
+						wp_kses( /* translators: %s - WPForms.com GDPR documentation URL. */
+							__( 'Check this option to enable GDPR related features and enhancements. <a href="%s" target="_blank" rel="noopener noreferrer">Read our GDPR documentation</a> to learn more.', 'wpforms-lite' ),
 							[
 								'a' => [
 									'href'   => [],
@@ -330,7 +332,7 @@ class WPForms_Settings {
 				'email-async'            => [
 					'id'   => 'email-async',
 					'name' => esc_html__( 'Optimize Email Sending', 'wpforms-lite' ),
-					'desc' => esc_html__( 'Check this if you would like to enable sending emails asynchronously, which can make submission processing faster.', 'wpforms-lite' ),
+					'desc' => esc_html__( 'Check this option to enable sending emails asynchronously, which can make submission processing faster.', 'wpforms-lite' ),
 					'type' => 'checkbox',
 				],
 				'email-template'         => [
@@ -360,7 +362,7 @@ class WPForms_Settings {
 				'email-carbon-copy'      => [
 					'id'   => 'email-carbon-copy',
 					'name' => esc_html__( 'Carbon Copy', 'wpforms-lite' ),
-					'desc' => esc_html__( 'Check this if you would like to enable the ability to CC: email addresses in the form notification settings.', 'wpforms-lite' ),
+					'desc' => esc_html__( 'Check this option to enable the ability to CC: email addresses in the form notification settings.', 'wpforms-lite' ),
 					'type' => 'checkbox',
 				],
 			],
@@ -414,6 +416,12 @@ class WPForms_Settings {
 					'name'    => esc_html__( 'Number', 'wpforms-lite' ),
 					'type'    => 'text',
 					'default' => esc_html__( 'Please enter a valid number.', 'wpforms-lite' ),
+				],
+				'validation-number-positive'       => [
+					'id'      => 'validation-number-positive',
+					'name'    => esc_html__( 'Number Positive', 'wpforms-lite' ),
+					'type'    => 'text',
+					'default' => esc_html__( 'Please enter a valid positive number.', 'wpforms-lite' ),
 				],
 				'validation-confirm'               => [
 					'id'      => 'validation-confirm',
@@ -474,19 +482,19 @@ class WPForms_Settings {
 				'hide-announcements' => [
 					'id'   => 'hide-announcements',
 					'name' => esc_html__( 'Hide Announcements', 'wpforms-lite' ),
-					'desc' => esc_html__( 'Check this if you would like to hide plugin announcements and update details.', 'wpforms-lite' ),
+					'desc' => esc_html__( 'Check this option to hide plugin announcements and update details.', 'wpforms-lite' ),
 					'type' => 'checkbox',
 				],
 				'hide-admin-bar'     => [
 					'id'   => 'hide-admin-bar',
 					'name' => esc_html__( 'Hide Admin Bar Menu', 'wpforms-lite' ),
-					'desc' => esc_html__( 'Check this if you would like to hide the WPForms admin bar menu.', 'wpforms-lite' ),
+					'desc' => esc_html__( 'Check this option to hide the WPForms admin bar menu.', 'wpforms-lite' ),
 					'type' => 'checkbox',
 				],
 				'uninstall-data'     => [
 					'id'   => 'uninstall-data',
 					'name' => esc_html__( 'Uninstall WPForms', 'wpforms-lite' ),
-					'desc' => esc_html__( 'Check this if you would like to remove ALL WPForms data upon plugin deletion. All forms and settings will be unrecoverable.', 'wpforms-lite' ),
+					'desc' => esc_html__( 'Check this option to remove ALL WPForms data upon plugin deletion. All forms and settings will be unrecoverable.', 'wpforms-lite' ),
 					'type' => 'checkbox',
 				],
 			],
@@ -494,7 +502,7 @@ class WPForms_Settings {
 
 		// TODO: move this to Pro.
 		if ( wpforms()->pro ) {
-			$defaults['misc']['uninstall-data']['desc'] = esc_html__( 'Check this if you would like to remove ALL WPForms data upon plugin deletion. All forms, entries, and uploaded files will be unrecoverable.', 'wpforms-lite' );
+			$defaults['misc']['uninstall-data']['desc'] = esc_html__( 'Check this option to remove ALL WPForms data upon plugin deletion. All forms, entries, and uploaded files will be unrecoverable.', 'wpforms-lite' );
 		}
 
 		$defaults = apply_filters( 'wpforms_settings_defaults', $defaults );

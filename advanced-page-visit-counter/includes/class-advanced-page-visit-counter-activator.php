@@ -82,7 +82,7 @@ class Advanced_Visit_Counter_Activator
             $wpdb->query( $addColumn );
         }
         
-        update_option( "apvc_version", "4.3.0" );
+        update_option( "apvc_version", "4.4.0" );
         delete_option( "apvc_newsletter" );
         delete_option( "avc_config" );
     }

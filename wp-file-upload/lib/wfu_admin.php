@@ -744,7 +744,7 @@ function wfu_manage_mainmenu($message = '') {
 	$echo_str .= "\n\t\t\t\t\t".'<td colspan="2" style="width:100px;">';
 	$rel_path = ABSWPFILEUPLOAD_DIR.'release_notes.txt';
 	$rel_notes = '';
-	if ( file_exists($rel_path) ) $rel_notes = file_get_contents($rel_path);
+	if ( wfu_file_exists($rel_path, "wfu_manage_mainmenu") ) $rel_notes = file_get_contents($rel_path);
 	$echo_str .= "\n\t\t\t\t\t\t".'<div style="text-align:justify;">'.$rel_notes.'</div>';
 	$echo_str .= "\n\t\t\t\t\t".'</td>';
 	$echo_str .= "\n\t\t\t\t".'</tr>';
@@ -1012,8 +1012,8 @@ function wfu_manage_instances_of_shortcode($tag, $title, $slug, $inc) {
 	}
 
 	$list = wfu_construct_post_list($posts);
-	$pagelist = wfu_flatten_post_list($list["page"]);
-	$postlist = wfu_flatten_post_list($list["post"]);
+	$pagelist = ( isset($list["page"]) ? wfu_flatten_post_list($list["page"]) : array() );
+	$postlist = ( isset($list["post"]) ? wfu_flatten_post_list($list["post"]) : array() );
 
 	$echo_str = "\n\t\t".'<h3 style="margin-bottom: 10px; margin-top: 40px;">'.$title.'</h3>';
 	$onchange_js = 'document.getElementById(\'wfu_add_plugin_ok_'.$inc.'\').disabled = !((document.getElementById(\'wfu_page_type_'.$inc.'\').value == \'page\' && document.getElementById(\'wfu_page_list_'.$inc.'\').value != \'\') || (document.getElementById(\'wfu_page_type_'.$inc.'\').value == \'post\' && document.getElementById(\'wfu_post_list_'.$inc.'\').value != \'\'));';

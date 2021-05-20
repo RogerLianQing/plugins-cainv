@@ -297,9 +297,9 @@ function wppb_general_settings_content() {
 						<option value="email" <?php if ( $wppb_generalSettings['loginWith'] == 'email' ) echo 'selected'; ?>><?php _e( 'Email', 'profile-builder' ); ?></option>
 					</select>
 					<ul>
-						<li class="description"><?php _e( '"Username and Email" - users can Log In with both Username and Email.', 'profile-builder' ); ?></li>
-						<li class="description"><?php _e( '"Username" - users can Log In only with Username.', 'profile-builder' ); ?></li>
-						<li class="description"><?php _e( '"Email" - users can Log In only with Email.', 'profile-builder' ); ?></li>
+						<li class="description"><?php _e( '"Username and Email" - users can Log In with either their Username or their Email.', 'profile-builder' ); ?></li>
+						<li class="description"><?php _e( '"Username" - users can only Log In with their Username. Both the Username and Email fields will be shown in the front-end forms.', 'profile-builder' ); ?></li>
+						<li class="description"><?php _e( '"Email" - users can only Log In with their Email. The Username field will be hidden in the front-end forms and Usernames will be automatically generated based on the Emails.', 'profile-builder' ); ?></li>
 					</ul>
 				</td>
 			</tr>
@@ -337,8 +337,8 @@ function wppb_general_settings_content() {
 				</th>
 				<td>
 					<select name="wppb_general_settings[conditional_fields_ajax]" class="wppb-select" id="wppb_settings_conditional_fields_ajax" onchange="wppb_display_page_select(this.value)">
-                        <option value="no" <?php if ( $wppb_generalSettings['conditional_fields_ajax'] === 'no' ) echo 'selected'; ?>><?php _e( 'No', 'profile-builder' ); ?></option>
-                        <option value="yes" <?php if ( $wppb_generalSettings['conditional_fields_ajax'] === 'yes' ) echo 'selected'; ?>><?php _e( 'Yes', 'profile-builder' ); ?></option>
+                        <option value="no" <?php if ( !isset($wppb_generalSettings['conditional_fields_ajax']) || $wppb_generalSettings['conditional_fields_ajax'] === 'no' ) echo 'selected'; ?>><?php _e( 'No', 'profile-builder' ); ?></option>
+                        <option value="yes" <?php if ( isset($wppb_generalSettings['conditional_fields_ajax']) && $wppb_generalSettings['conditional_fields_ajax'] === 'yes' ) echo 'selected'; ?>><?php _e( 'Yes', 'profile-builder' ); ?></option>
 					</select>
                     <ul>
                         <li class="description"><?php _e( 'For large conditional forms select "Yes" for an improved page performance', 'profile-builder' ); ?> </li>

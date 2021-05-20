@@ -622,13 +622,13 @@ function wfu_process_files($params, $method) {
 			   is permitted, then the file will remain as it is but a warning
 			   message will notify the user that the extension of the file does
 			   not match its contents. */
-			$check = wp_check_filetype_and_ext( $target_path, $only_filename, null );
+			$check = wfu_wp_check_filetype_and_ext( $target_path, $only_filename, null );
 			if ( $check['proper_filename'] !== false ) {
 				$proper_filename = $check['proper_filename'];
 				if ( wfu_file_extension_blacklisted(strtolower($proper_filename)) ) {
 					$file_finished_successfully = false;
 					$file_finished_unsuccessfully = true;
-					unlink($target_path);
+					wfu_unlink($target_path, "wfu_process_files:1");
 					$file_output['message_type'] = "errorabort";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], WFU_ERROR_FILE_REJECT);
 					$file_output['admin_messages'] = wfu_join_strings("<br />", $file_output['admin_messages'], WFU_ERROR_ADMIN_FILE_WRONGEXT.$check['proper_filename']);
@@ -659,7 +659,7 @@ function wfu_process_files($params, $method) {
 				if ( $filter_error_message != '' ) {
 					$file_finished_successfully = false;
 					$file_finished_unsuccessfully = true;
-					unlink($target_path);
+					wfu_unlink($target_path, "wfu_process_files:3");
 					$file_output['message_type'] = "errorabort";
 					$file_output['message'] = wfu_join_strings("<br />", $file_output['message'], $filter_error_message);
 					if ( $filter_admin_message != '' )

@@ -3,7 +3,7 @@
 Plugin Name: Profile Builder
 Plugin URI: https://www.cozmoslabs.com/wordpress-profile-builder/
 Description: Login, registration and edit profile shortcodes for the front-end. Also you can choose what fields should be displayed or add new (custom) ones both in the front-end and in the dashboard.
-Version: 3.3.8
+Version: 3.4.5
 Author: Cozmoslabs
 Author URI: https://www.cozmoslabs.com/
 Text Domain: profile-builder
@@ -70,7 +70,7 @@ function wppb_free_plugin_init() {
          *
          *
          */
-        define('PROFILE_BUILDER_VERSION', '3.3.8' );
+        define('PROFILE_BUILDER_VERSION', '3.4.5' );
         define('WPPB_PLUGIN_DIR', plugin_dir_path(__FILE__));
         define('WPPB_PLUGIN_URL', plugin_dir_url(__FILE__));
         define('WPPB_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -80,6 +80,12 @@ function wppb_free_plugin_init() {
         /* include notices class */
         if (file_exists(WPPB_PLUGIN_DIR . '/assets/lib/class_notices.php'))
             include_once(WPPB_PLUGIN_DIR . '/assets/lib/class_notices.php');
+
+        /* include review class */
+        if (file_exists(WPPB_PLUGIN_DIR . '/admin/review.php')){
+            include_once(WPPB_PLUGIN_DIR . '/admin/review.php');
+            $wppb_review_request = new WPPB_Review_Request ();
+        }
 
         if (file_exists(WPPB_PLUGIN_DIR . '/add-ons/add-ons.php'))
             define('PROFILE_BUILDER', 'Profile Builder Pro');

@@ -24,7 +24,7 @@
 /*--------------------------------------------------------------
 2.0 Forms
 --------------------------------------------------------------*/
-.wppb-user-forms input:not([type="button"]):not([type="reset"]):not([type="submit"]):not([type="file"]),
+.wppb-user-forms input:not([type="button"]):not([type="reset"]):not([type="submit"]):not([type="file"]):not([value="agree"]),
 .wppb-user-forms select,
 .wppb-user-forms textarea{
 	font-size: 100%; /* Corrects font size not being inherited in all browsers */
@@ -185,7 +185,6 @@
 	float:left;
 	min-height:1px;
 }
-.wppb-form-field input,
 .wppb-form-field input[type="text"], .wppb-form-field input[type="number"], .wppb-form-field input[type="email"], .wppb-form-field input[type="url"], .wppb-form-field input[type="password"], .wppb-form-field input[type="search"],
 .wppb-form-field select,
 .wppb-form-field textarea,
@@ -213,7 +212,6 @@
 
 input#send_credentials_via_email{
 	float:none;
-	width:auto;
 	margin-right:10px
 }
 
@@ -282,7 +280,6 @@ input#send_credentials_via_email{
 .wppb-radios li input{
 	min-width:0;
 	float:none;
-	width:auto;
 }
 
 .wppb-edit-user .wppb-checkbox-terms-and-conditions {
@@ -303,7 +300,6 @@ input#send_credentials_via_email{
 
 .wppb-form-field.wppb-checkbox-terms-and-conditions input[type="checkbox"].custom_field_toa {
     float:none;
-    width:auto;
     margin-right:10px
 }
 
@@ -356,7 +352,6 @@ label[for=blog-privacy]{
 
 .wppb-gdpr-checkbox.wppb-form-field #user_consent_gdpr{
     float:none;
-    width:auto;
     margin:0 10px 0 0;
 }
 
@@ -861,7 +856,6 @@ li.wppb-facet-search{
 
 .wppb-form-field.wppb-subscription-plans input {
     display: inline-block;
-    width: auto;
     float: none;
     margin-right: 10px !important;
 }

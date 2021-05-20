@@ -63,15 +63,15 @@ function wfu_download_file() {
 	//destroy file code as it is no longer needed
 	WFU_USVAR_unset_downloader('wfu_storage_'.$file_code);
 	//check that file exists
-	if ( !file_exists($filepath) ) {
+	if ( !wfu_file_exists_for_downloader($filepath) ) {
 		wfu_update_download_status($ticket, 'failed');
 		die('<script language="javascript">alert("'.( WFU_USVAR_exists_downloader('wfu_browser_downloadfile_notexist') ? WFU_USVAR_downloader('wfu_browser_downloadfile_notexist') : 'File does not exist!' ).'");</script>');
 	}
 
 	$open_session = false;
 	@set_time_limit(0); // disable the time limit for this script
-	$fsize = filesize($filepath);
-	if ( $fd = @fopen ($filepath, "rb") ) {
+	$fsize = wfu_filesize_for_downloader($filepath);
+	if ( $fd = wfu_fopen_for_downloader($filepath, "rb") ) {
 		$open_session = ( ( $wfu_user_state_handler == "session" || $wfu_user_state_handler == "" ) && ( function_exists("session_status") ? ( PHP_SESSION_ACTIVE !== session_status() ) : ( empty(session_id()) ) ) );
 		if ( $open_session ) session_start();
 		header('Content-Type: application/octet-stream');
@@ -97,7 +97,7 @@ function wfu_download_file() {
 	}
 	else $failed = true;
 	
-	if ( $delete_file ) unlink($filepath);
+	if ( $delete_file ) wfu_unlink_for_downloader($filepath);
 	
 	if ( !$failed ) {
 		wfu_update_download_status($ticket, 'downloaded');
@@ -131,4 +131,79 @@ function WFU_USVAR_downloader($var) {
 function WFU_USVAR_unset_downloader($var) {
 	global $wfu_user_state_handler;
 	if ( $wfu_user_state_handler == "session" || $wfu_user_state_handler == "" ) WFU_USVAR_unset_session($var);
+}
+
+function wfu_file_exists_for_downloader($filepath) {
+	if ( substr($filepath, 0, 7) != "sftp://" ) return file_exists($filepath);
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			$ret = ( $sftp && @file_exists("ssh2.sftp://".intval($sftp).$data["filepath"]) );
+		}
+	}
+	
+	return $ret;
+}
+
+function wfu_filesize_for_downloader($filepath) {
+	if ( substr($filepath, 0, 7) != "sftp://" ) return filesize($filepath);
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) $ret = @filesize("ssh2.sftp://".intval($sftp).$data["filepath"]);
+		}
+	}
+	
+	return $ret;
+}
+
+function wfu_fopen_for_downloader($filepath, $mode) {
+	if ( substr($filepath, 0, 7) != "sftp://" ) return @fopen($filepath, $mode);
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) {
+				//$ret = @fopen("ssh2.sftp://".intval($sftp).$data["filepath"], $mode);
+				$contents = @file_get_contents("ssh2.sftp://".intval($sftp).$data["filepath"]);
+				$stream = fopen('php://memory', 'r+');
+				fwrite($stream, $contents);
+				rewind($stream);
+				$ret = $stream;
+			}
+		}
+	}
+	
+	return $ret;
+}
+
+function wfu_unlink_for_downloader($filepath) {
+	if ( substr($filepath, 0, 7) != "sftp://" ) return @unlink($filepath);
+	$ret = false;
+	$ftpinfo = wfu_decode_ftpurl($filepath);
+	if ( $ftpinfo["error"] ) return $ret;
+	$data = $ftpinfo["data"];
+	{
+		$conn = @ssh2_connect($data["ftpdomain"], $data["port"]);
+		if ( $conn && @ssh2_auth_password($conn, $data["username"], $data["password"]) ) {
+			$sftp = @ssh2_sftp($conn);
+			if ( $sftp ) $ret = @unlink("ssh2.sftp://".intval($sftp).$data["filepath"]);
+		}
+	}
+	
+	return $ret;
 }

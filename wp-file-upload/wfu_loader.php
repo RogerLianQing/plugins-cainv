@@ -31,7 +31,7 @@ $wfu_tb_dbxqueue_version = "1.0";
 DEFINE("WPFILEUPLOAD_DIR", plugin_dir_url( WPFILEUPLOAD_PLUGINFILE ));
 DEFINE("ABSWPFILEUPLOAD_DIR", plugin_dir_path( WPFILEUPLOAD_PLUGINFILE ));
 if ( !defined("WPFILEUPLOAD_COOKIE") ) {
-	if ( defined(COOKIEHASH) ) DEFINE("WPFILEUPLOAD_COOKIE", "wp_wpfileupload_".COOKIEHASH);
+	if ( defined("COOKIEHASH") ) DEFINE("WPFILEUPLOAD_COOKIE", "wp_wpfileupload_".COOKIEHASH);
 	else DEFINE("WPFILEUPLOAD_COOKIE", "wp_wpfileupload_0");
 }
 add_shortcode("wordpress_file_upload", "wordpress_file_upload_handler");

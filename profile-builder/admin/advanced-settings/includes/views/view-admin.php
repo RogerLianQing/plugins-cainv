@@ -87,7 +87,7 @@
                             <input class="wppb-text widefat" type="text" name="wppb_toolbox_admin_settings[admin-emails]" value="<?php echo ( ( isset( $settings['admin-emails'] ) ) ? esc_attr( $settings['admin-emails'] ) : '' ); ?>" />
                         </li>
                         <li class="description">
-                            <?php echo sprintf( __( 'Add email addresses, separated by comma, for people you wish to receive notifications from Profile Builder. These addresses will overwrite the default Email Adress from <a href="%s">Settings -> General</a>', 'profile-builder' ), get_site_url() . "/wp-admin/options-general.php" ); ?>
+                            <?php echo sprintf( __( 'Add email addresses, separated by comma, for people you wish to receive notifications from Profile Builder. These addresses will overwrite the default Email Address from <a href="%s">Settings -> General</a>', 'profile-builder' ), get_site_url() . "/wp-admin/options-general.php" ); ?>
                         </li>
                     </ul>
 
