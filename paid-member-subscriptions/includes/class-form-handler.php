@@ -1783,7 +1783,7 @@ Class PMS_Form_Handler {
              * Insert the payment into the db
              *
              */
-            if( ! empty( $amount ) ) {
+            if( ! empty( $payment_data['amount'] ) ) {
 
                 $payment = new PMS_Payment();
                 $payment->insert( $payment_data );
@@ -1954,6 +1954,9 @@ Class PMS_Form_Handler {
                     $subscription->update( $subscription_data );
 
                     pms_add_member_subscription_log( $subscription->id, 'subscription_renewed_manually', array( 'until' => $subscription_data['expiration_date'] ) );
+
+                    pms_delete_member_subscription_meta( $subscription->id, 'pms_retry_payment' );
+
 
                     break;
 

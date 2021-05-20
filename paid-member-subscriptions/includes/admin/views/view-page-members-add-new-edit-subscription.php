@@ -125,9 +125,9 @@ if( ! empty( $_POST ) ) {
 									<?php if( $subpage == 'add_subscription' && $first_subscription ): ?>
 
 										<?php
-										$users = count_users();
+										$users = pms_count_users();
 
-										if( $users['total_users'] < apply_filters( 'pms_add_new_member_select_user_limit', '8000' ) ) : ?>
+										if( $users < apply_filters( 'pms_add_new_member_select_user_limit', '8000' ) ) : ?>
 								            <select id="pms-member-username" name="pms-member-username" class="widefat pms-chosen">
 								                <option value=""><?php _e( 'Select...', 'paid-member-subscriptions' ); ?></option>
 								                <?php
@@ -246,14 +246,26 @@ if( ! empty( $_POST ) ) {
 
 									</div>
 
-									<!-- Expiration Date -->
-									<div class="pms-meta-box-field-wrapper">
+                                    <?php
+                                        $settings = get_option( 'pms_payments_settings' );
 
-									    <label for="pms-subscription-expiration-date" class="pms-meta-box-field-label"><?php echo __( 'Expiration Date', 'paid-member-subscriptions' ); ?></label>
+                                        if( isset( $member_subscription ) && $member_subscription->is_auto_renewing() ){
+                                            if( ( $member_subscription->payment_gateway == 'stripe_intents' || ( $member_subscription->payment_gateway == 'paypal_express' && !empty( $settings['gateways']['paypal']['reference_transactions'] ) ) ) ){
+                                                $hide_expiration_date = true;
+                                            }
+                                        }
 
-									    <input id="pms-subscription-expiration-date" type="text" name="expiration_date" class="datepicker pms-subscription-field" value="<?php echo ( ! empty( $form_data['expiration_date'] ) ? esc_attr( pms_sanitize_date( $form_data['expiration_date'] ) ) : '' ); ?>" />
+                                        if( !isset( $hide_expiration_date ) ) :
+                                    ?>
+                                            <!-- Expiration Date -->
+                                            <div class="pms-meta-box-field-wrapper">
 
-									</div>
+                                                <label for="pms-subscription-expiration-date" class="pms-meta-box-field-label"><?php echo __( 'Expiration Date', 'paid-member-subscriptions' ); ?></label>
+
+                                                <input id="pms-subscription-expiration-date" type="text" name="expiration_date" class="datepicker pms-subscription-field" value="<?php echo ( ! empty( $form_data['expiration_date'] ) ? esc_attr( pms_sanitize_date( $form_data['expiration_date'] ) ) : '' ); ?>" />
+
+                                            </div>
+                                    <?php endif; ?>
 
 									<!-- Status -->
 									<div class="pms-meta-box-field-wrapper">

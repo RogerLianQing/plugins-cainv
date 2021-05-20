@@ -1092,6 +1092,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
      */
     function pms_website_was_previously_initialized(){
 
+        if( apply_filters( 'pms_disable_cloned_website_check', false ) )
+            return false;
+            
         if( !function_exists( 'password_hash' ) )
             return false;
 
@@ -1127,7 +1130,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
     }
 
-    if( pms_website_was_previously_initialized() ) {
+    $payments_settings = get_option( 'pms_payments_settings', array() );
+
+    if( pms_website_was_previously_initialized() && ( !empty( $payments_settings ) && ( in_array( 'stripe_intents', $payments_settings['active_pay_gates'] ) || ( in_array( 'paypal_express', $payments_settings['active_pay_gates'] ) && isset( $payments_settings['gateways']['paypal'] ) && isset( $payments_settings['gateways']['paypal']['reference_transactions'] ) && $payments_settings['gateways']['paypal']['reference_transactions'] == '1' ) ) ) ) {
 
         $message = __( 'It looks like this website is a clone of another one. In order to not generate errors like double payments, the Plugin Scheduled Payments functionality from <strong>Paid Member Subscriptions</strong> has been disabled.', 'paid-member-subscriptions' ) . '<br>';
         $message .= __( 'In order to restore it, you need to put the plugin into <strong>Test Mode</strong>.', 'paid-member-subscriptions' );
@@ -1242,3 +1247,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
           }
       }
+
+    /**
+     * Add a notice requesting a plugin review on wp.org
+     *
+     */
+    new PMS_Review_Request ();

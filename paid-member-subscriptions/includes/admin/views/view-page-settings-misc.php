@@ -62,6 +62,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         </p>
     </div>
 
+    <div class="pms-form-field-wrapper">
+        <label class="pms-form-field-label" for="cron-jobs"><?php _e( 'Cron Jobs' , 'paid-member-subscriptions' ) ?></label>
+
+        <p class="description">
+            <a href="<?php echo admin_url( wp_nonce_url( 'admin.php?page=pms-settings-page&tab=misc&pms_reset_cron_jobs=true', 'pms_reset_cron_jobs' ) ); ?>" class="button-primary"><?php _e( 'Reset cron jobs' , 'paid-member-subscriptions' ) ?></a>
+        </p>
+        <p class="description">
+            <?php _e( 'By clicking this button, the plugin will try to register the cron jobs that it uses again.', 'paid-member-subscriptions' ); ?>
+        </p>
+    </div>
+
     <?php do_action( $this->menu_slug . '_misc_after_content', $this->options ); ?>
 
 </div>

@@ -13,6 +13,7 @@ class PMS_Setup_Wizard {
     public function __construct(){
         if( apply_filters( 'pms_run_setup_wizard', true ) && current_user_can( 'manage_options' ) ){
             add_action( 'admin_menu', array( $this, 'add_page' ) );
+            add_action( 'admin_head', array( $this, 'hide_page_from_dashboard' ) );
             add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_and_styles' ) );
             add_action( 'admin_init', array( $this, 'setup_wizard' ) );
             add_action( 'admin_init', array( $this, 'redirect_to_setup' ) );
@@ -23,6 +24,10 @@ class PMS_Setup_Wizard {
     public function add_page(){
         // add_submenu_page( 'pms-setup', 'pms-setup', 'pms-setup', 'manage_options', 'pms-setup', array( __CLASS__, 'setup_wizard' ) );
         add_dashboard_page( '', '', 'manage_options', 'pms-setup', '' );
+    }
+
+    public function hide_page_from_dashboard(){
+        remove_submenu_page( 'index.php', 'pms-setup' );
     }
 
     public function enqueue_scripts_and_styles(){

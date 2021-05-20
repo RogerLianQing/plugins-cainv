@@ -164,7 +164,7 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
 
             echo '</select>';
 
-            echo '<label>' . __( 'Expiration Date', 'paid-memeber-subscriptions' ) . '<input id="pms_add_member_bulk_subscription_expiration_date" type="text" name="subscription_expiration_date" class="datepicker pms-subscription-field" value="" />' . '</label>';
+            echo '<label>' . __( 'Expiration Date', 'paid-member-subscriptions' ) . '<input id="pms_add_member_bulk_subscription_expiration_date" type="text" name="subscription_expiration_date" class="datepicker pms-subscription-field" value="" />' . '</label>';
 
             submit_button( __( 'Assign', 'paid-member-subscriptions' ), 'secondary', 'pms_add_member_bulk_assign', false );
 

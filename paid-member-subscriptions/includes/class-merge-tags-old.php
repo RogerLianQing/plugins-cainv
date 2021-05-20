@@ -301,7 +301,7 @@ Class PMS_Merge_Tags{
                 $retry_count = pms_get_subscription_payments_retry_count( $member_subscription[0]->id );
 
                 if( $retry_count < apply_filters( 'pms_retry_payment_count', 3 ) )
-                    return sprintf( __( 'The payment will be automatically retried on %s. After %s more attempts, the subscription will remain expired.', 'paid-member-subscription' ), '<strong>' . $member_subscription[0]->billing_next_payment . '</strong>', '<strong>' . ( (int)apply_filters( 'pms_retry_payment_count', 3 ) - $retry_count ) . '</strong>' );
+                    return sprintf( __( 'The payment will be automatically retried on %s. After %s more attempts, the subscription will remain expired.', 'paid-member-subscriptions' ), '<strong>' . $member_subscription[0]->billing_next_payment . '</strong>', '<strong>' . ( (int)apply_filters( 'pms_retry_payment_count', 3 ) - $retry_count ) . '</strong>' );
             }
 
         }

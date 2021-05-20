@@ -358,12 +358,12 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             $post_children = get_children( array( 'post_parent' => $post_id, 'post_type' => 'pms-subscription' ) );
 
             if( $parent_id != false )
-                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_up_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-up" title="' . __( 'Move Subscription Plan Up', 'pms-member-subscriptions' ) . '">&uarr;</a>';
+                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_up_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-up" title="' . __( 'Move Subscription Plan Up', 'paid-member-subscriptions' ) . '">&uarr;</a>';
             else
                 echo '<span class="pms-subscription-plan-order-move-up pms-subscription-plan-order-placeholder ' . ( !empty( $post_children ) ? 'move-down' : '' ) . '"><span class="pms-inner">&uarr;</span></span>';
 
             if( !empty( $post_children ) )
-                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_down_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-down" title="' . __( 'Move Subscription Plan Down', 'pms-member-subscriptions' ) . '">&darr;</a>';
+                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_down_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-down" title="' . __( 'Move Subscription Plan Down', 'paid-member-subscriptions' ) . '">&darr;</a>';
             else
                 echo '<span class="pms-subscription-plan-order-move-down pms-subscription-plan-order-placeholder ' . ( $parent_id != false ? 'move-up' : '' ) . '"><span class="pms-inner">&darr;</span></span>';
 

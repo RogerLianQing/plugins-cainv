@@ -743,7 +743,7 @@ Class PMS_Shortcodes {
                                 if( $member->get_subscriptions_count() >= 0 && $member->get_subscriptions_count() < pms_get_subscription_plan_groups_count() )
                                     $show_content = true;
                                 else
-                                    $show_contnet = false;
+                                    $show_content = false;
 
                             } else
                                 $show_content = false;

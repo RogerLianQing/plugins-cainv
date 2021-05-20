@@ -443,3 +443,22 @@ function pms_should_use_old_merge_tags(){
     return false;
 
 }
+
+function pms_count_users(){
+
+    global $wpdb;
+
+    return $wpdb->get_var(
+    	"SELECT COUNT(*) FROM $wpdb->users"
+    );
+
+}
+
+function pms_icl_t( $context, $name, $value ){
+    
+	if( function_exists( 'icl_t' ) )
+		return icl_t( $context, $name, $value );
+	else
+		return $value;
+
+}

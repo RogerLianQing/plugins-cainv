@@ -5,6 +5,49 @@
 jQuery( function($) {
 
     /**
+     * Selecting the username
+     *
+     */
+    $(document).on( 'change', '#pms-member-username', function() {
+
+        $select = $(this);
+
+        if( $select.val().trim() == '' )
+            return false;
+
+        var user_id = $select.val().trim();
+
+        $('#pms-member-user-id').val( user_id );
+    });
+
+    /**
+     * Fired when an username is entered manually by the admin
+     */
+    $(document).on( 'change', '#pms-member-username-input', function() {
+
+        $( '.pms-member-details-error' ).remove()
+
+        if( $(this).val().trim() == '' )
+            return
+
+        $( '#pms-member-username-input' ).pms_addSpinner()
+
+        $.post( ajaxurl, { action: 'check_payment_username', username: $(this).val() }, function( response ) {
+
+            if( response != 0 ) {
+
+                $('#pms-member-user-id').val( response )
+                $('#pms-member-username-input').pms_removeSpinner()
+
+            } else {
+                $('#pms-member-username-input').after('<span class="pms-member-details-error">Invalid username</span>')
+                $('#pms-member-username-input').pms_removeSpinner()
+            }
+
+        });
+    });
+
+    /**
      * Initialize datepicker
      */
     $(document).on( 'focus', '.datepicker', function() {

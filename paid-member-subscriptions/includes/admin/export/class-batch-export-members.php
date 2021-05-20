@@ -163,6 +163,9 @@ class PMS_Batch_Export_Members extends PMS_Batch_Export {
                     $member_subscriptionmeta = array();
                     foreach ( $meta_keys as $meta_key ){
                         $member_subscriptionmeta['subscriptionmeta_' . $meta_key] = pms_get_member_subscription_meta( $subscription->id, $meta_key, true );
+                        if( $meta_key == 'pms_group_name' && $member_subscriptionmeta['subscriptionmeta_' . $meta_key] == '' && function_exists( 'pms_gm_get_group_name' ) ){
+                            $member_subscriptionmeta['subscriptionmeta_' . $meta_key] = pms_gm_get_group_name( $subscription->id );
+                        }
                     }
 
                     foreach ( $usermeta_keys as $umeta_key ){

@@ -161,11 +161,16 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
                 if (isset($options['gdpr_checkbox']))
                     $options['gdpr_checkbox'] = sanitize_text_field($options['gdpr_checkbox']);
 
-                if (isset($options['gdpr_checkbox_text']))
+                if (isset($options['gdpr_checkbox_text'])){
                     $options['gdpr_checkbox_text'] = sanitize_text_field($options['gdpr_checkbox_text']);
+
+                    if( function_exists() )
+                        icl_register_string('plugin paid-member-subscriptions', 'gdpr_checkbox_text' , $options['gdpr_checkbox_text'] );
+                }
 
                 if (isset($options['gdpr_delete']))
                     $options['gdpr_delete'] = sanitize_text_field($options['gdpr_delete']);
+
             }
         }
 

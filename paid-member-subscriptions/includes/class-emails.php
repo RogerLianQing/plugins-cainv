@@ -20,6 +20,8 @@ Class PMS_Emails {
         add_action( 'pms_member_subscription_insert', array( 'PMS_Emails', 'send_emails' ), 10, 2 );
         add_action( 'pms_member_subscription_update', array( 'PMS_Emails', 'send_emails' ), 10, 3 );
 
+        add_action( 'pms_member_subscription_update', array( 'PMS_Emails', 'send_renewal_email' ), 11, 3 );
+
         add_action( 'pms_payment_update', array( 'PMS_Emails', 'send_payment_failed_email' ), 10, 3 );
 
         add_filter( 'pms_email_content_user',  array( 'PMS_Emails', 'maybe_add_html_tags' ), 20 );
@@ -79,11 +81,19 @@ Class PMS_Emails {
         if( empty( $action ) )
             return;
 
-        $settings  = get_option( 'pms_emails_settings', array() );
+        $settings = get_option( 'pms_emails_settings', array() );
 
         // Check that the status is a supported email action and that the email is active
         if( ! in_array( $action, PMS_Emails::get_email_actions() ) )
             return;
+
+        // Dont send activate email if status changes from expired and renew mail is active
+        if( isset( $settings['renew_is_enabled'] ) && $action == 'active' ){
+
+            if( $subcription_data['status'] == 'active' && $old_subscription_data['status'] == 'expired' )
+                return;
+                
+        }
 
         // Grab the latest payment done for this subscription
         $payments = pms_get_payments( array( 'user_id' => $subscription->user_id, 'subscripton_plan_id' => $subscription->subscription_plan_id, 'number' => 1 ) );
@@ -121,6 +131,69 @@ Class PMS_Emails {
 
     }
 
+    static function send_renewal_email( $subscription_id = 0, $subscription_data = array(), $old_subscription_data = array() ) {
+
+        if( is_admin() ){
+
+            if( $old_subscription_data['payment_gateway'] != 'manual' )
+                return;
+
+        }
+
+        // Don't send anything if current status is not active
+        if( empty( $subscription_id ) || empty( $subscription_data['status'] ) || $subscription_data['status'] != 'active' )
+            return;
+
+        // Only send email if status changes from expired to active
+        if( $old_subscription_data['status'] != $subscription_data['status'] && $old_subscription_data['status'] != 'expired' )
+            return;
+
+        // Don't do anything if subscription is upgraded
+        if( !empty( $subscription_data['subscription_plan_id'] ) && $subscription_data['subscription_plan_id'] != $old_subscription_data['subscription_plan_id'] )
+            return;
+
+        // Don't do anything if expiration date does not change
+        if( empty( $subscription_data['expiration_date'] ) || $subscription_data['expiration_date'] == $old_subscription_data['expiration_date'] ){
+            if( empty( $subscription_data['billing_next_payment'] ) )
+                return;
+        }
+
+        $subscription = pms_get_member_subscription( (int)$subscription_id );
+        $settings     = get_option( 'pms_emails_settings', array() );
+
+        // Grab the latest payment done for this subscription
+        $payments = pms_get_payments( array( 'user_id' => $subscription->user_id, 'subscripton_plan_id' => $subscription->subscription_plan_id, 'number' => 1 ) );
+
+        if( isset( $payments[0] ) && !empty( $payments[0]->id ) )
+            $payment_id = $payments[0]->id;
+        else
+            $payment_id = 0;
+
+        $action = 'renew';
+
+        if ( isset( $settings[ $action . '_is_enabled' ] ) ){
+
+            if( pms_should_use_old_merge_tags() === true )
+                PMS_Emails::pms_mail( 'user', $action, $subscription->user_id, $subscription->subscription_plan_id, $subscription->start_date, $subscription->expiration_date );
+            else
+                PMS_Emails::mail( 'user', $action, $subscription->user_id, $subscription->id, $payment_id );
+
+        }
+
+        /**
+         * Send the email to the admins
+         *
+         */
+
+        if( empty( $settings['admin_emails_on'] ) || !isset( $settings[ $action . '_admin_is_enabled' ] ) )
+            return;
+
+        if( pms_should_use_old_merge_tags() === true )
+            PMS_Emails::pms_mail( 'admin', $action, $subscription->user_id, $subscription->subscription_plan_id, $subscription->start_date, $subscription->expiration_date );
+        else
+            PMS_Emails::mail( 'admin', $action, $subscription->user_id, $subscription->id, $payment_id );
+
+    }
 
     /**
      * Sends the user registration mail
@@ -472,6 +545,7 @@ Class PMS_Emails {
             'cancel'         => __( 'Cancel and Abandon Subscription Email', 'paid-member-subscriptions' ),
             'expired'        => __( 'Expired Subscription Email', 'paid-member-subscriptions' ),
             'payment_failed' => __( 'Failed Payment Email', 'paid-member-subscriptions' ),
+            'renew'          => __( 'Renew Subscription Email', 'paid-member-subscriptions' )
         );
 
         return apply_filters( 'pms_email_headings', $email_headings );
@@ -498,6 +572,7 @@ Class PMS_Emails {
                 'cancel'         => __( 'Your Subscription has been canceled', 'paid-member-subscriptions' ),
                 'expired'        => __( 'Your Subscription has expired', 'paid-member-subscriptions' ),
                 'payment_failed' => __( 'Your latest payment has failed', 'paid-member-subscriptions' ),
+                'renew'          => __( 'Your Subscription was renewed', 'paid-member-subscriptions' ),
             );
 
         }
@@ -510,6 +585,7 @@ Class PMS_Emails {
                 'activate'       => __( 'A Member Subscription is now active', 'paid-member-subscriptions' ),
                 'cancel'         => __( 'A Member Subscription has been canceled', 'paid-member-subscriptions' ),
                 'expired'        => __( 'A Member Subscription has expired', 'paid-member-subscriptions' ),
+                'renew'          => __( 'A Member Subscription was renewed', 'paid-member-subscriptions' ),
             );
 
         }
@@ -536,8 +612,9 @@ Class PMS_Emails {
                 'register'       => __( 'Congratulations {{display_name}}! You have successfully created an account!', 'paid-member-subscriptions' ),
                 'activate'       => __( 'Congratulations {{display_name}}! The "{{subscription_name}}" plan has been successfully activated.', 'paid-member-subscriptions' ),
                 'cancel'         => __( 'Hello {{display_name}}, The "{{subscription_name}}" plan has been canceled.', 'paid-member-subscriptions' ),
-                'expired'        => __( 'Hello {{display_name}},The "{{subscription_name}}" plan has expired.', 'paid-member-subscriptions' ),
+                'expired'        => __( 'Hello {{display_name}}, The "{{subscription_name}}" plan has expired.', 'paid-member-subscriptions' ),
                 'payment_failed' => __( 'Your latest payment for the "{{subscription_name}}" plan has failed. You can go to the <a href="{{account_page_url}}">account page</a> and login in order to try again.<br><br>{{automatic_retry_message}}', 'paid-member-subscriptions' ),
+                'renew'          => __( 'Hello {{display_name}}, The "{{subscription_name}}" plan has been renewed.', 'paid-member-subscriptions' ),
             );
 
         }
@@ -546,10 +623,11 @@ Class PMS_Emails {
         if( $send_to == 'admin' ) {
 
             $email_content = array(
-                'register'       => __( '{{display_name}} has just created an account!', 'paid-member-subscriptions' ),
-                'activate'       => __( 'The "{{subscription_name}}" plan has been successfully activated for user {{display_name}}.', 'paid-member-subscriptions' ),
-                'cancel'         => __( 'The "{{subscription_name}}" plan has been canceled for user {{display_name}}.', 'paid-member-subscriptions' ),
-                'expired'        => __( 'The "{{subscription_name}}" plan has expired for user {{display_name}}.', 'paid-member-subscriptions' ),
+                'register' => __( '{{display_name}} has just created an account!', 'paid-member-subscriptions' ),
+                'activate' => __( 'The "{{subscription_name}}" plan has been successfully activated for user {{display_name}}.', 'paid-member-subscriptions' ),
+                'cancel'   => __( 'The "{{subscription_name}}" plan has been canceled for user {{display_name}}.', 'paid-member-subscriptions' ),
+                'expired'  => __( 'The "{{subscription_name}}" plan has expired for user {{display_name}}.', 'paid-member-subscriptions' ),
+                'renew'    => __( 'The "{{subscription_name}}" plan was renewed for user {{display_name}}.', 'paid-member-subscriptions' ),
             );
 
         }

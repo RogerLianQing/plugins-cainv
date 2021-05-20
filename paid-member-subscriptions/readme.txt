@@ -3,8 +3,8 @@ Contributors: cozmoslabs, iova.mihai, madalin.ungureanu, adispiac, sareiodata, r
 Donate link: https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/
 Tags: membership, paid membership, membership plan, membership level, member, members, subscription plans, user payments, paying users, paid users, restrict content, restrict access, content protection, content restriction, recurring payments, woocommerce
 Requires at least: 3.1
-Tested up to: 5.6
-Stable tag: 2.3.0
+Tested up to: 5.7
+Stable tag: 2.3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -193,6 +193,42 @@ For more information please check out [Paid Member Subscriptions documentation](
 
 
 == Changelog ==
+= 2.3.6 =
+* Fix: Some issues with the IPN Url message displayed in the back-end.
+* Fix: An issue with the Payments Retry functionality.
+* Misc: Added possibility to export failed payments.
+* Misc: Hide extra dismiss button from reviews notice.
+
+= 2.3.5 =
+* Fix: A notice happening on the Add New Member or Payment pages
+* Fix: An issue with the `Custom` filter from the Members page
+* Fix: A couple instances where the text domain we were using for our strings was wrong
+* Misc: Implemented WPML support for the custom GDPR checkbox text from settings
+
+= 2.3.4 =
+* Feature: Added an email for subscription renewals. Disabled by default
+* Fix: Make the GDPR text that the user enters translateable
+* Misc: Change method of determining website user count when choosing to show a select or input on the Add New Member and Add New Payment pages
+
+= 2.3.3 =
+* Fix: A notice that started appearing with WordPress 5.7
+* Fix: An issue with a link from our Setup Wizard appearing as an empty link under the Dashboard menu
+* Feature: Improved Add New Payment page behaviour when the website has a lot of users
+* Misc: When exporting members that are part of a group subscriptions, every member will have an entry with his group name
+* Misc: Show current website IPN Url on the back-end payments page where credentials are added
+* Misc: Updated provided .po/.mo files with new strings from the plugin
+
+= 2.3.2 =
+* Misc: Don't show empty expiration date in back-end for recurring plugin managed subscriptions.
+* Misc: Added a button on the Settings -> Misc page that will re-register the Cron jobs from the plugin.
+* Misc: Fix an inconsistency in the checkout function.
+
+= 2.3.1 =
+* Misc: Hide comments from restricted pages
+* Misc: Update WooCommerce Compatibility
+* Misc: Fixed a display issue for the subscription plans box with the Twenty Twenty-One theme
+* Misc: Added a filter to bypass the site clone checking feature
+
 = 2.3.0 =
 * Fix: recurring subscriptions not being cancelled when the user was deleting his own account through the GDPR functionality
 * Fix: sign-up fees should not be shown during a subscription upgrade as they are not applied

@@ -115,7 +115,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <li class="pms-field pms-gdpr-field <?php echo ( !empty( $field_errors ) ? 'pms-field-error' : '' ); ?>">
                     <label for="pms_user_consent">
                         <input id="pms_user_consent" name="user_consent" type="checkbox" value="1">
-                        <?php echo ( isset($gdpr_settings['gdpr_checkbox_text']) ? wp_kses_post( str_replace( '{{privacy_policy}}', get_the_privacy_policy_link(), $gdpr_settings['gdpr_checkbox_text'] ) ) : __( 'I allow the website to collect and store the data I submit through this form. *', 'paid-member-subscriptions' ) ); ?>
+                        <?php echo ( isset($gdpr_settings['gdpr_checkbox_text']) ? wp_kses_post( str_replace( '{{privacy_policy}}', get_the_privacy_policy_link(), pms_icl_t( 'plugin paid-member-subscriptions', 'gdpr_checkbox_text', $gdpr_settings['gdpr_checkbox_text'] ) ) ) : __( 'I allow the website to collect and store the data I submit through this form. *', 'paid-member-subscriptions' ) ); ?>
                     </label>
 
                     <?php pms_display_field_errors( $field_errors ); ?>

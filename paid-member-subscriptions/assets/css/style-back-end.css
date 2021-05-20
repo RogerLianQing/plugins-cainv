@@ -876,6 +876,10 @@ div.pms-notice .notice-dismiss {
     float:right;
 }
 
+div.pms-review-notice button.notice-dismiss{
+    display: none;
+}
+
 /**************************************************/
 /* Subscription Plan Postbox Meta-Box
 /**************************************************/
@@ -1782,6 +1786,14 @@ body.post-type-pms-subscription #delete-action {
     margin-top: 0;
     margin-bottom: 0;
     font-size: 110%;
+}
+
+.pms-ipn-url {
+    margin-left: 160px;
+    padding: 20px;
+    background: white;
+    font-size: 110%;
+    font-weight: bold;
 }
 
 #pms-member-details label {

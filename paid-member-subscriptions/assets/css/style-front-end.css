@@ -241,7 +241,6 @@ form.pms-form ul.pms-form-fields-wrapper {
 
 .wppb-form-field.wppb-subscription-plans input {
     display: inline-block;
-    width: auto;
     float: none;
     margin-right: 7px !important;
 }

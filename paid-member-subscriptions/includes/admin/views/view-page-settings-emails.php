@@ -128,6 +128,27 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <?php wp_editor( ( isset($this->options['payment_failed_sub']) ? $this->options['payment_failed_sub'] : $email_content['payment_failed'] ), 'payment_failed_sub', array( 'textarea_name' => 'pms_emails_settings[payment_failed_sub]', 'editor_height' => 250 ) ); ?>
         </div>
 
+        <!-- Renew Email -->
+        <div class="pms-heading-wrap">
+            <h3><?php echo $email_headings['renew']; ?></h3>
+
+            <label for="renew-is-enabled">
+                <input type="checkbox" id="renew-is-enabled" name="pms_emails_settings[renew_is_enabled]" value="yes" <?php echo ( isset( $this->options['renew_is_enabled'] ) ? 'checked' : '' ); ?> />
+
+                <?php _e( 'Enable email', 'paid-member-subscriptions' ); ?>
+            </label>
+        </div>
+
+        <div class="pms-form-field-wrapper">
+            <label class="pms-form-field-label" for="email-renew-subject"><?php _e( 'Subject', 'paid-member-subscriptions' ) ?></label>
+            <input type="text" id="email-renew-subject" class="widefat" name="pms_emails_settings[renew_sub_subject]" value="<?php echo ( isset($this->options['renew_sub_subject']) ? esc_attr( $this->options['renew_sub_subject'] ) : esc_attr( $email_subjects['renew'] ) ) ?>">
+        </div>
+
+        <div class="pms-form-field-wrapper">
+            <label class="pms-form-field-label" for="renew_sub"><?php _e( 'Content', 'paid-member-subscriptions' ) ?></label>
+            <?php wp_editor( ( isset($this->options['renew_sub']) ? $this->options['renew_sub'] : $email_content['renew'] ), 'renew_sub', array( 'textarea_name' => 'pms_emails_settings[renew_sub]', 'editor_height' => 250 ) ); ?>
+        </div>
+
         <?php do_action( $this->menu_slug . '_tab_emails_after_user_tab', $this->options ); ?>
 
     </div>
@@ -206,6 +227,27 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             </div>
 
         <?php endforeach; ?>
+
+        <!-- Renew Email -->
+        <div class="pms-heading-wrap">
+            <h3><?php echo $email_headings['renew']; ?></h3>
+
+            <label for="renew-admin-is-enabled">
+                <input type="checkbox" id="renew-admin-is-enabled" name="pms_emails_settings[renew_admin_is_enabled]" value="yes" <?php echo ( isset( $this->options['renew_admin_is_enabled'] ) ? 'checked' : '' ); ?> />
+
+                <?php _e( 'Enable email', 'paid-member-subscriptions' ); ?>
+            </label>
+        </div>
+
+        <div class="pms-form-field-wrapper">
+            <label class="pms-form-field-label" for="email-renew-subject"><?php _e( 'Subject', 'paid-member-subscriptions' ) ?></label>
+            <input type="text" id="email-renew-subject" class="widefat" name="pms_emails_settings[renew_sub_subject_admin]" value="<?php echo ( isset($this->options['renew_sub_subject_admin']) ? esc_attr( $this->options['renew_sub_subject_admin'] ) : esc_attr( $email_subjects['renew'] ) ) ?>">
+        </div>
+
+        <div class="pms-form-field-wrapper">
+            <label class="pms-form-field-label" for="emails_renew_sub"><?php _e( 'Content', 'paid-member-subscriptions' ) ?></label>
+            <?php wp_editor( ( isset( $this->options['renew_sub_admin'] ) ? $this->options['renew_sub_admin'] : $email_content['renew'] ), 'emails_renew_sub_admin', array( 'textarea_name' => 'pms_emails_settings[renew_sub_admin]', 'editor_height' => 250 ) ); ?>
+        </div>
 
         <?php do_action( $this->menu_slug . '_tab_emails_after_admin_tab', $this->options ); ?>
 

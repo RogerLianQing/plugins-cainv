@@ -30,6 +30,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
 
         // Add Ajax hooks
         add_action( 'wp_ajax_populate_subscription_price', array( $this, 'ajax_populate_subscription_price' ) );
+        add_action( 'wp_ajax_check_payment_username', array( $this, 'ajax_check_payment_username' ) );
 
         if( isset( $_GET['page'] ) && $_GET['page'] == 'pms-payments-page' )
             add_action( 'current_screen', array( $this, 'load_table' ) );
@@ -187,9 +188,9 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
 
                 $form_data = pms_array_sanitize_text_field( $_POST );
 
-                if ( !empty( $form_data['pms-member-username'] ) ) {
+                if ( !empty( $form_data['user_id'] ) ) {
 
-                    $member = pms_get_member( $form_data['pms-member-username'] );
+                    $member = pms_get_member( $form_data['user_id'] );
 
                     if ( is_object($member) && !empty($member) ) {
 
@@ -251,7 +252,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
                 }
 
                 $payment_data = array(
-                    'user_id'              => $form_data['pms-member-username'],
+                    'user_id'              => $form_data['user_id'],
                     'subscription_plan_id' => $form_data['pms-payment-subscription-id'],
                     'date'                 => $form_data['pms-payment-date'],
                     'amount'               => $form_data['pms-payment-amount'],
@@ -306,11 +307,11 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
         $request_data = $_REQUEST;
 
         //Check to see if the a username was selected (not empty)
-        if ( empty($request_data['pms-member-username']) ) {
+        if ( empty($request_data['user_id']) ) {
             $this->add_admin_notice( __( 'Please select a user.', 'paid-member-subscriptions' ), 'error' );
         }
         else {
-            $user_id = sanitize_text_field( $request_data['pms-member-username'] );
+            $user_id = sanitize_text_field( $request_data['user_id'] );
 
             // Check to see if the username exists
             $user = get_user_by( 'id', $user_id );
@@ -330,7 +331,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
         }
 
         // Make sure we can add the selected subscription to this user (it doesn't already have one from the same group)
-        $member = pms_get_member( $request_data['pms-member-username'] );
+        $member = pms_get_member( $request_data['user_id'] );
 
         if ( is_object($member) && !empty($member) ) {
 
@@ -400,6 +401,25 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
         } else
             echo '';
 
+        wp_die();
+
+    }
+
+    public function ajax_check_payment_username() {
+
+        if( empty( $_POST['username'] ) ){
+            echo 0;
+            die();
+        }
+
+        $user = get_user_by( 'login', sanitize_text_field( $_POST['username'] ) );
+
+        if( !empty( $user->ID ) ){
+            echo $user->ID;
+            wp_die();
+        }
+
+        echo 0;
         wp_die();
 
     }

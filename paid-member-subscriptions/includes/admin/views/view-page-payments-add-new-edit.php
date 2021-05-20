@@ -64,22 +64,30 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <label class="pms-form-field-label"><?php echo __( 'Username', 'paid-member-subscriptions' ); ?></label>
 
                 <?php if ($action == 'add_payment') { ?>
+                    <?php
+                    $users = pms_count_users();
 
-                    <select id="pms-member-username" name="pms-member-username" class="widefat pms-chosen">
+                    if( $users < apply_filters( 'pms_add_new_payment_select_user_limit', '8000' ) ) : ?>
+                        <select id="pms-member-username" name="pms-member-username" class="widefat pms-chosen">
+                            <option value=""><?php _e( 'Select...', 'paid-member-subscriptions' ); ?></option>
+                            <?php
+                            $users = get_users();
 
-                        <option value=""><?php echo __( 'Select...', 'paid-member-subscriptions' ); ?></option>
+                            foreach( $users as $user ) {
+                                echo '<option ' . ( ! empty( $form_data['pms-member-username'] ) ? selected( $form_data['pms-member-username'], $user->ID, false ) : '' ) . ' value="' . esc_attr( $user->ID ) . '">' . esc_html( $user->data->user_login ) . '</option>';
+                            }
+                            ?>
+                        </select>
 
-                        <?php
-                        $users = get_users();
+                        <p class="description"><?php printf( __( 'Select the username you wish to associate a subscription plan with. You can create a new user <a href="%s">here</a>.', 'paid-member-subscriptions' ), admin_url('user-new.php') ); ?></p>
+                    <?php else : ?>
+                        <label for="pms-member-username-input"><?php _e( 'Username', 'paid-member-subscriptions' ) ?></label>
+                        <input type="text" id="pms-member-username-input" name="pms-member-username" value="<?php echo !empty( $form_data['pms-member-username'] ) ? $form_data['pms-member-username'] : ''; ?>" />
 
-                        foreach( $users as $user ) {
-                            echo '<option ' . ( ! empty( $form_data['pms-member-username'] ) ? selected( $form_data['pms-member-username'], $user->ID, false ) : '' ) . ' value="' . esc_attr( $user->ID ) . '">' . esc_html( $user->data->user_login ) . '</option>';
-                        }
-                        ?>
-                    </select>
+                        <p class="description"><?php printf( __( 'Enter the username you wish to associate a payment with. You can create a new user <a href="%s">here</a>.', 'paid-member-subscriptions' ), admin_url('user-new.php') ); ?></p>
+                    <?php endif; ?>
+
                     <input type="hidden" id="pms-member-user-id" name="user_id" class="widefat" value="<?php echo ( ! empty( $form_data['user_id'] ) ? esc_attr( $form_data['user_id'] ) : 0 ); ?>" />
-
-                    <p class="description"><?php printf( __( 'Select the username you wish to assign this payment to. You can create a new user <a href="%s">here</a>.', 'paid-member-subscriptions' ), admin_url('user-new.php') ); ?></p>
 
                 <?php } else { ?>
 

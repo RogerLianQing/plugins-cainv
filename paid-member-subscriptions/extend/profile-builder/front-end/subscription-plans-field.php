@@ -83,6 +83,20 @@ function pms_pb_subscription_plans_handler( $output, $form_location, $field, $us
                     }
                 }
 
+                /* compatibility with MailChimp on edit profile forms */
+                if( !empty( $member->subscriptions ) ){
+                    $output .= '<input name="subscription_plans" type="hidden" value="';
+                    $i = 0;
+                    foreach ($member->subscriptions as $sub_plan) {
+                        $output .= $sub_plan['subscription_plan_id'];
+                        $i++;
+                        if ( $i !== count( $member->subscriptions ) ) {
+                            $output .= ',';
+                        }
+                    }
+                    $output .= '">';
+                }
+
             }
         }
 

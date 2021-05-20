@@ -505,15 +505,15 @@ jQuery( function($) {
     //Handle the display of datepicker when Custom intervals are selected on Members page
     $('#pms-start-date-interval').hide();
     $('#pms-expiration-date-interval').hide();
-    if( $('#pms-filter-start-date').find(":selected").text() == 'Custom' ){
+    if( $('#pms-filter-start-date').val() == 'custom' ){
         $('#pms-start-date-interval').show();
     }
-    if( $('#pms-filter-expiration-date').find(":selected").text() == 'Custom' ){
+    if( $('#pms-filter-expiration-date').val() == 'custom' ){
         $('#pms-expiration-date-interval').show();
     }
 
     $('#pms-filter-start-date').change(function(e){
-        if( $('#pms-filter-start-date').find(":selected").text() == 'Custom' ){
+        if( $('#pms-filter-start-date').val() == 'custom' ){
             $('#pms-start-date-interval').show();
         }
         else{
@@ -521,7 +521,7 @@ jQuery( function($) {
         }
     });
     $('#pms-filter-expiration-date').change(function(e){
-        if( $('#pms-filter-expiration-date').find(":selected").text() == 'Custom' ){
+        if( $('#pms-filter-expiration-date').val() == 'custom' ){
             $('#pms-expiration-date-interval').show();
         }
         else{

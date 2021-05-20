@@ -143,6 +143,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     echo '<option value="completed">' . __( 'Completed', 'paid-member-subscriptions' ) . '</option>';
                                     echo '<option value="pending">' . __( 'Pending', 'paid-member-subscriptions' ) . '</option>';
                                     echo '<option value="refunded">' . __( 'Refunded', 'paid-member-subscriptions' ) . '</option>';
+                                    echo '<option value="failed">' . __( 'Failed', 'paid-member-subscriptions' ) . '</option>';
                                     echo '</select> ';
                                     _e('Choose the payment status', 'paid-member-subscriptions');
                                     ?>
