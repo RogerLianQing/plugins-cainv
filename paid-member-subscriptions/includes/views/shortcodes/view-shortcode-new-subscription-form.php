@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				elseif($chosen_role == 'Regular Membership - $48.99 / year + HST'){
 					$include = array(0=>563, 1=>694, 2=>806, 3=>890, 4=>561 , 5=>416);
 				}
-				elseif($chosen_role == 'ACI VIP Membership $1099 / year + HST'){
+				elseif($chosen_role == 'ACI VIP Membership $1799 / year + HST'){
 					$include = array(0=>416, 1=>694, 2=>806, 3=>563, 4=>890, 5=>561 );
 				}
 				elseif($chosen_role == 'Business Membership $149.99 / year + HST'){

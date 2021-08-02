@@ -126,7 +126,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		$toupdate = array('testtt' => 'Admin');
 		}
 		elseif('vip_member' == $user_role ){
-			$toupdate = array('testtt' => 'ACI VIP Membership $1099 / year + HST');
+			$toupdate = array('testtt' => 'ACI VIP Membership $1799 / year + HST');
 		}
 		elseif('regular_member' == $user_role){
 			$toupdate = array('testtt' => 'Regular Membership $48.99 / year + HST');
