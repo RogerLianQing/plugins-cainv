@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     $form_name = 'new_subscription';
 ?>
 
-<form id="pms_<?php echo $form_name; ?>-form" class="pms-form" method="POST">
+<form id="pms_<?php echo esc_attr( $form_name ); ?>-form" class="pms-form" method="POST">
 
     <?php do_action( 'pms_' . $form_name . '_form_top', $atts ); ?>
 
@@ -21,11 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         pms_display_success_messages( pms_success()->get_messages('subscription_plans') );
 
     ?>
-	
+
     <ul class="pms-form-fields-wrapper">
-		
 
         <?php
+
 		$user_roles = wp_get_current_user() -> roles;
 		um_fetch_user(wp_get_current_user() -> ID );
 		$chosen_role = um_user('testtt'); 
@@ -53,9 +53,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				$exclude = array(0=> 924);
 			}
 			$plans =  pms_output_subscription_plans($include, $exclude, false, (isset($atts['selected']) ? trim($atts['selected']) : '' ), 'new_subscription' );
+
             $field_errors = pms_errors()->get_error_messages( 'subscription_plans' );
             echo '<li class="pms-field pms-field-subscriptions ' . ( !empty( $field_errors ) ? 'pms-field-error' : '' ) . '">';
-                echo $plans;
+//                echo pms_output_subscription_plans( $atts['subscription_plans'], $atts['exclude'], false, (isset($atts['selected']) ? trim($atts['selected']) : '' ), 'new_subscription' ); //phpcs:ignore  WordPress.Security.EscapeOutput.OutputNotEscaped
+               echo $plans;
             echo '</li>';
 
         ?>
@@ -64,6 +66,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
     <?php do_action( 'pms_' . $form_name . '_form_bottom', $atts ); ?>
 
-    <input name="pms_<?php echo $form_name; ?>" type="submit" value="<?php echo apply_filters( 'pms_' . $form_name . '_form_submit_text', __( 'Subscribe', 'paid-member-subscriptions' ) ); ?>" />
+    <input name="pms_<?php echo esc_attr( $form_name ); ?>" type="submit" value="<?php echo esc_attr( apply_filters( 'pms_' . $form_name . '_form_submit_text', __( 'Subscribe', 'paid-member-subscriptions' ) ) ); ?>" />
 
 </form>

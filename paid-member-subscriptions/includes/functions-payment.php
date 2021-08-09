@@ -569,19 +569,19 @@ function pms_cron_process_member_subscriptions_payments() {
 
                     $retry_count = pms_get_subscription_payments_retry_count( $subscription->id );
 
-                    if( $retry_count < apply_filters( 'pms_retry_payment_count', 3 ) ){
+                    if( $retry_count < apply_filters( 'pms_retry_payment_count', 3, $subscription->id ) ){
 
                         $subscription_data = array(
                             'status'                => 'expired',
                             'billing_duration'      => $subscription->billing_duration,
                             'billing_duration_unit' => $subscription->billing_duration_unit,
-                            'billing_next_payment'  => date( 'Y-m-d H:i:s', strtotime( "+" . apply_filters( 'pms_retry_payment_interval', 3 ) . " day", strtotime( $subscription->billing_next_payment ) ) ),
+                            'billing_next_payment'  => date( 'Y-m-d H:i:s', strtotime( "+" . apply_filters( 'pms_retry_payment_interval', 3, $subscription->id ) . " day", strtotime( $subscription->billing_next_payment ) ) ),
                         );
+
+	                    pms_add_member_subscription_log( $subscription->id, 'subscription_renewal_failed_retry_enabled', array( 'days'=> apply_filters( 'pms_retry_payment_interval', 3, $subscription->id ) ) );
 
                         pms_update_member_subscription_meta( $subscription->id, 'pms_retry_payment', 'active' );
                         pms_update_member_subscription_meta( $subscription->id, 'pms_retry_payment_count', $retry_count + 1 );
-
-                        pms_add_member_subscription_log( $subscription->id, 'subscription_renewal_failed_retry_enabled' );
 
                     } else {
                         pms_update_member_subscription_meta( $subscription->id, 'pms_retry_payment', 'inactive' );

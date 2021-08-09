@@ -148,7 +148,6 @@ function pms_get_subscription_plan_upgrades( $subscription_plan_id, $only_active
 
     $subscription_plan_posts = array();
 
-		
     while( $post_ancestor = get_post( $parent_post_id ) ) {
 
         $parent_post_id = $post_ancestor->post_parent;
@@ -173,7 +172,7 @@ function pms_get_subscription_plan_upgrades( $subscription_plan_id, $only_active
 
         }
     }
-	
+
 	// Roger Custom
 	$user_roles = wp_get_current_user() -> roles;
 	um_fetch_user(wp_get_current_user() -> ID );
@@ -190,6 +189,7 @@ function pms_get_subscription_plan_upgrades( $subscription_plan_id, $only_active
 		}
 	}
 	$subscription_plans = pms_get_subscription_plans( true, $include );
+
     /**
      * Filter the subscription plans available for upgrade just before returning them
      *
@@ -304,7 +304,7 @@ function pms_output_subscription_plans( $include = array(), $exclude_id_group = 
                 // Output subscription plan price
                 $subscription_plan_output .= '<span class="pms-subscription-plan-price">' . pms_get_output_subscription_plan_price( $subscription_plan ) . '</span>';
 
-                if( in_array( $form_location, array( 'register', 'new_subscription', 'retry_payment', 'upgrade_subscription', 'register_email_confirmation' ) ) ) {
+                if( in_array( $form_location, array( 'register', 'new_subscription', 'retry_payment', 'upgrade_subscription', 'register_email_confirmation', 'wppb_register' ) ) ) {
 
                     // Output subscription plan trial
                     $subscription_plan_output .= '<span class="pms-subscription-plan-trial">' . pms_get_output_subscription_plan_trial( $subscription_plan ) . '</span>';
@@ -333,12 +333,12 @@ function pms_output_subscription_plans( $include = array(), $exclude_id_group = 
             $current_group = 1;
             $group_count = count( $subscription_plan_groups );
 
-            $default_checked = ( ! empty( $_REQUEST['subscription_plans'] ) ? (int)$_REQUEST['subscription_plans'] : (int)$default_checked );
+            $default_checked = ( ! empty( $_REQUEST['subscription_plans'] ) ? absint($_REQUEST['subscription_plans']) : absint($default_checked) );
             $default_checked = ( ! empty( $default_checked ) ? $default_checked : $subscription_plans[0]->id );
-            $default_checked = ( ! empty( $_GET['subscription_plan'] ) ? (int)$_GET['subscription_plan'] : (int)$default_checked );
-            $default_checked = ( ! empty( $_GET['upgrade_subscription_plan'] ) ? (int)$_GET['upgrade_subscription_plan'] : (int)$default_checked );
+            $default_checked = ( ! empty( $_GET['subscription_plan'] ) ? absint( $_GET['subscription_plan'] ) : absint( $default_checked ) );
+            $default_checked = ( ! empty( $_GET['upgrade_subscription_plan'] ) ? absint( $_GET['upgrade_subscription_plan'] ) : absint( $default_checked ) );
 
-            if( $form_location == 'upgrade_subscription' && isset( $subscription_plan_groups[key( $subscription_plan_groups )][0]->id ))
+            if( $form_location === 'upgrade_subscription' && isset( $subscription_plan_groups[key( $subscription_plan_groups )][0]->id ))
                 $default_checked = $subscription_plan_groups[key( $subscription_plan_groups )][0]->id;
 
             $default_checked = apply_filters( 'pms_output_subscription_default_checked', $default_checked );
@@ -364,7 +364,7 @@ function pms_output_subscription_plans( $include = array(), $exclude_id_group = 
                             // Output subscription plan price
                             $subscription_plan_output .= '<span class="pms-subscription-plan-price">' . pms_get_output_subscription_plan_price( $subscription_plan ) . '</span>';
 
-                            if( in_array( $form_location, array( 'register', 'new_subscription', 'retry_payment', 'upgrade_subscription', 'register_email_confirmation' ) ) ) {
+                            if( in_array( $form_location, array( 'register', 'new_subscription', 'retry_payment', 'upgrade_subscription', 'register_email_confirmation', 'wppb_register' ) ) ) {
 
                                 // Output subscription plan trial
                                 $subscription_plan_output .= '<span class="pms-subscription-plan-trial">' . pms_get_output_subscription_plan_trial( $subscription_plan ) . '</span>';

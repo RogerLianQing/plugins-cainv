@@ -118,10 +118,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         if( ! isset( $wp_roles->role_names[$user_role] ) )
             return;
 
-		// Roger Custom
-		$user = new WP_User( $user_id );
+        $user = new WP_User( $user_id );
         $user->add_role( $user_role );
-		
+
 		if('administrator' == $user_role){
 		$toupdate = array('testtt' => 'Admin');
 		}
@@ -183,12 +182,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 		
 		UM()->user()->update_profile($toupdate);
-	}
+    }
 
 
     /**
      * Remove a new user role from an existing user. If the user remains without a role,
-     * "subscriber" is added by default
+     * the default website role is added
      *
      * @param int    $user_id
      * @param string $user_role
@@ -204,13 +203,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         $user = new WP_User( $user_id );
         $user->remove_role( $user_role );
-		
 
+// Roger Custom
         if( empty( $user->roles ) )
-            $user->add_role( 'unpaid_business_member' );
-			$toupdate = array('testtt' => 'Not a Member');
-			um_fetch_user($user -> ID );
-			UM()->user()->update_profile($toupdate);
+		$user->add_role( 'unpaid_business_member' );
+		$toupdate = array('testtt' => 'Not a Member');
+		um_fetch_user($user -> ID );
+		UM()->user()->update_profile($toupdate);
 
     }
 
