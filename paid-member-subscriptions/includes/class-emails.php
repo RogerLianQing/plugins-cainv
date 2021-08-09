@@ -88,11 +88,11 @@ Class PMS_Emails {
             return;
 
         // Dont send activate email if status changes from expired and renew mail is active
-        if( isset( $settings['renew_is_enabled'] ) && $action == 'active' ){
+        if( isset( $settings['renew_is_enabled'] ) && $action == 'activate' ){
 
-            if( $subcription_data['status'] == 'active' && $old_subscription_data['status'] == 'expired' )
+            if( isset( $subscription_data['status'] ) && isset( $old_subscription_data['status'] ) && $subscription_data['status'] == 'active' && $old_subscription_data['status'] == 'expired' )
                 return;
-                
+
         }
 
         // Grab the latest payment done for this subscription

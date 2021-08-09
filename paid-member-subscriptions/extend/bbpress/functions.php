@@ -29,10 +29,10 @@ function pms_meta_box_post_content_restriction_bbpress_output() {
 
 	echo '<div class="pms-icon-wrapper"><span class="dashicons dashicons-lock"></span></div>';
 
-	echo '<h4>' . __( 'Create member only forums with just a few clicks.', 'paid-member-subscriptions' ) . '</h4>';
+	echo '<h4>' . esc_html( __( 'Create member only forums with just a few clicks.', 'paid-member-subscriptions' ) ) . '</h4>';
 
-	echo '<p>' . __( "Allow only members to have access to forums and topics with Paid Member Subscriptions's bbPress Add-On.", 'paid-member-subscriptions' ) . '</p>';
+	echo '<p>' . esc_html( __( "Allow only members to have access to forums and topics with Paid Member Subscriptions's bbPress Add-On.", 'paid-member-subscriptions' ) ). '</p>';
 
-	echo '<a href="https://www.cozmoslabs.com/add-ons/paid-member-subscriptions-bbpress/" target="_blank" class="button-secondary">' . __( 'Learn More', 'paid-member-subscriptions' ) . '</a>';
+	echo '<a href="https://www.cozmoslabs.com/add-ons/paid-member-subscriptions-bbpress/" target="_blank" class="button-secondary">' . esc_html( __( 'Learn More', 'paid-member-subscriptions' ) ) . '</a>';
 
 }

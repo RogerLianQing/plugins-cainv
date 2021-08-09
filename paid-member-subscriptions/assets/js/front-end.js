@@ -292,7 +292,7 @@ jQuery( function($) {
          * Handle auto-renew checkbox and payment gateways display when clicking on a subscription plan
          *
          */
-        jQuery( document ).on( 'click', subscription_plan_selector + '[type=radio]', function() {
+        jQuery( document ).on( 'click', subscription_plan_selector + '[type=radio], ' + subscription_plan_selector + '[type="hidden"]', function() {
 
             if( jQuery(this).is(':checked') )
                 $pms_checked_subscription = jQuery(this);

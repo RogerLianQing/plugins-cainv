@@ -12,6 +12,30 @@
     width: 100%;
 }
 
+#pms_login p {
+    margin-bottom: 16px;
+}
+
+#pms_login .login-remember {
+    display: flex;
+    align-items: center;
+}
+
+#pms_login .login-remember input {
+    cursor: pointer;
+}
+
+#pms_login .login-remember label {
+    margin-bottom: 0px;
+    padding-left: 8px;
+    cursor: pointer;
+}
+
+#pms_login .login-extra .separator {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
 .pms-form > input[type=submit] {
     margin-right: 20px;
 }
@@ -72,7 +96,11 @@ form.pms-form ul.pms-form-fields-wrapper {
 
 /* input[type=submit] that are disabled */
 .pms-submit-disabled {
-    cursor: not-allowed !important;
+    cursor: wait !important;
+}
+
+.pms-form .beehive {
+    display: none;
 }
 
 .pms_field-errors-wrapper p {
@@ -129,6 +157,12 @@ form.pms-form ul.pms-form-fields-wrapper {
 
 #pms_billing_country_chosen, #pms_billing_state_chosen {
     width: 100% !important;
+}
+
+#pms-renew-subscription-form p,
+#pms-cancel-subscription-form p,
+#pms-abandon-subscription-form p {
+    margin-bottom: 16px;
 }
 
 /**************************************************/
@@ -253,6 +287,13 @@ form.pms-form ul.pms-form-fields-wrapper {
     margin-bottom: 1.5em;
 }
 
+.wppb-form-field.wppb-subscription-plans h4 {
+    margin-bottom: 16px;
+}
+
+.wppb-user-forms .pms-billing-details input[type="text"] {
+    width: 100%;
+}
 
 /**************************************************/
 /* Payment Gateways Options
@@ -261,17 +302,24 @@ form.pms-form ul.pms-form-fields-wrapper {
     margin-bottom: 1em;
 }
 
+#pms-paygates-wrapper h3 {
+    margin-bottom: 16px;
+}
+
 #pms-paygates-inner {
     visibility: hidden;
 }
 
 #pms-paygates-inner > label {
+    display: inline-flex;
+    align-items: center;
     margin-right: 20px;
     cursor: pointer;
 }
 
 #pms-paygates-inner > label input[type=radio] {
     margin-right: 7px;
+    cursor: pointer;
 }
 
 #pms-active-gateways-not-available,

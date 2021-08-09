@@ -33,14 +33,35 @@ Class PMS_Form_Handler {
 
 
     /**
-     * Handles data sent from the register form
+     * Registration Form logic
      *
      */
     public static function register_form() {
 
         // Check nonce
-        if (!isset($_POST['pmstkn']) || !wp_verify_nonce($_POST['pmstkn'], 'pms_register_form_nonce'))
+        if ( !isset( $_POST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_register_form_nonce') )
             return;
+
+        // Validate data sent from the registration form
+        if( !self::validate_register_form() )
+            return;
+
+        // Check if we need to register the user without him selecting a subscription (becoming a member) - thins happens when "subscription_plans" param in register form is = "none"
+        if ( isset( $_POST['pmstkn2'] ) && ( wp_verify_nonce( sanitize_text_field( $_POST['pmstkn2'] ), 'pms_register_user_no_subscription_nonce' ) ) ) {
+
+            // Register the user
+            self::register_user( self::get_request_member_data(), true );
+
+        } else {
+
+            // Proceed to checkout
+            self::process_checkout();
+
+        }
+
+    }
+
+    public static function validate_register_form() {
 
         /**
          * Username
@@ -51,7 +72,7 @@ Class PMS_Form_Handler {
 
         if (isset($_POST['user_login'])) {
 
-            $user_login = sanitize_user(trim($_POST['user_login']));
+            $user_login = trim( sanitize_user($_POST['user_login']));
 
             if (empty($user_login))
                 pms_errors()->add('user_login', __('Please enter a username.', 'paid-member-subscriptions'));
@@ -82,7 +103,7 @@ Class PMS_Form_Handler {
 
         if (isset($_POST['user_email'])) {
 
-            $user_email = trim($_POST['user_email']);
+            $user_email = trim( sanitize_email( $_POST['user_email']) );
 
             if (empty($user_email))
                 pms_errors()->add('user_email', __('Please enter an e-mail address.', 'paid-member-subscriptions'));
@@ -122,8 +143,8 @@ Class PMS_Form_Handler {
 
         if (isset($_POST['pass1']) && isset($_POST['pass2'])) {
 
-            $pass1 = trim($_POST['pass1']);
-            $pass2 = trim($_POST['pass2']);
+            $pass1 = trim($_POST['pass1']);// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+            $pass2 = trim($_POST['pass2']);// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
             if ($pass1 != $pass2)
                 pms_errors()->add('pass2', __('The passwords did not match.', 'paid-member-subscriptions'));
@@ -151,25 +172,12 @@ Class PMS_Form_Handler {
 
 
         // Stop if there are errors
-        if (count(pms_errors()->get_error_codes()) > 0)
-            return;
-
-
-        // Check if we need to register the user without him selecting a subscription (becoming a member) - thins happens when "subscription_plans" param in register form is = "none"
-        if ( isset( $_POST['pmstkn2'] ) && ( wp_verify_nonce( $_POST['pmstkn2'], 'pms_register_user_no_subscription_nonce' ) ) ) {
-
-            // Register the user
-            self::register_user( self::get_request_member_data(), true );
-
-        } else {
-
-            // Proceed to checkout
-            self::process_checkout();
-
-        }
+        if( count( pms_errors()->get_error_messages() ) > 0 )
+            return false;
+        else
+            return true;
 
     }
-
 
     /**
      * Inserts a new user in the database given an array of user information
@@ -254,21 +262,23 @@ Class PMS_Form_Handler {
         }
 
 
-        $subscription_plan = pms_get_subscription_plan( (int)trim( $post_data['subscription_plans'] ) );
+        $subscription_plan = pms_get_subscription_plan( absint( trim( $post_data['subscription_plans'] ) ) );
 
         // Check to see if the subscription plan exists and is active
-        if( !$subscription_plan->is_valid() || !$subscription_plan->is_active() )
+        if( !$subscription_plan->is_valid() || !$subscription_plan->is_active() ){
             pms_errors()->add( 'subscription_plans', __( 'The selected subscription plan does not exist or is inactive.', 'paid-member-subscriptions' ) );
-
-        if( count( pms_errors()->get_error_messages() ) > 0 )
             return false;
-        else
-            return true;
+        }
+
+        return true;
 
     }
 
 
     public static function validate_subscription_plans_member_eligibility( $user_data = array() ) {
+
+        if( empty( $user_data ) )
+            $user_data = self::get_request_member_data();
 
         $form_location = self::get_request_form_location();
 
@@ -348,7 +358,7 @@ Class PMS_Form_Handler {
 
         // Get subscription plan
         if( !empty($_POST['subscription_plans']) ) {
-            $subscription_plan = pms_get_subscription_plan((int)$_POST['subscription_plans']);
+            $subscription_plan = pms_get_subscription_plan(absint( $_POST['subscription_plans'] ));
         }else{
             pms_errors()->add( 'subscription_plan', __( 'There was no subscription plan selected.', 'paid-member-subscriptions' ) );
             return false;
@@ -444,14 +454,27 @@ Class PMS_Form_Handler {
 
 
     /*
-     * Validates when a member subscribes to a new plan
-     *
+     * New Subscription Form logic
      */
     public static function new_subscription_form() {
 
         // Verify nonce
-        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_new_subscription_form_nonce' ) )
+        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_new_subscription_form_nonce' ) )
             return;
+
+        // Validate data sent from the new subscription form
+        if( !self::validate_new_subscription_form() )
+            return;
+
+        // Proceed to checkout
+        self::process_checkout();
+
+    }
+
+    /**
+     * New Subscription Form validation
+     */
+    public static function validate_new_subscription_form() {
 
         // Just in case, do not let logged out users get here
         if( !is_user_logged_in() )
@@ -469,51 +492,37 @@ Class PMS_Form_Handler {
             return;
         }
 
-
         // Extra validations
         do_action( 'pms_new_subscription_form_validation' );
 
         // Stop if there are errors
         if ( count( pms_errors()->get_error_codes() ) > 0 )
-            return;
-
-        // Proceed to checkout
-        self::process_checkout();
+            return false;
+        else
+            return true;
 
     }
 
 
     /*
-     * Method that validates when a member upgrades to a higher subscription plan
-     *
+     * Upgrade Subscription Plan form logic
      */
     public static function upgrade_subscription() {
 
         // Verify nonce
-        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_upgrade_subscription' ) )
+        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_upgrade_subscription' ) )
             return;
-
-        // Just in case, do not let logged out users get here
-        if( !is_user_logged_in() )
-            return;
-
 
         // Upgrade subscription
         if( isset( $_POST['pms_upgrade_subscription'] ) ) {
 
-            if( !self::validate_subscription_plans($_POST) )
-                return;
-
-            // Extra validations
-            do_action('pms_upgrade_subscription_form_validation' );
-
-            // Stop if there are errors
-            if ( count( pms_errors()->get_error_codes() ) > 0 )
+            // Validate data sent from the upgrade subscription form
+            if( !self::validate_upgrade_subscription_form() )
                 return;
 
             // Log attempt
             if( isset( $_GET['subscription_id'] ) )
-                pms_add_member_subscription_log( (int)$_GET['subscription_id'], 'subscription_upgrade_attempt', array( 'new_plan' => isset( $_POST['subscription_plans'] ) ? $_POST['subscription_plans'] : '' ) );
+                pms_add_member_subscription_log( absint( $_GET['subscription_id'] ), 'subscription_upgrade_attempt', array( 'new_plan' => isset( $_POST['subscription_plans'] ) ? absint( $_POST['subscription_plans'] ) : '' ) );
 
             // Proceed to checkout
             self::process_checkout();
@@ -528,32 +537,43 @@ Class PMS_Form_Handler {
 
     }
 
+    /*
+     * Upgrade Subscription Plan form validation
+     */
+    public static function validate_upgrade_subscription_form() {
+
+        // Just in case, do not let logged out users get here
+        if( !is_user_logged_in() )
+            return;
+
+        if( !self::validate_subscription_plans($_POST) )
+            return;
+
+        // Extra validations
+        do_action('pms_upgrade_subscription_form_validation' );
+
+        // Stop if there are errors
+        if ( count( pms_errors()->get_error_codes() ) > 0 )
+            return false;
+        else
+            return true;
+
+    }
 
     /*
-     * Executes when a member renews a subscription plan
-     *
+     * Renew Form logic
      */
     public static function renew_subscription() {
 
         // Verify nonce
-        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_renew_subscription' ) )
-            return;
-
-        // Just in case, do not let logged out users get here
-        if( !is_user_logged_in() )
+        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_renew_subscription' ) )
             return;
 
         // Renew subscription
         if( isset( $_POST['pms_renew_subscription'] ) ) {
 
-            if( !self::validate_subscription_plans($_POST) )
-                return;
-
-            // Extra validations
-            do_action( 'pms_renew_subscription_form_validation' );
-
-            // Stop if there are errors
-            if ( count( pms_errors()->get_error_codes() ) > 0 )
+            // Validate data sent from the renew subscription form
+            if( !self::validate_renew_subscription_form() )
                 return;
 
             // Proceed to checkout
@@ -569,15 +589,36 @@ Class PMS_Form_Handler {
 
     }
 
+    /*
+     * Renew Subscription Plan form validation
+     */
+    public static function validate_renew_subscription_form() {
+
+        // Just in case, do not let logged out users get here
+        if( !is_user_logged_in() )
+            return;
+
+        if( !self::validate_subscription_plans($_POST) )
+            return;
+
+        // Extra validations
+        do_action( 'pms_renew_subscription_form_validation' );
+
+        // Stop if there are errors
+        if ( count( pms_errors()->get_error_codes() ) > 0 )
+            return false;
+        else
+            return true;
+
+    }
 
     /*
      * Handles manual user subscription cancellation from account shortcode
-     *
      */
     public static function cancel_subscription() {
 
         // Verify nonce
-        if( ! isset( $_POST['pmstkn'] ) || ! wp_verify_nonce( $_POST['pmstkn'], 'pms_cancel_subscription' ) )
+        if( ! isset( $_POST['pmstkn'] ) || ! wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_cancel_subscription' ) )
             return;
 
         // Just in case, do not let logged out users get here
@@ -588,7 +629,7 @@ Class PMS_Form_Handler {
             return;
 
         // Get member subscription
-        $member_subscription = pms_get_member_subscription( (int)$_POST['subscription_id'] );
+        $member_subscription = pms_get_member_subscription( absint( $_POST['subscription_id'] ) );
 
         if( is_null( $member_subscription ) )
             return;
@@ -670,12 +711,11 @@ Class PMS_Form_Handler {
 
     /*
      * Handles manual user subscription abandon from account shortcode
-     *
      */
     public static function abandon_subscription() {
 
         // Verify nonce
-        if( ! isset( $_REQUEST['pmstkn'] ) || ! wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_abandon_subscription' ) )
+        if( ! isset( $_REQUEST['pmstkn'] ) || ! wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_abandon_subscription' ) )
             return;
 
         // Just in case, do not let logged out users get here
@@ -686,7 +726,7 @@ Class PMS_Form_Handler {
             return;
 
         // Get member subscription
-        $member_subscription = pms_get_member_subscription( (int)$_POST['subscription_id'] );
+        $member_subscription = pms_get_member_subscription( absint( $_POST['subscription_id'] ) );
 
         if( is_null( $member_subscription ) )
             return;
@@ -755,33 +795,20 @@ Class PMS_Form_Handler {
 
 
     /*
-     * Executes when a member retries a payment for a pending subscription
-     *
+     * Retry Payment form logic
      */
     public static function retry_payment_subscription() {
 
         // Verify nonce
-        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_retry_payment_subscription' ) )
+        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_retry_payment_subscription' ) )
             return;
 
-        // Just in case, do not let logged out users get here
-        if( !is_user_logged_in() )
-            return;
-
-
-        // Renew subscription
+        // Retry payment for subscription
         if( isset( $_POST['pms_confirm_retry_payment_subscription'] ) ) {
 
-            if( !self::validate_subscription_plans($_POST) )
+            // Validate data sent from the retry subscription form
+            if( !self::validate_retry_payment_form() )
                 return;
-
-            // Extra validations
-            do_action('pms_retry_payment_subscription_form_validation' );
-
-            // Stop if there are errors
-            if ( count( pms_errors()->get_error_codes() ) > 0 )
-                return;
-
 
             // Proceed to checkout
             self::process_checkout();
@@ -796,18 +823,40 @@ Class PMS_Form_Handler {
 
     }
 
+    /*
+     * Retry Payment form validation
+     */
+    public static function validate_retry_payment_form(){
+
+        // Just in case, do not let logged out users get here
+        if( !is_user_logged_in() )
+            return;
+
+        if( !self::validate_subscription_plans($_POST) )
+            return;
+
+        // Extra validations
+        do_action('pms_retry_payment_subscription_form_validation' );
+
+        // Stop if there are errors
+        if ( count( pms_errors()->get_error_codes() ) > 0 )
+            return false;
+        else
+            return true;
+
+    }
+
 
     /*
      * Handles login form validation and redirection
-     *
      */
     public static function validate_login_form( $redirect_to, $request, $user ) {
 
-        if( isset( $_POST['pms_login'] ) && $_POST['pms_login'] == 1 ) {
+        if( isset( $_POST['pms_login'] ) && $_POST['pms_login'] == 1 && !empty( $_POST['pms_redirect'] ) ) {
 
             if( is_wp_error($user) ) {
 
-                $redirect_to   = esc_url( $_POST['pms_redirect'] );
+                $redirect_to   = esc_url_raw( $_POST['pms_redirect'] );
 
                 $error_code    = $user->get_error_code();
                 $error_message = $user->get_error_message( $error_code );
@@ -854,7 +903,7 @@ Class PMS_Form_Handler {
     public static function get_request_member_data( $user_id = 0 ) {
 
         $member_id          = ( ! empty( $user_id ) ? $user_id : pms_get_current_user_id() );
-        $subscription_plans = ( ! empty( $_POST['subscription_plans'] ) ? array( trim( $_POST['subscription_plans'] ) ) : array() );
+        $subscription_plans = ( ! empty( $_POST['subscription_plans'] ) ? array( trim( absint( $_POST['subscription_plans'] ) ) ) : array() );
 
         /**
          * Member data array base structure
@@ -877,11 +926,11 @@ Class PMS_Form_Handler {
          */
         if( empty( $member_id ) ) {
 
-            $member_data['user_login'] = ( isset( $_POST['user_login'] ) ? sanitize_user(trim($_POST['user_login'])) : '' );
-            $member_data['user_email'] = ( isset( $_POST['user_email'] ) ? trim( $_REQUEST['user_email'] ) : '' );
-            $member_data['first_name'] = ( isset( $_POST['first_name'] ) ? trim( $_POST['first_name'] ) : '' );
-            $member_data['last_name']  = ( isset( $_POST['last_name'] )  ? trim( $_POST['last_name'] ) : '' );
-            $member_data['user_pass']  = ( isset( $_POST['pass1'] ) ? $_POST['pass1'] : '' );
+            $member_data['user_login'] = ( isset( $_POST['user_login'] ) ? sanitize_user($_POST['user_login']) : '' );
+            $member_data['user_email'] = ( isset( $_POST['user_email'] ) ? sanitize_email( $_POST['user_email'] ) : '' );
+            $member_data['first_name'] = ( isset( $_POST['first_name'] ) ? sanitize_text_field( $_POST['first_name'] ) : '' );
+            $member_data['last_name']  = ( isset( $_POST['last_name'] )  ? sanitize_text_field( $_POST['last_name'] ) : '' );
+            $member_data['user_pass']  = ( isset( $_POST['pass1'] ) ? $_POST['pass1'] : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
             $member_data['role']       = apply_filters( 'pms_change_default_site_user_role', get_option('default_role') );
 
         /**
@@ -921,37 +970,37 @@ Class PMS_Form_Handler {
 
         $location = '';
 
-        if( !isset( $_POST['pmstkn'] ) )
+        if( !isset( $_REQUEST['pmstkn'] ) )
             $location = '';
 
         else {
 
             // Register form
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_register_form_nonce') )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_register_form_nonce') )
                 $location = 'register';
 
             // Cancel subscription
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_edit_profile_form_nonce' ) )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_edit_profile_form_nonce' ) )
                 $location = 'edit_profile';
 
             // Add new subscription
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_new_subscription_form_nonce' ) )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_new_subscription_form_nonce' ) )
                 $location = 'new_subscription';
 
             // Upgrade subscription
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_upgrade_subscription' ) )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_upgrade_subscription' ) )
                 $location = 'upgrade_subscription';
 
             // Renew subscription
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_renew_subscription' ) )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_renew_subscription' ) )
                 $location = 'renew_subscription';
 
             // Cancel subscription
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_cancel_subscription' ) )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_cancel_subscription' ) )
                 $location = 'cancel_subscription';
 
             // Retry subscription payment
-            if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_retry_payment_subscription' ) )
+            if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_retry_payment_subscription' ) )
                 $location = 'retry_payment';
 
             /**
@@ -959,7 +1008,7 @@ Class PMS_Form_Handler {
              *
              * @since 2.0.5
              */
-            if( function_exists( 'wp_doing_ajax') && wp_doing_ajax() && $_REQUEST['pmstkn'] == 'pb_form' )
+            if( function_exists( 'wp_doing_ajax') && wp_doing_ajax() && $_REQUEST['pmstkn'] === 'pb_form' )
                 $location = 'register';
 
         }
@@ -980,7 +1029,7 @@ Class PMS_Form_Handler {
 
         if ( pms_is_autologin_active() && !empty( $user_data['user_login'] ) && !empty( $user_data['user_pass'] ) ){
 
-            if ( !empty( $settings['gateways']['paypal']['reference_transactions'] ) && !empty( $_POST['pay_gate'] ) && ($_POST['pay_gate'] == 'paypal_express') ){
+            if ( !empty( $settings['gateways']['paypal']['reference_transactions'] ) && !empty( $_POST['pay_gate'] ) && ($_POST['pay_gate'] === 'paypal_express') ){
                 //set a transient so we log the user in after payment confirmation
                 set_transient( 'pms-rt-autologin', $user_data['user_id'], 60 * 5 );
 
@@ -1078,7 +1127,7 @@ Class PMS_Form_Handler {
         }
 
         if ( isset( $_REQUEST['redirect_to'] ) ) {
-            $redirect_to = $_REQUEST['redirect_to'];
+            $redirect_to = wp_sanitize_redirect( $_REQUEST['redirect_to'] );
         }
 
         $user = wp_signon( array(), $secure_cookie );
@@ -1086,12 +1135,12 @@ Class PMS_Form_Handler {
         if ( empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
             if ( headers_sent() ) {
                 /* translators: 1: Browser cookie documentation URL, 2: Support forums URL */
-                $user = new WP_Error( 'test_cookie', sprintf( __( '<strong>ERROR</strong>: Cookies are blocked due to unexpected output. For help, please see <a href="%1$s">this documentation</a> or try the <a href="%2$s">support forums</a>.' ),
-                    __( 'https://codex.wordpress.org/Cookies' ), __( 'https://wordpress.org/support/' ) ) );
+                $user = new WP_Error( 'test_cookie', sprintf( __( '<strong>ERROR</strong>: Cookies are blocked due to unexpected output. For help, please see <a href="%1$s">this documentation</a> or try the <a href="%2$s">support forums</a>.', 'paid-member-subscriptions' ),
+                    'https://codex.wordpress.org/Cookies', 'https://wordpress.org/support/' ) );
             }
         }
 
-        $requested_redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : '';
+        $requested_redirect_to = isset( $_REQUEST['redirect_to'] ) ? wp_sanitize_redirect( $_REQUEST['redirect_to'] ) : '';
         /**
          * Filters the login redirect URL.
          */
@@ -1132,10 +1181,10 @@ Class PMS_Form_Handler {
         if( isset( $_POST['pms_username_email'] ) ) {
 
             //Check recover password form nonce;
-            if( !isset( $_POST['pmstkn'] ) || ( !wp_verify_nonce( $_POST['pmstkn'], 'pms_recover_password_form_nonce') ) )
+            if( !isset( $_POST['pmstkn'] ) || ( !wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_recover_password_form_nonce') ) )
                 return;
 
-            $username_email = sanitize_text_field( $_POST['pms_username_email'] );
+            $username_email = sanitize_email( $_POST['pms_username_email'] );
 
             if( empty( $username_email ) )
                 pms_errors()->add( 'pms_username_email', __( 'Please enter a username or email address.', 'paid-member-subscriptions' ) );
@@ -1223,14 +1272,14 @@ Class PMS_Form_Handler {
         if ( !empty($_GET['loginName']) && !empty($_GET['key']) ) {
 
             //Check new password form nonce;
-            if( !isset( $_POST['pmstkn'] ) || ( !wp_verify_nonce( $_POST['pmstkn'], 'pms_new_password_form_nonce') ) )
+            if( !isset( $_POST['pmstkn'] ) || ( !wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_new_password_form_nonce') ) )
                 return;
 
             //check if the new password form was submitted
             if ( !empty($_POST['pms_new_password']) && !empty($_POST['pms_repeat_password']) ) {
 
-                $new_pass    = trim($_POST['pms_new_password']);
-                $repeat_pass = trim($_POST['pms_repeat_password']);
+                $new_pass    = trim($_POST['pms_new_password']); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+                $repeat_pass = trim($_POST['pms_repeat_password']); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
                 if ($new_pass != $repeat_pass )
                     pms_errors()->add('pms_repeat_password',__( 'The entered passwords don\'t match! Please try again.', 'paid-member-subscriptions'));
@@ -1262,7 +1311,7 @@ Class PMS_Form_Handler {
     public static function edit_profile() {
 
         // Verify nonce
-        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_edit_profile_form_nonce' ) )
+        if( !isset( $_REQUEST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_edit_profile_form_nonce' ) )
             return;
 
         // Just in case, do not let logged out users get here
@@ -1312,8 +1361,8 @@ Class PMS_Form_Handler {
          */
         if( ( isset( $_POST['pass1'] ) && !empty( $_POST['pass1'] ) ) && ( isset( $_POST['pass2'] ) && !empty( $_POST['pass2'] ) ) ) {
 
-            $pass1 = trim($_POST['pass1']);
-            $pass2 = trim($_POST['pass2']);
+            $pass1 = trim($_POST['pass1']); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+            $pass2 = trim($_POST['pass2']); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
             // Check for HTML in the fields
             if( strip_tags( $pass1 ) != $pass1 )
@@ -1381,7 +1430,7 @@ Class PMS_Form_Handler {
         if( empty( $_POST['subscription_plans'] ) )
             return false;
 
-        $subscription_plan = pms_get_subscription_plan( (int)$_POST['subscription_plans'] );
+        $subscription_plan = pms_get_subscription_plan( absint( $_POST['subscription_plans'] ) );
 
         // Subscription plan is never ending
         if( empty( $subscription_plan->duration ) )
@@ -1463,11 +1512,13 @@ Class PMS_Form_Handler {
 
             if( $payment_gateway->supports( 'subscription_free_trial' ) ) {
 
-                // Get subscription plan
-                $subscription_plan = pms_get_subscription_plan( (int)$_POST['subscription_plans'] );
+                if( !empty( $_POST['subscription_plans'] ) ) {
+                    // Get subscription plan
+                    $subscription_plan = pms_get_subscription_plan(absint($_POST['subscription_plans']));
 
-                if( ! empty( $subscription_plan->trial_duration ) ) {
-                    $has_trial = true;
+                    if (!empty($subscription_plan->trial_duration)) {
+                        $has_trial = true;
+                    }
                 }
 
             }
@@ -1724,6 +1775,12 @@ Class PMS_Form_Handler {
         else
             $payment_response = true;
 
+
+        /**
+         * Filter amount that the user has to pay
+         *
+         */
+        $amount = apply_filters( 'pms_checkout_payment_amount', $amount, $subscription );
 
         /**
          * If we have an amount to charge or we have a trial that will need a payment in the future,
@@ -2110,7 +2167,7 @@ Class PMS_Form_Handler {
         else
             $redirect_page = pms_get_page( 'account', true );
 
-        if( empty( $redirect_page ) )
+        if( empty( $redirect_page ) && !empty( $_POST['current_page'] ) )
             $redirect_page = esc_url_raw( $_POST['current_page'] );
 
         //@TODO: Log this case / add a notice / by adding an option or something we can make the user aware of this 'error'

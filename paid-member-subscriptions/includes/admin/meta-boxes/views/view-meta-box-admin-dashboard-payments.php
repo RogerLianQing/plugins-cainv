@@ -35,15 +35,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <!-- This Month's Payments -->
     <div class="pms-month-income">
 
-        <h4><?php echo __( 'Current Month', 'paid-member-subscriptions' ); ?></h4>
+        <h4><?php esc_html_e( 'Current Month', 'paid-member-subscriptions' ); ?></h4>
 
         <p>
-            <span><?php echo __( 'Income:', 'paid-member-subscriptions' ); ?></span>
-            <span><?php echo $currency_symbol . $month_income; ?></span>
+            <span><?php esc_html_e( 'Income:', 'paid-member-subscriptions' ); ?></span>
+            <span><?php echo esc_html( $currency_symbol . $month_income ); ?></span>
         </p>
 
         <p>
-            <span><?php echo __( 'Payments:', 'paid-member-subscriptions' ); ?></span>
+            <span><?php esc_html_e( 'Payments:', 'paid-member-subscriptions' ); ?></span>
             <span><?php echo count( $month_payments ); ?></span>
         </p>
 
@@ -52,15 +52,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <!-- Today's Payments -->
     <div class="pms-today-income">
 
-        <h4><?php echo __( 'Today', 'paid-member-subscriptions' ); ?></h4>
+        <h4><?php esc_html_e( 'Today', 'paid-member-subscriptions' ); ?></h4>
 
         <p>
-            <span><?php echo __( 'Income:', 'paid-member-subscriptions' ); ?></span>
-            <span><?php echo $currency_symbol . $today_income; ?></span>
+            <span><?php esc_html_e( 'Income:', 'paid-member-subscriptions' ); ?></span>
+            <span><?php echo esc_html( $currency_symbol . $today_income ); ?></span>
         </p>
 
         <p>
-            <span><?php echo __( 'Payments:', 'paid-member-subscriptions' ); ?></span>
+            <span><?php esc_html_e( 'Payments:', 'paid-member-subscriptions' ); ?></span>
             <span><?php echo count( $today_payments ); ?></span>
         </p>
 
@@ -69,24 +69,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <!-- Recent Payments -->
     <div class="pms-recent-payments">
 
-        <h4><?php echo __( 'Recent Payments', 'paid-member-subscriptions' ); ?></h4>
+        <h4><?php esc_html_e( 'Recent Payments', 'paid-member-subscriptions' ); ?></h4>
 
         <?php if( !empty( $recent_payments ) ): ?>
         <?php foreach( $recent_payments as $payment ): ?>
             <?php $payment_user = get_userdata( $payment->user_id ); ?>
             <div class="pms-recent-payment">
                 <div>
-                    <?php echo $payment_user->user_login . ' (' . $payment_user->user_email . ')' ?>
-                    <span class="pms-recent-payments-amount"><?php echo $currency_symbol . $payment->amount; ?></span>
+                    <?php echo esc_html( $payment_user->user_login ) . ' (' . esc_html( $payment_user->user_email ) . ')' ?>
+                    <span class="pms-recent-payments-amount"><?php echo esc_html( $currency_symbol . $payment->amount ); ?></span>
                 </div>
-                <a href="<?php echo add_query_arg( array( 'page' => 'pms-payments-page', 'pms-action' => 'edit_payment', 'payment_id' => $payment->id ), admin_url( 'admin.php' ) ); ?>"><?php echo __( 'View Details', 'paid-member-subscriptions' ); ?></a>
+                <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'pms-payments-page', 'pms-action' => 'edit_payment', 'payment_id' => $payment->id ), admin_url( 'admin.php' ) ) ); ?>"><?php echo esc_html__( 'View Details', 'paid-member-subscriptions' ); ?></a>
             </div>
         <?php endforeach; ?>
 
-            <a href="<?php echo add_query_arg( array( 'page' => 'pms-payments-page' ), admin_url( 'admin.php' ) ); ?>"><?php echo __( 'View All Payments', 'paid-member-subscriptions' ); ?></a>
+            <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'pms-payments-page' ), admin_url( 'admin.php' ) ) ); ?>"><?php echo esc_html__( 'View All Payments', 'paid-member-subscriptions' ); ?></a>
 
         <?php else: ?>
-            <div><?php echo __( 'No payments found.', 'paid-member-subscriptions' ); ?></div>
+            <div><?php esc_html_e( 'No payments found.', 'paid-member-subscriptions' ); ?></div>
         <?php endif; ?>
     </div>
 

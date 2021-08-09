@@ -68,21 +68,7 @@ class Advanced_Visit_Counter_Activator
             dbDelta( $sql );
         }
         
-        $article_title = $wpdb->get_results( "SELECT article_title FROM {$history_table} WHERE article_title != ''" );
-        
-        if ( empty($article_title) ) {
-            $sqlAlter = "ALTER TABLE {$history_table} DROP COLUMN article_title";
-            $wpdb->query( $sqlAlter );
-        }
-        
-        $addColumn = $wpdb->get_results( "SELECT country FROM {$history_table} WHERE country != ''" );
-        
-        if ( empty($addColumn) ) {
-            $addColumn = "ALTER TABLE {$history_table} ADD country TEXT AFTER flag";
-            $wpdb->query( $addColumn );
-        }
-        
-        update_option( "apvc_version", "4.4.0" );
+        update_option( "apvc_version", "5.0.2" );
         delete_option( "apvc_newsletter" );
         delete_option( "avc_config" );
     }

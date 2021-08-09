@@ -47,9 +47,12 @@ Class PMS_Payment_Gateway_PayPal_Standard extends PMS_Payment_Gateway {
         $payment = pms_get_payment( $this->payment_id );
         $payment->update( array( 'type' => apply_filters( 'pms_paypal_standard_payment_type', 'web_accept_paypal_standard', $this, $settings ) ) );
 
+        add_filter( 'trp_home_url', 'pms_trp_paypal_return_absolute_home', 20, 2 );
 
         // Set the notify URL
         $notify_url = home_url() . '/?pay_gate_listener=paypal_ipn';
+
+        remove_filter( 'trp_home_url', 'pms_trp_paypal_return_absolute_home', 20 );
 
         if( pms_is_payment_test_mode() )
             $paypal_link = 'https://www.sandbox.paypal.com/cgi-bin/webscr/?';
@@ -99,7 +102,7 @@ Class PMS_Payment_Gateway_PayPal_Standard extends PMS_Payment_Gateway {
      */
     public function process_webhooks() {
 
-        if( !isset( $_GET['pay_gate_listener'] ) || $_GET['pay_gate_listener'] != 'paypal_ipn' )
+        if( !isset( $_GET['pay_gate_listener'] ) || $_GET['pay_gate_listener'] !== 'paypal_ipn' )
             return;
 
         // Init IPN Verifier

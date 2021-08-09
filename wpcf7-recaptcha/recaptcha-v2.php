@@ -69,7 +69,7 @@ function iqfix_wpcf7_recaptcha_enqueue_scripts() {
 		'render' 	=> 'explicit',
 	), $url );
 
-	wp_register_script( 'wpcf7-recaptcha-controls', plugins_url( 'assets/js/wpcf7-recaptcha-controls.js', __FILE__ ), array(), '1.1', true );
+	wp_register_script( 'wpcf7-recaptcha-controls', plugins_url( 'assets/js/wpcf7-recaptcha-controls.js', __FILE__ ), array(), '1.2', true );
 	wp_register_script( 'google-recaptcha', $url, array( 'wpcf7-recaptcha-controls' ), '2.0', true );
 	wp_localize_script( 'google-recaptcha', 'wpcf7iqfix', array(
 		'recaptcha_empty'	=> esc_html__( 'Please verify that you are not a robot.', 'wpcf7-recaptcha' ),
@@ -598,16 +598,18 @@ function iqfix_recaptcha_validation( $result, $tag ) {
 	$tag->name = 'recaptcha';
 	if( ! isset( $_POST['g-recaptcha-response'] ) ) {
 		
+		$invalidate = wpcf7_get_message( 'iqfix_recaptcha_no_set' );
 		$result->invalidate(
 			$tag,
-			esc_html__( 'wpcf7-recaptcha: Could not verify reCaptcha response.', 'wpcf7-recaptcha' )
+			( ( ! empty( $invalidate ) ) ? $invalidate : __( 'Could not verify the reCaptcha response.', 'wpcf7-recaptcha' ) )
 		);
 		
 	} else if( empty( $_POST['g-recaptcha-response'] ) ) {
 		
+		$invalidate = wpcf7_get_message( 'iqfix_recaptcha_response_empty' );
 		$result->invalidate(
 			$tag,
-			esc_html__( 'Please verify that you are not a robot.', 'wpcf7-recaptcha' )
+			( ( ! empty( $invalidate ) ) ? $invalidate : __( 'Please verify that you are not a robot.', 'wpcf7-recaptcha' ) )
 		);
 		
 	}
@@ -617,3 +619,27 @@ function iqfix_recaptcha_validation( $result, $tag ) {
 }
 add_filter( 'wpcf7_validate_recaptcha', 'iqfix_recaptcha_validation', 10, 2 );
 add_filter( 'wpcf7_validate_recaptcha*', 'iqfix_recaptcha_validation', 10, 2 );
+
+
+/**
+ * Add reCaptcha message settings to Contact Form 7
+ * 
+ * @param String $message
+ * 
+ * @return String $message
+ */
+function iqfix_recaptcha_messages( $messages ) {
+	
+	return array_merge( $messages, array(
+		'iqfix_recaptcha_no_set' => array(
+			'description'	=> __( 'This message shows whenever the reCaptcha is completely blocked. Added by plugin: ReCaptcha for Contact Form 7.', 'wpcf7-recaptcha' ),
+			'default'		=> __( 'Could not verify the reCaptcha response.', 'wpcf7-recaptcha' ),
+		),
+		'iqfix_recaptcha_response_empty' => array(
+			'description'	=> __( 'This message shows whenever the reCaptcha is unchecked upon submission. Added by plugin: ReCaptcha for Contact Form 7.', 'wpcf7-recaptcha' ),
+			'default'		=> __( 'Please verify that you are not a robot.', 'wpcf7-recaptcha' ),
+		),
+	) );
+	
+}
+add_filter( 'wpcf7_messages', 'iqfix_recaptcha_messages' );

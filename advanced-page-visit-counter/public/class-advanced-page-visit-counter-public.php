@@ -241,13 +241,9 @@ class Advanced_Visit_Counter_Public
         $date = current_time( 'mysql' );
         $last_date = current_time( 'mysql' );
         $ip_address = $this->apvc_get_user_ip_address();
-        $ch = curl_init();
-        curl_setopt( $ch, CURLOPT_URL, "http://www.geoplugin.net/json.gp?ip=" . $ip_address );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        $details = curl_exec( $ch );
-        curl_close( $ch );
-        $details = json_decode( $details );
-        $country = $details->geoplugin_countryName;
+        // $ip_address = "24.221.38.181";
+        $locData = $this->ip_info( $ip_address );
+        $country = $locData['country'];
         
         if ( $is_rest == true ) {
             $browser = $this->avp_get_Browser( true, $user_agent );
@@ -511,6 +507,135 @@ class Advanced_Visit_Counter_Public
         
         }
         $differenceTime = 0;
+        
+        if ( apvc_fs()->is__premium_only() && $last_id != "" ) {
+            $realtime_users = $wpdb->prefix . "apvc_realtime_users";
+            $wpdb->insert( $realtime_users, array(
+                'ref_id'     => $article_id,
+                'date'       => date( 'Y-m-d H:i:s' ),
+                'time'       => date( "H:i" ),
+                'ip_address' => $ip_address,
+                "country"    => $country,
+            ), array(
+                '%d',
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+            ) );
+            $user_loc = $wpdb->prefix . "apvc_user_locations";
+            $wpdb->insert( $user_loc, array(
+                'ent_id'         => $last_id,
+                'city'           => $locData['city'],
+                'state'          => $locData['state'],
+                "country"        => $locData['country'],
+                "country_code"   => $locData['country_code'],
+                "continent"      => $locData['continent'],
+                "continent_code" => $locData['continent_code'],
+            ), array(
+                '%d',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+            ) );
+        }
+    
+    }
+    
+    public function ip_info( $ip = NULL, $purpose = "location", $deep_detect = TRUE )
+    {
+        $output = NULL;
+        if ( filter_var( $ip, FILTER_VALIDATE_IP ) === FALSE ) {
+            
+            if ( $deep_detect ) {
+                if ( filter_var( @$_SERVER['HTTP_X_FORWARDED_FOR'], FILTER_VALIDATE_IP ) ) {
+                    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+                }
+                if ( filter_var( @$_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP ) ) {
+                    $ip = $_SERVER['HTTP_CLIENT_IP'];
+                }
+            }
+        
+        }
+        $purpose = str_replace( array(
+            "name",
+            "\n",
+            "\t",
+            " ",
+            "-",
+            "_"
+        ), NULL, strtolower( trim( $purpose ) ) );
+        $support = array(
+            "country",
+            "countrycode",
+            "state",
+            "region",
+            "city",
+            "location",
+            "address"
+        );
+        $continents = array(
+            "AF" => "Africa",
+            "AN" => "Antarctica",
+            "AS" => "Asia",
+            "EU" => "Europe",
+            "OC" => "Australia (Oceania)",
+            "NA" => "North America",
+            "SA" => "South America",
+        );
+        
+        if ( filter_var( $ip, FILTER_VALIDATE_IP ) && in_array( $purpose, $support ) ) {
+            $ch = curl_init();
+            curl_setopt( $ch, CURLOPT_URL, "http://www.geoplugin.net/json.gp?ip=" . $ip );
+            curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+            $details = curl_exec( $ch );
+            curl_close( $ch );
+            $ipdat = @json_decode( $details );
+            if ( @strlen( trim( $ipdat->geoplugin_countryCode ) ) == 2 ) {
+                switch ( $purpose ) {
+                    case "location":
+                        $output = array(
+                            "city"           => @$ipdat->geoplugin_city,
+                            "state"          => @$ipdat->geoplugin_regionName,
+                            "country"        => @$ipdat->geoplugin_countryName,
+                            "country_code"   => @$ipdat->geoplugin_countryCode,
+                            "continent"      => @$continents[strtoupper( $ipdat->geoplugin_continentCode )],
+                            "continent_code" => @$ipdat->geoplugin_continentCode,
+                        );
+                        break;
+                    case "address":
+                        $address = array( $ipdat->geoplugin_countryName );
+                        if ( @strlen( $ipdat->geoplugin_regionName ) >= 1 ) {
+                            $address[] = $ipdat->geoplugin_regionName;
+                        }
+                        if ( @strlen( $ipdat->geoplugin_city ) >= 1 ) {
+                            $address[] = $ipdat->geoplugin_city;
+                        }
+                        $output = implode( ", ", array_reverse( $address ) );
+                        break;
+                    case "city":
+                        $output = @$ipdat->geoplugin_city;
+                        break;
+                    case "state":
+                        $output = @$ipdat->geoplugin_regionName;
+                        break;
+                    case "region":
+                        $output = @$ipdat->geoplugin_regionName;
+                        break;
+                    case "country":
+                        $output = @$ipdat->geoplugin_countryName;
+                        break;
+                    case "countrycode":
+                        $output = @$ipdat->geoplugin_countryCode;
+                        break;
+                }
+            }
+        }
+        
+        return $output;
     }
     
     public function apvc_get_html_with_icon( $class )

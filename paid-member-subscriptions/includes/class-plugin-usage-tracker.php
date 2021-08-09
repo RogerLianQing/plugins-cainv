@@ -309,7 +309,7 @@ class PMS_Plugin_Usage_Tracker {
 		if( empty( $_REQUEST['pmstkn'] ) || !isset( $_REQUEST['pms_action'] ) || !in_array( $_REQUEST['pms_action'], array( 'allow_tracking', 'deny_tracking' ) ) )
 			return;
 
-		if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_admin_notice_allow_tracking' ) ){
+		if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_admin_notice_allow_tracking' ) ){
 
 			update_option( 'pms_admin_notice_usage_tracking', '1' );
 
@@ -322,7 +322,7 @@ class PMS_Plugin_Usage_Tracker {
 
 			}
 
-		} else if( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_admin_notice_deny_tracking' ) ){
+		} else if( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_admin_notice_deny_tracking' ) ){
 
 			update_option( 'pms_admin_notice_usage_tracking', '1' );
 

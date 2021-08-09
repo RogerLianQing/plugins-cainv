@@ -83,18 +83,18 @@ Class PMS_Submenu_Page_Addons extends PMS_Submenu_Page {
 
         check_ajax_referer( 'pms-activate-addon', 'nonce' );
 
-        if( current_user_can( 'manage_options' ) ){
+        if( current_user_can( 'manage_options' ) && isset( $_POST['pms_add_on_to_activate'] ) ){
 
             // Setup variables from POST
             $pms_add_on_to_activate = sanitize_text_field( $_POST['pms_add_on_to_activate'] );
-            $response               = (int)$_POST['pms_add_on_index'];
+            $response               = isset( $_POST['pms_add_on_index'] ) ? (int)$_POST['pms_add_on_index'] : '';
 
             if( !empty( $pms_add_on_to_activate ) && !is_plugin_active( $pms_add_on_to_activate )) {
                 activate_plugin( $pms_add_on_to_activate );
             }
 
             if( !empty( $response ) || $response == 0 )
-                echo $response;
+                echo esc_html( $response );
         }
 
         wp_die();
@@ -108,17 +108,17 @@ Class PMS_Submenu_Page_Addons extends PMS_Submenu_Page {
 
         check_ajax_referer( 'pms-activate-addon', 'nonce' );
 
-        if( current_user_can( 'manage_options' ) ) {
+        if( current_user_can( 'manage_options' ) && isset( $_POST['pms_add_on_to_deactivate'] ) ) {
 
             // Setup variables from POST
             $pms_add_on_to_deactivate = sanitize_text_field( $_POST['pms_add_on_to_deactivate'] );
-            $response                 = (int)$_POST['pms_add_on_index'];
+            $response                 = isset( $_POST['pms_add_on_index'] ) ? (int)$_POST['pms_add_on_index'] : '';
 
             if( !empty( $pms_add_on_to_deactivate ))
                 deactivate_plugins( $pms_add_on_to_deactivate );
 
             if( !empty( $response ) || $response == 0 )
-                echo $response;
+                echo esc_html( $response );
         }
 
         wp_die();
@@ -195,31 +195,31 @@ Class PMS_Submenu_Page_Addons extends PMS_Submenu_Page {
         $status = pms_get_serial_number_status();
 
         if ( empty( $status ) || !pms_get_serial_number() )
-            return printf( __( 'Need a licence ? <a href="%s">Click here</a> to purchase one.', 'paid-member-subscriptions'), esc_url( 'https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-no-serial-number-message' ) );
+            return printf( wp_kses_post( __( 'Need a licence ? <a href="%s">Click here</a> to purchase one.', 'paid-member-subscriptions' ) ), esc_url( 'https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-no-serial-number-message' ) );
         else if ( $status == 'found' )
-            return _e( 'Your serial number has been successfully validated.', 'paid-member-subscriptions' );
+            return esc_html_e( 'Your serial number has been successfully validated.', 'paid-member-subscriptions' );
         else if ( $status == 'expired' )
-            return printf( __( 'Your serial number has expired. <a href="%s">Click here</a> to renew.', 'paid-member-subscriptions'), esc_url( 'https://www.cozmoslabs.com/account/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-expired-serial-number-message' ) );
+            return printf( wp_kses_post( __( 'Your serial number has expired. <a href="%s">Click here</a> to renew.', 'paid-member-subscriptions' ) ), esc_url( 'https://www.cozmoslabs.com/account/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-expired-serial-number-message' ) );
         else if ( strpos( $status, 'aboutToExpire' ) !== false ) {
             $parts = explode( '#', $status );
 
             if ( !empty( $parts[1] ) )
-                return printf( __( 'Your licence is valid but will expire on %s. <a href="%s">Click here</a> to renew.', 'paid-member-subscriptions'), $parts[1], esc_url( 'https://www.cozmoslabs.com/account/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-expired-serial-number-message' ) );
+                return printf( wp_kses_post( __( 'Your licence is valid but will expire on %s. <a href="%s">Click here</a> to renew.', 'paid-member-subscriptions') ), esc_html( $parts[1] ), esc_url( 'https://www.cozmoslabs.com/account/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-expired-serial-number-message' ) );
             else
-                return printf( __( 'Your licence is valid but it will expire soon. <a href="%s">Click here</a> to renew.', 'paid-member-subscriptions'), esc_url( 'https://www.cozmoslabs.com/account/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-expired-serial-number-message' ) );
+                return printf( wp_kses_post( __( 'Your licence is valid but it will expire soon. <a href="%s">Click here</a> to renew.', 'paid-member-subscriptions') ), esc_url( 'https://www.cozmoslabs.com/account/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-expired-serial-number-message' ) );
         }
         else if ( $status == 'notFound' )
-            return printf( __( 'The serial number you entered is invalid. Need a licence ? <a href="%s">Click here</a> to purchase one.', 'paid-member-subscriptions'), esc_url( 'https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-no-serial-number-message' ) );
+            return printf( wp_kses_post( __( 'The serial number you entered is invalid. Need a licence ? <a href="%s">Click here</a> to purchase one.', 'paid-member-subscriptions' ) ), esc_url( 'https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/?utm_source=wpbackend&utm_medium=clientsite&utm_campaign=PMS&utm_content=add-on-page-no-serial-number-message' ) );
         else if ( $status == 'serverDown' )
-            return _e( 'Couldn\'t contact our server. Please try again later.', 'paid-member-subscriptions' );
+            return esc_html_e( 'Couldn\'t contact our server. Please try again later.', 'paid-member-subscriptions' );
     }
 
     static function add_ons_output_styling_class( $status ) {
         if ( !pms_get_serial_number() ) {}
         else if ( !empty( $status ) && ( $status == 'found' || strpos( $status, 'aboutToExpire' ) !== false ) )
-            echo 'pms-found';
+            echo esc_attr( 'pms-found' );
         else
-            echo 'pms-error';
+            echo esc_attr( 'pms-error' );
     }
 }
 

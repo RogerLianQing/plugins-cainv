@@ -71,15 +71,15 @@ class PMS_Batch_Export_Members extends PMS_Batch_Export {
             $cols['subscriptionmeta_' . $meta_key] = 'subscriptionmeta_' . $meta_key;
         }
 
-        $usermeta_titles = ( isset( $_REQUEST['pms-filter-user-meta-title'] ) ? $_REQUEST['pms-filter-user-meta-title'] : [] );
-        $usermeta_keys = ( isset( $_REQUEST['pms-filter-user-meta'] ) ? $_REQUEST['pms-filter-user-meta'] : [] );
+        $usermeta_titles = ( isset( $_REQUEST['pms-filter-user-meta-title'] ) ? array_map( 'sanitize_text_field', $_REQUEST['pms-filter-user-meta-title'] ) : [] );
+        $usermeta_keys = ( isset( $_REQUEST['pms-filter-user-meta'] ) ? array_map( 'sanitize_text_field', $_REQUEST['pms-filter-user-meta'] ) : [] );
 
         update_user_meta(get_current_user_id(), 'pms_export_meta', array_combine( $usermeta_keys, $usermeta_titles ));
 
         foreach ( $usermeta_keys as $i => $umeta_key ){
-            $umeta_key = sanitize_text_field($umeta_key);
+            $umeta_key = $umeta_key;
             if(isset($usermeta_titles[$i]) && !empty($usermeta_titles[$i])){
-                $cols['usermeta_' . $umeta_key] = sanitize_text_field($usermeta_titles[$i]);
+                $cols['usermeta_' . $umeta_key] = $usermeta_titles[$i];
             } else {
                 $cols['usermeta_' . $umeta_key] = 'usermeta_' . $umeta_key;
             }
@@ -99,12 +99,15 @@ class PMS_Batch_Export_Members extends PMS_Batch_Export {
 		global $wpdb;
         $data = array();
 
+        if( !isset( $_REQUEST['pms-filter-subscription-plan'] ) )
+            return;
+
         /**
          * Set member arguments
          *
          */
         $member_status = ( isset( $_REQUEST['pms-filter-member-status'] ) ? sanitize_text_field( $_REQUEST['pms-filter-member-status'] ) : '' );
-        $usermeta_keys = ( isset( $_REQUEST['pms-filter-user-meta'] ) ? $_REQUEST['pms-filter-user-meta'] : [] );
+        $usermeta_keys = ( isset( $_REQUEST['pms-filter-user-meta'] ) ? array_map( 'sanitize_text_field', $_REQUEST['pms-filter-user-meta'] ) : [] );
 
         $args['number'] = 10;
         $args['offset'] = ( $this->step - 1 ) * 10;

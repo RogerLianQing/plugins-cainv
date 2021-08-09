@@ -181,7 +181,7 @@ Class PMS_Merge_Tags{
                 $subscription_plan = pms_get_subscription_plan( $subscription_plan_id );
 
                 if ( !empty( $_POST['discount_code'] ) && !empty( $subscription_plan->price ) )
-                    $amount = pms_calculate_discounted_amount( $subscription_plan->price, pms_get_discount_by_code( $_POST['discount_code'] ) );
+                    $amount = pms_calculate_discounted_amount( $subscription_plan->price, pms_get_discount_by_code( sanitize_text_field( $_POST['discount_code'] ) ) );
                 else
                     $amount = $subscription_plan->price;
 

@@ -60,8 +60,8 @@ Class PMS_Uninstaller {
 			// Remove data
 			$this->remove_user_roles();
 			$this->remove_options();
-			$this->remove_custom_posts();
 			$this->remove_tables();
+			$this->remove_postmeta();
 
 			// Deactivate the plugin
 			if( defined( 'PMS_PLUGIN_BASENAME' ) )
@@ -135,24 +135,6 @@ Class PMS_Uninstaller {
 
 
 	/**
-	 * Removes all custom posts from custom post types
-	 *
-	 */
-	private function remove_custom_posts() {
-
-		// Remove subscription plans
-		$subscription_plans = pms_get_subscription_plans( false );
-
-		if( !empty( $subscription_plans ) ) {
-			foreach( $subscription_plans as $plan ) {
-				wp_delete_post( $plan->id, true );
-			}
-		}
-
-	}
-
-
-	/**
 	 * Removes all the custom tables we create
 	 * At the moment there are only two: pms_payments, pms_member_subscriptions
 	 *
@@ -161,11 +143,24 @@ Class PMS_Uninstaller {
 
 		global $wpdb;
 
-		$tables = array( 'payments', 'member_subscriptions' );
+		$tables = array( 'payments', 'member_subscriptions', 'paymentmeta', 'member_subscriptionmeta' );
 
 		foreach( $tables as $table )
 			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$this->db_prefix}{$table}" );
 
 	}
+
+	/*
+	 * Removes everything related to PMS from the wp_posts and wp_postmeta tables
+	 *
+	 */
+	private function remove_postmeta(){
+
+	    global $wpdb;
+
+        $delete_posts = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->posts} WHERE post_type LIKE %s", 'pms\-%' ) );
+        $delete_postmeta = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s OR meta_key LIKE %s", 'pms\_%', 'pms\-%' ) );
+
+    }
 
 }

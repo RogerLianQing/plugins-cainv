@@ -3,8 +3,9 @@ Contributors: icegram, storeapps, niravmehta, sandhyam, malayladu, asmipatel, ki
 Donate link: http://www.icegram.com/
 Tags:  subscription form, contact form, lead capture, mailchimp, wpforms, blog post, builder, CRM, CSS, custom form, custom forms, database, email, email services, free WordPress plugin, form, form maker, forms, forms plugin, HTML, JavaScript, Mailpoet, landing page, list, lead, leads, list builder, MailChimp, mailing list, marketing, plugins, webhooks, WordPress, WordPress database, forms, Icegram, form builder,subscription
 Requires at least: 4.0
-Tested up to: 5.7
-Stable tag: 1.2.8.1
+Requires PHP: 5.5
+Tested up to: 5.8
+Stable tag: 1.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -74,12 +75,67 @@ It provides you readymade form templates, styles that can be inserted anywhere o
 
 > 👉 **Lastly, Rainmaker and Icegram both are absolutely FREE!!**
 
+= Powerful Features Of Icegram Rainmaker Premium =
+
+> 👉 **[Captcha security](https://www.icegram.com/documentation/how-to-enable-captcha-in-your-rainmaker-form/)**
+> 👉 **Filter & Export leads**
+> 👉 **Active Campaign integration**
+> 👉 **Mad Mimi integration**
+> 👉 **HubSpot Pro integration**
+> 👉 **Aweber integration**
+
+= What customers have to say about Rainmaker? =
+
+> 👉 **Amazing support! Great products.**
+> Great plugins with absolutely amazing tech support. (Icegram & Rainmaker in my case.) I found the support staff helpful, knowledgable, professional and friendly. Not only did they acknowledge and understand my concerns, but they went out of their way to ensure my needs were met. You don’t always find high quality customer service/support this good. A great experience all around.
+> - [ttrusty](https://wordpress.org/support/topic/amazing-support-great-products/)
+
+> 👉 **Nice to use, simple WP email form**
+> We like using Icegram’s rainmaker form, free and simple.
+Plus they helped us with the code to center the button.
+Just need to add this –
+.rm_form_el_set.rm_form_el_button{
+text-align:center !important;
+}
+thank you!
+> - [octopihost](https://wordpress.org/support/topic/nice-to-use-simple-wp-email-form/)
+
+> 👉 **Going the extra 5280 feet**
+> Icegram support has been just the best. I had trouble with some form, and when i enquired they not only helped my initial problem, they helped me out with custom code for my specific inquiry as well. That is something no one in my organization could even believe.
+Thank you Moxa and team. You guys deserve all the help you can get.
+> - [ashwintitan](https://wordpress.org/support/topic/going-the-extra-5280-feet/)
+
+> 👉 **Great Free Form Builder!**
+> One of the best FREE form builders I could find. Other form builders are as nice or nicer IF you pay extra for them.
+> - [aswin4](https://wordpress.org/support/topic/great-free-form-builder/)
+
+> 👉 **Rains or pours…**
+> Been using icegram for a while and found this add on. whilst it is early days the plugin is useful and helps build a subscriber list. Being able to integrate it into Icegram is a powerful feature and with a bit more development of the core and add ons it will be a very useful plugin. Worth a look
+> - [closeburn](https://wordpress.org/support/topic/rains-or-pours/)
+
+Go to [Icegram Rainmaker review section](https://wordpress.org/support/plugin/icegram-rainmaker/reviews/) to know more about our recent reviews.
+
+= Some of our other free plugins on WordPress.org =
+
+[Icegram](https://wordpress.org/plugins/icegram/) - Popups, Welcome Bar, Opt-Ins and Lead Generation Plugin
+
+[Email Subscribers & Newsletters](https://wordpress.org/plugins/email-subscribers/) - Simple and Effective Email Marketing WordPress Plugin
+
+[Temporary Login Without Password](https://wordpress.org/plugins/temporary-login-without-password/) -It's a handy tool to support our customers. We use it daily.
+
+[Smart Manager](https://wordpress.org/plugins/smart-manager-for-wp-e-commerce/) - Manage & Bulk edit Products, Orders & more..
+
+[Offermative](https://wordpress.org/plugins/offermative-discount-pricing-related-products-upsell-funnels-for-woocommerce/) - Dynamic discount pricing, related product recommendations, upsells and funnels for WooCommerce.
 
 == Frequently Asked Questions ==
 
 = Is Rainmaker compatible with Email Subscribers? =
 
 Yes, Rainmaker is compatible with Email Subscribers.
+
+= How to send notification email of a new lead to more than one email address? =
+
+You can add multiple email addresses separated by comma into the email id field under the Form Actions tab. Whenever a new lead is captured, all entered email addresses will receive the notification email.
 
 == Installation ==
 
@@ -99,345 +155,237 @@ Yes, Rainmaker is compatible with Email Subscribers.
 
 == Upgrade Notice ==
 
-= 1.2.8.1 =
+**1.3.0**
 
-Fix: Fixed - PHP Fatal error: Uncaught Error: Using $this when not in object context
-
-= 1.2.8 =
-
-Update: WordPress 5.7 compatibility test
-Update: UI improvements
-
-= 1.2.7 =
-
-New: Send subscription notification to multiple email addresses
-
-= 1.2.6 =
-
-Update: PHP 8.0 compatibility
-
-= 1.2.5 =
-
-Update: WordPress 5.6 compatibility check
-Update: UI improvements
-
-= 1.2.4 =
-
-Update: WordPress 5.5.3 compatibility check
-Update: UI improvements
-
-= 1.2.3 =
-
-Update: UI improvements
-
-= 1.2.2 =
-
-Update: Compatibility check with WordPress 5.5
-
-= 1.2.1 =
-
-Added GDPR support
-
-= 1.2 =
-Bug Fix release
-
-= 1.1 =
-Bug Fix release
-
-= 1.0 =
-Added 'Subject' and 'Message' column to the leads dashboard
-
-= 0.39 =
- Added compatibility with Email Subscribers Lite & Premium >= 4.3.0
-
-= 0.38 =
-Compatibility with WordPress 5.2.2
-
-= 0.37 =
-Security fixes
-
-= 0.36 =
-Internal changes for better performance
-
-= 0.35 =
-Bug Fix release
-
-= 0.34 =
-Bug Fix release
-
-= 0.33 =
-GDPR updates
-
-= 0.32 =
-Added Compact layout for forms
-
-= 0.31 =
-Bug Fix release
-
-= 0.30 =
-Ability to search leads within the list
-
-= 0.29 =
-Internal changes for better performance
-
-= 0.28 =
-Compatibility with WordPress 4.9
-
-= 0.27 =
-Bug Fix release
-
-= 0.26 =
-Compatibility with WordPress 4.8.2
-
-= 0.25 =
-Bug Fix release
-
-= 0.24 =
-Loader image wasn't displaying while submitting the form
-
-= 0.23 =
-Added Support and Upgrade page in plugin 
-
-= 0.22 =
-Fix for "Inherit form style"
-
-= 0.21 =
-Added custom css support for form
-
-= 0.20 =
-Internal changes for better performance
-
-= 0.19 =
-Added group selector for 'Email Subscribers' plugin
-
-= 0.18 =
-Redirection URL is not working
-
-= 0.17 =
-Added integration for HubSpot
-
-= 0.16.1 =
-Bug Fix release
-
-= 0.16 =
-Improved forms for mobile devices
-
-= 0.15 =
-Release new Rainmaker Plus
-
-= 0.14.2 =
-Fix for "white screen" errors
-
-= 0.14.1 =
-Bug Fix release
-
-= 0.14 =
-Added integration for Campaign Monitor and Mailpoet
-
-= 0.13 =
-Added option to inherit wordpress theme style for form
-
-= 0.12 =
-Leads were not getting sync with Mailchimp
-
-= 0.11 =
-Added Contact form
-
-= 0.10 =
-Added Email notification for form submission
-
-= 0.9 =
-Added redirection after form submission.
-
-= 0.8 =
-Compatibility with Icegram and Icegram's CTA addon
-
-= 0.7 =
-Email Subscribers integration
-
-= 0.6 =
-Custom Form support
-
-= 0.5 =
-Initial Release 
-
+* Update: UI/UX improvements
+* Fix: Icegram account connection issue [Premium]
 
 == Changelog ==
 
-= 1.2.8.1 =
+**1.3.0**
 
-Fix: Fixed - PHP Fatal error: Uncaught Error: Using $this when not in object context
+* Update: UI/UX improvements
+* Fix: Icegram account connection issue [Premium]
 
-= 1.2.8 =
+**1.2.9**
 
-Update: WordPress 5.7 compatibility check
-Update: UI improvements
+* Update: WordPress 5.8 compatibility test
+* Update: UI improvements
 
-= 1.2.7 =
+**1.2.8.1**
 
-New: Send subscription notification to multiple email addresses
+* Fix: Fixed - PHP Fatal error: Uncaught Error: Using $this when not in object context
 
-= 1.2.6 =
+**1.2.8**
 
-Update: PHP 8.0 compatibility
+* Update: WordPress 5.7 compatibility check
+* Update: UI improvements
 
-= 1.2.5 =
+**1.2.7**
 
-Update: WordPress 5.6 compatibility check
-Update: UI improvements
+* New: Send subscription notification to multiple email addresses
 
-= 1.2.4 =
+**1.2.6**
 
-Update: WordPress 5.5.3 compatibility check
-Update: UI improvements
+* Update: PHP 8.0 compatibility
 
-= 1.2.3 =
+**1.2.5**
 
-Update: UI improvements
+* Update: WordPress 5.6 compatibility check
+* Update: UI improvements
 
-= 1.2.2 =
+**1.2.4**
+
+* Update: WordPress 5.5.3 compatibility check
+* Update: UI improvements
+
+**1.2.3**
+
+* Update: UI improvements
+
+**1.2.2**
 
 * Update: Compatibility check with WordPress 5.5
 
-= 1.2.1 =
+**1.2.1**
 
 * Added GDPR support
 
-= 1.2 =
+**1.2**
 
 * Bug Fix release
 
-= 1.1 =
+**1.1**
+
 * Fix: Small bug fixes
 
-= 1.0 =
+**1.0**
+
 * New: Added 'Subject' and 'Message' column to the leads dashboard
 * Fix: Security issues
 
-= 0.39 =
-* Fix: Email Subscribers option missing from mailing list when ES Premium (>= 4.3.0) installed and activated
+**0.39**
 
-= 0.38 =
+* Fix: Email Subscribers option missing from mailing list when ES Premium (>**4.3.0) installed and activated
+
+**0.38**
+
 * Update: Compatibility with WordPress 5.2.2
 
-= 0.37 =
+**0.37**
+
 * Fix: Secured Rainmaker with a wp_remote call instead of CURL
 
-= 0.36 =
+**0.36**
+
 * Update: Internal changes for better performance
 
-= 0.35 =
+**0.35**
+
 * Fix: Small bug fixes
 
-= 0.34 =
+**0.34**
+
 * Fix: Search by name and email not working in leads dashboard
 
-= 0.33 =
+**0.33**
+
 * New: [GDPR] Provision for consent checkbox in form [Steps to enable it](https://www.icegram.com/documentation/gdpr-how-to-enable-consent-checkbox-in-the-form/)
 
-= 0.32 =
+**0.32**
+
 * New: Added compact layout option for forms
 * Update: Compatibility with latest [Email Subscribers](https://wordpress.org/plugins/email-subscribers/)
 
-= 0.31 =
+**0.31**
+
 * Fix: Fixed the "Warning: Parameter 2 to Rainmaker::rm_custom_search_query_string() expected to be a reference, value given"
 
-= 0.30 =
+**0.30**
+
 * New: Ability to search leads within the list
 
-= 0.29 =
+**0.29**
+
 * Update: Internal changes for better performance
 
-= 0.28 =
+**0.28**
+
 * Update: Compatibility with WordPress 4.9
 
-= 0.27 =
+**0.27**
+
 * Fix: Small bug fixes
 
-= 0.26 =
+**0.26**
+
 * Update: Compatibility with WordPress 4.8.2
 
-= 0.25 =
+**0.25**
+
 * Fix: Small bug fixes
 
-= 0.24 =
+**0.24**
+
 * Fix: Loader image wasn't displaying while submitting the form
 
-= 0.23 =
+**0.23**
+
 * New: Added Support and Upgrade page within Rainmaker
 * Fix: Fixed the "Fatal error: Cannot redeclare class HubSpot_BaseClient"
 
-= 0.22 =
+**0.22**
+
 * Fix: Fix for inherit WordPress theme style button
 * Update: 'Email Subscribers' compatibility with new options
 
-= 0.21 =
+**0.21**
+
 * New: Added custom css support for form
 
-= 0.20 =
+**0.20**
+
 * Update: Internal changes for better performance
 
-= 0.19 =
+**0.19**
+
 * Enhancement: Added option to select groups of 'Email Subscribers' during form creation
 
-= 0.18 =
+**0.18**
+
 * Fix: Loader image wasn't getting hidden in case of some WordPress themes
 * Fix: Redirection URL was not working
 
-= 0.17 =
+**0.17**
+
 * New: Added integration for [HubSpot](https://www.hubspot.com/)
 * Enhancement: Added more security for forms
 * Fix: Added jQuery dependency in Rainmaker
 
-= 0.16.1  =
+**0.16.1**
+
 * Fix: "Blank / White Screen of death" / Fatal error - Failed opening required ‘mailers/campaignmonitor.php’ 
 
-= 0.16  =
+**0.16**
+
 * Enhancement: Forms made mobile responsive 
 
-= 0.15 =
+**0.15**
+
 * New: Release new Rainmaker-Plus
 * Fix: Fatal error - Failed opening required ‘mailers/rainmaker.php’ 
 
-= 0.14.2 =
+**0.14.2**
+
 * Fix: "Blank / White Screen of death" / Fatal error - Failed opening required ‘mailers/email_subscribers.php’ 
 
-= 0.14.1 =
+**0.14.1**
+
 * Fix: Loader was continuously spinning while switching mailing list
 
-= 0.14 =
+**0.14**
+
 * New: Added integration for Campaign Monitor
 * New: Leads from Forms can now be send to [Mailpoet](https://wordpress.org/plugins/wysija-newsletters/)
 
-= 0.13 =
+**0.13**
+
 * New: Added option to inherit wordpress theme style for form 
 * New: Improved form css for text widget
 * Fix: Custom forms were not getting display
 
-= 0.12 =
+**0.12**
+
 * Fix: Subscribers were not getting added to Mailchimp list
 
-= 0.11 =
+**0.11**
+
 * New: Added Contact form
 
-= 0.10 =
+**0.10**
+
 * New: Added Email notification when a form is submitted
 * Fix: Form submission was throwing 404 error
 * Fix: Subscribers were not getting added to Email Subscriber's list
 
-= 0.9 =
+**0.9**
+
 * New: Added support for redirection after successful form submission
 * New: Rainmaker form compatibility with Icegram's Remote addon
 
-= 0.8 =
+**0.8**
+
 * Fix: Compatibility with Icegram and Icegram's CTA addon
 
-= 0.7 =
+**0.7**
+
 * New: Leads from Forms can now be send to [Email Subscribers](https://wordpress.org/plugins/email-subscribers/)
 
-= 0.6 =
+**0.6**
+
 * New: Custom forms can be added in Rainmaker
 * New: Existing forms in [Icegram](https://wordpress.org/plugins/icegram) messages will automatically imported
 
-= 0.5 =
+**0.5**
+
 * New: Initial Release

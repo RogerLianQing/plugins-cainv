@@ -4,7 +4,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Extends core PMS_Submenu_Page base class to create and add an uninstall page where the admin can 
+ * Extends core PMS_Submenu_Page base class to create and add an uninstall page where the admin can
  * uninstall everything PMS related from the DB
  *
  */
@@ -33,7 +33,7 @@ Class PMS_Submenu_Page_Uninstall extends PMS_Submenu_Page {
      */
     public function process_data() {
 
-    	if( !empty( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'pms_uninstall_page_nonce' ) && !empty( $_POST['pmstkn'] ) && wp_verify_nonce( $_POST['pmstkn'], 'pms_uninstall_nonce' ) ) {
+    	if( !empty( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'pms_uninstall_page_nonce' ) && !empty( $_POST['pmstkn'] ) && wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_uninstall_nonce' ) ) {
 
     		// The user must be an admin
     		if( !current_user_can( 'manage_options' ) )
@@ -47,7 +47,7 @@ Class PMS_Submenu_Page_Uninstall extends PMS_Submenu_Page {
     		if( file_exists( PMS_PLUGIN_DIR_PATH . 'includes/class-uninstaller.php' ) ) {
     			include_once PMS_PLUGIN_DIR_PATH . 'includes/class-uninstaller.php';
 
-	    		$uninstaller = new PMS_Uninstaller( $_POST['pmstkn'] );
+	    		$uninstaller = new PMS_Uninstaller( sanitize_text_field( $_POST['pmstkn'] ) );
 
 	    		// Run uninstaller and redirect to the plugins page
 	    		if( $uninstaller->run() )
@@ -66,7 +66,7 @@ Class PMS_Submenu_Page_Uninstall extends PMS_Submenu_Page {
      */
     public function output() {
 
-        if( empty( $_GET['_wpnonce'] ) || !wp_verify_nonce( $_GET['_wpnonce'], 'pms_uninstall_page_nonce' ) )
+        if( empty( $_GET['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'pms_uninstall_page_nonce' ) )
         	return;
 
         include_once 'views/view-page-uninstall.php';

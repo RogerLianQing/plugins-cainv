@@ -79,7 +79,7 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
      */
     public function admin_scripts() {
 
-        wp_enqueue_script( 'pms-chart-js', PMS_PLUGIN_DIR_URL . 'assets/js/admin/libs/chart/chart.js' );
+        wp_enqueue_script( 'pms-chart-js', PMS_PLUGIN_DIR_URL . 'assets/js/admin/libs/chart/chart.min.js' );
 
     }
 
@@ -91,7 +91,7 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
     public function process_data() {
 
         // Get current actions
-        $action = !empty( $_REQUEST['pms-action'] ) ? $_REQUEST['pms-action'] : '';
+        $action = !empty( $_REQUEST['pms-action'] ) ? sanitize_text_field( $_REQUEST['pms-action'] ) : '';
 
         // Get default results if no filters are applied by the user
         if( empty($action) && !empty( $_REQUEST['page'] ) && $_REQUEST['page'] == 'pms-reports-page' ) {
@@ -103,7 +103,7 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
         } else {
 
             // Verify correct nonce
-            if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( $_REQUEST['_wpnonce'], 'pms_reports_nonce' ) )
+            if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['_wpnonce'] ), 'pms_reports_nonce' ) )
                 return;
 
             // Filtering results
@@ -133,7 +133,6 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
 
         if( empty( $_REQUEST['pms-filter-time'] ) || $_REQUEST['pms-filter-time'] == 'current_month' )
             $date = date("Y-m");
-
         else
             $date = sanitize_text_field( $_REQUEST['pms-filter-time'] );
 
@@ -209,11 +208,11 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
 
         echo '<select name="pms-filter-time">';
 
-            echo '<option value="current_month">' . __( 'Current month', 'paid-member-subscriptions' ) . '</option>';
+            echo '<option value="current_month">' . esc_html__( 'Current month', 'paid-member-subscriptions' ) . '</option>';
 
             for ($i = 1; $i <= 12; $i++) {
                 $month = date("Y-m", strtotime( date( 'Y-m-01' ) . " -$i months"));
-                echo '<option value="' . $month . '" ' . ( !empty( $_GET['pms-filter-time'] ) ? selected( $month, $_GET['pms-filter-time'], false ) : '' ) . '>' . date( 'F', strtotime( $month ) ) . ' ' . date( 'Y', strtotime( $month ) ) . '</option>';
+                echo '<option value="' . esc_attr( $month ) . '" ' . ( !empty( $_GET['pms-filter-time'] ) ? selected( $month, sanitize_text_field( $_GET['pms-filter-time'] ), false ) : '' ) . '>' . esc_html( date( 'F', strtotime( $month ) ) ) . ' ' . esc_html( date( 'Y', strtotime( $month ) ) ) . '</option>';
             }
 
         echo '</select>';
@@ -237,9 +236,9 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
 
         echo '<div class="postbox">';
             echo '<div class="inside">';
-                echo '<h4>' . __( 'Summary', 'paid-member-subscriptions' ) . '</h4>';
-                echo '<p>' . __( 'Total earnings for the selected period: ', 'paid-member-subscriptions' ) . '<strong>' . pms_get_currency_symbol( pms_get_active_currency() ) . $payments_amount . '</strong>' . '</p>';
-                echo '<p>' . __( 'Total number of payments for the selected period: ', 'paid-member-subscriptions' ) . '<strong>' . $payments_count . '</strong>' . '</p>';
+                echo '<h4>' . esc_html__( 'Summary', 'paid-member-subscriptions' ) . '</h4>';
+                echo '<p>' . esc_html__( 'Total earnings for the selected period: ', 'paid-member-subscriptions' ) . '<strong>' . esc_html( pms_get_currency_symbol( pms_get_active_currency() ) . $payments_amount ) . '</strong>' . '</p>';
+                echo '<p>' . esc_html__( 'Total number of payments for the selected period: ', 'paid-member-subscriptions' ) . '<strong>' . esc_html( $payments_count ) . '</strong>' . '</p>';
             echo '</div>';
         echo '</div>';
 
@@ -257,30 +256,25 @@ Class PMS_Submenu_Page_Reports extends PMS_Submenu_Page {
 
         $results = $this->results;
 
+        // Generate chart labels
+        $chart_labels_js_array = $data_set_earnings_js_array = $data_set_payments_js_array = array();
+
+        foreach( $results as $key => $details ) {
+
+            $chart_labels_js_array[] = $key;
+            $data_set_earnings_js_array[] = $details['earnings'];
+            $data_set_payments_js_array[] = $details['payments'];
+
+        }
+
         // Start ouput
         echo '<script type="text/javascript">';
 
-            // Echo the labels of the chart
-            $chart_labels_js_array = $data_set_earnings_js_array = $data_set_payments_js_array = '[';
+            echo 'var pms_currency = "' . esc_html( html_entity_decode( pms_get_currency_symbol( pms_get_active_currency() ) ) ) . '";';
 
-            foreach( $results as $key => $details ) {
-
-                $chart_labels_js_array      .= $key . ',';
-                $data_set_earnings_js_array .= $details['earnings'] . ', ';
-                $data_set_payments_js_array .= $details['payments'] . ', ';
-
-            }
-            $chart_labels_js_array      .= ']';
-            $data_set_earnings_js_array .= ']';
-            $data_set_payments_js_array .= ']';
-
-
-
-            echo 'var pms_currency = "' . html_entity_decode(pms_get_currency_symbol( pms_get_active_currency() )) . '";';
-
-            echo 'var pms_chart_labels = ' . $chart_labels_js_array . ';';
-            echo 'var pms_chart_earnings = ' . $data_set_earnings_js_array . ';';
-            echo 'var pms_chart_payments = ' . $data_set_payments_js_array . ';';
+            echo 'var pms_chart_labels = ' . wp_json_encode( $chart_labels_js_array ) . ';';
+            echo 'var pms_chart_earnings = ' . wp_json_encode( $data_set_earnings_js_array ) . ';';
+            echo 'var pms_chart_payments = ' . wp_json_encode( $data_set_payments_js_array ) . ';';
 
         echo '</script>';
 

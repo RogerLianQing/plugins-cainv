@@ -3,8 +3,8 @@ Contributors: cozmoslabs, iova.mihai, adispiac
 Donate link: http://www.cozmoslabs.com/wordpress-paid-member-subscriptions/
 Tags: membership, paid membership, membership plan, paypal, paypal pro, paypal express
 Requires at least: 3.1
-Tested up to: 5.4
-Stable tag: 1.4.4
+Tested up to: 5.7
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

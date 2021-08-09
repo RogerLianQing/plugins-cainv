@@ -10,11 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 <div class="wrap">
 
-    <h1><?php echo $this->page_title; ?></h1>
+    <h1><?php echo esc_html( $this->page_title ); ?></h1>
 
     <h2 class="nav-tab-wrapper">
-        <a href="<?php echo admin_url( 'admin.php?page=pms-reports-page' ); ?>" class="nav-tab <?php echo $active_tab == 'pms-reports-page' ? 'nav-tab-active' : ''; ?>"><?php _e( 'Reports', 'paid-member-subscriptions' ); ?></a>
-        <a href="<?php echo admin_url( 'admin.php?page=pms-export-page' ); ?>"  class="nav-tab <?php echo $active_tab == 'pms-export-page' ? 'nav-tab-active' : ''; ?>"><?php _e( 'Export', 'paid-member-subscriptions' ); ?></a>
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=pms-reports-page' ) ); ?>" class="nav-tab <?php echo $active_tab == 'pms-reports-page' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Reports', 'paid-member-subscriptions' ); ?></a>
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=pms-export-page' ) ); ?>"  class="nav-tab <?php echo $active_tab == 'pms-export-page' ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Export', 'paid-member-subscriptions' ); ?></a>
         <?php do_action( 'pms_reports_tab' ); ?>
     </h2>
 
@@ -25,9 +25,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 
                     <div class="postbox pms-export">
-                        <h3><span><?php _e( 'Members Export', 'paid-member-subscriptions' ); ?></span></h3>
+                        <h3><span><?php esc_html_e( 'Members Export', 'paid-member-subscriptions' ); ?></span></h3>
                         <div class="inside">
-                            <p><?php _e( 'Download a CSV with your user subscriptions (an user with multiple subscriptions will have a record for each individual one).', 'paid-member-subscriptions' ); ?></p>
+                            <p><?php esc_html_e( 'Download a CSV with your user subscriptions (an user with multiple subscriptions will have a record for each individual one).', 'paid-member-subscriptions' ); ?></p>
                             <form id="pms-export" class="pms-export-form " method="post">
                                 <?php wp_nonce_field( 'pms_ajax_export', 'pms_ajax_export' ); ?>
                                 <input type="hidden" name="pms-export-class" value="PMS_Batch_Export_Members"/>
@@ -36,25 +36,25 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
                                 $subscription_plans = pms_get_subscription_plans( false );
                                 echo '<select name="pms-filter-subscription-plan" class="pms-export-filter">';
-                                echo '<option value="0">' . __( 'All Subscriptions', 'paid-member-subscriptions' ) . '</option>';
+                                echo '<option value="0">' . esc_html__( 'All Subscriptions', 'paid-member-subscriptions' ) . '</option>';
 
                                 foreach( $subscription_plans as $subscription_plan )
-                                    echo '<option value="' . $subscription_plan->id . '">' . $subscription_plan->name . '</option>';
+                                    echo '<option value="' . esc_attr( $subscription_plan->id ) . '">' . esc_html( $subscription_plan->name ) . '</option>';
                                 echo '</select> ';
-                                _e('Choose the Subscription to export members from', 'paid-member-subscriptions');
+                                esc_html_e('Choose the Subscription to export members from', 'paid-member-subscriptions');
                                 ?>
                                 </p>
 
                                 <p>
                                     <select name="pms-filter-member-status" class="pms-export-filter">
-                                        <option value="0"><?php _e( 'All Members', 'paid-member-subscriptions' ); ?></option>
-                                        <option value="active"><?php _e( 'Active', 'paid-member-subscriptions' ); ?></option>
-                                        <option value="canceled"><?php _e( 'Canceled', 'paid-member-subscriptions' ); ?></option>
-                                        <option value="expired"><?php _e( 'Expired', 'paid-member-subscriptions' ); ?></option>
-                                        <option value="pending"><?php _e( 'Pending', 'paid-member-subscriptions' ); ?></option>
+                                        <option value="0"><?php esc_html_e( 'All Members', 'paid-member-subscriptions' ); ?></option>
+                                        <option value="active"><?php esc_html_e( 'Active', 'paid-member-subscriptions' ); ?></option>
+                                        <option value="canceled"><?php esc_html_e( 'Canceled', 'paid-member-subscriptions' ); ?></option>
+                                        <option value="expired"><?php esc_html_e( 'Expired', 'paid-member-subscriptions' ); ?></option>
+                                        <option value="pending"><?php esc_html_e( 'Pending', 'paid-member-subscriptions' ); ?></option>
                                     </select>
 
-                                    <?php _e( 'Choose the current subscription status', 'paid-member-subscriptions' ); ?>
+                                    <?php esc_html_e( 'Choose the current subscription status', 'paid-member-subscriptions' ); ?>
                                 </p>
 
                                 <div id="pms-add-meta-key-wrap">
@@ -68,15 +68,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                             ?>
 
                                             <div class="pms-add-meta-key-row">
-                                                <label><?php _e( 'Column title', 'paid-member-subscriptions' ); ?><br/><input type="text" name="pms-filter-user-meta-title[]" value="<?php echo $value; ?>"></label>
+                                                <label><?php esc_html_e( 'Column title', 'paid-member-subscriptions' ); ?><br/><input type="text" name="pms-filter-user-meta-title[]" value="<?php echo esc_attr( $value ); ?>"></label>
                                                 <label>
-                                                    <?php _e( 'User meta key', 'paid-member-subscriptions' ); ?><br>
+                                                    <?php esc_html_e( 'User meta key', 'paid-member-subscriptions' ); ?><br>
                                                     <select name="pms-filter-user-meta[]" class="pms-export-filter pms-chosen">
-                                                        <option value="0"><?php _e( '...Choose', 'paid-member-subscriptions' ); ?></option>
+                                                        <option value="0"><?php esc_html_e( '...Choose', 'paid-member-subscriptions' ); ?></option>
                                                         <?php
                                                         foreach (PMS_Submenu_Page_Export::get_all_user_meta_keys() as $umeta_key){
-                                                            $selected = selected( $key, $umeta_key['meta_key'] );
-                                                            echo "<option {$selected} value='{$umeta_key['meta_key']}'>{$umeta_key['meta_key']}</option>";
+                                                            echo "<option ". selected( $key, $umeta_key['meta_key'], true ) ." value='". esc_attr( $umeta_key['meta_key'] ). "'>". esc_html( $umeta_key['meta_key'] ) ."</option>";
                                                         }
                                                         ?>
                                                     </select>
@@ -91,14 +90,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     </div>
                                     <template id="pms-add-meta-row-tpl">
                                     <div class="pms-add-meta-key-row">
-                                        <label><?php _e( 'Column title', 'paid-member-subscriptions' ); ?><br/><input type="text" name="pms-filter-user-meta-title[]"></label>
+                                        <label><?php esc_html_e( 'Column title', 'paid-member-subscriptions' ); ?><br/><input type="text" name="pms-filter-user-meta-title[]"></label>
                                         <label>
-                                            <?php _e( 'User meta key', 'paid-member-subscriptions' ); ?><br>
+                                            <?php esc_html_e( 'User meta key', 'paid-member-subscriptions' ); ?><br>
                                             <select name="pms-filter-user-meta[]" class="pms-export-filter pms-chosen">
-                                                <option value="0"><?php _e( '...Choose', 'paid-member-subscriptions' ); ?></option>
+                                                <option value="0"><?php esc_html_e( '...Choose', 'paid-member-subscriptions' ); ?></option>
                                             <?php
                                             foreach (PMS_Submenu_Page_Export::get_all_user_meta_keys() as $umeta_key){
-                                                echo "<option value='{$umeta_key['meta_key']}'>{$umeta_key['meta_key']}</option>";
+
+                                                echo "<option value='". esc_attr( $umeta_key['meta_key'] ). "'>". esc_html( $umeta_key['meta_key'] ) ."</option>";
+
                                             }
                                             ?>
                                             </select>
@@ -107,11 +108,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                     </div>
                                     </template>
 
-                                    <a href="#" class="button-secondary" id="pms-add-meta-button" title="Adds another column to the export containing the information found inside a particular user meta key">Add User Meta Column</a>
+                                    <a href="#" class="button-secondary" id="pms-add-meta-button" title="<?php esc_html_e( 'Adds another column to the export containing the information found inside a particular user meta key', 'paid-member-subscriptions' ); ?>">
+                                        <?php esc_html_e( 'Add User Meta Column', 'paid-member-subscriptions' ); ?>
+                                    </a>
                                 </div>
 
                                 <span>
-									<input type="submit" value="<?php _e( 'Generate CSV', 'paid-member-subscriptions' ); ?>"
+									<input type="submit" value="<?php esc_html_e( 'Generate CSV', 'paid-member-subscriptions' ); ?>"
                                            class="button-primary"/>
 									<span class="spinner"></span>
 								</span>
@@ -130,38 +133,39 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 
                     <div class="postbox pms-export">
-                        <h3><span><?php _e( 'Payments Export', 'paid-member-subscriptions' ); ?></span></h3>
+                        <h3><span><?php esc_html_e( 'Payments Export', 'paid-member-subscriptions' ); ?></span></h3>
                         <div class="inside">
-                            <p><?php _e( 'Download a CSV with your payments.', 'paid-member-subscriptions' ); ?></p>
+                            <p><?php esc_html_e( 'Download a CSV with your payments.', 'paid-member-subscriptions' ); ?></p>
                             <form id="pms-export" class="pms-export-form " method="post">
                                 <?php wp_nonce_field( 'pms_ajax_export', 'pms_ajax_export' ); ?>
                                 <input type="hidden" name="pms-export-class" value="PMS_Batch_Export_Payments"/>
                                 <p>
                                     <?php
                                     echo '<select name="pms-filter-payment-status" class="pms-export-filter">';
-                                    echo '<option value="0">' . __( 'All Payments', 'paid-member-subscriptions' ) . '</option>';
-                                    echo '<option value="completed">' . __( 'Completed', 'paid-member-subscriptions' ) . '</option>';
-                                    echo '<option value="pending">' . __( 'Pending', 'paid-member-subscriptions' ) . '</option>';
-                                    echo '<option value="refunded">' . __( 'Refunded', 'paid-member-subscriptions' ) . '</option>';
-                                    echo '<option value="failed">' . __( 'Failed', 'paid-member-subscriptions' ) . '</option>';
+                                        echo '<option value="0">' . esc_html__( 'All Payments', 'paid-member-subscriptions' ) . '</option>';
+                                        echo '<option value="completed">' . esc_html__( 'Completed', 'paid-member-subscriptions' ) . '</option>';
+                                        echo '<option value="pending">' . esc_html__( 'Pending', 'paid-member-subscriptions' ) . '</option>';
+                                        echo '<option value="refunded">' . esc_html__( 'Refunded', 'paid-member-subscriptions' ) . '</option>';
+                                        echo '<option value="failed">' . esc_html__( 'Failed', 'paid-member-subscriptions' ) . '</option>';
                                     echo '</select> ';
-                                    _e('Choose the payment status', 'paid-member-subscriptions');
+
+                                    esc_html_e('Choose the payment status', 'paid-member-subscriptions');
                                     ?>
                                 </p>
 
                                 <p style="display: inline-block; min-width: 200px">
-                                    <label for="pms-filter-date-start"><?php _e('Start Date', 'paid-member-subscriptions'); ?></label><br/>
+                                    <label for="pms-filter-date-start"><?php esc_html_e('Start Date', 'paid-member-subscriptions'); ?></label><br/>
                                     <input name="pms-filter-start-date" type="date" class="pms-export-filter">
                                 </p>
                                 <p style="display: inline-block; min-width: 200px">
-                                    <label for="pms-filter-end-date"><?php _e('End Date', 'paid-member-subscriptions'); ?></label><br/>
+                                    <label for="pms-filter-end-date"><?php esc_html_e('End Date', 'paid-member-subscriptions'); ?></label><br/>
                                     <input name="pms-filter-end-date" type="date" class="pms-export-filter">
                                 </p>
                                 <p>
-                                    <?php _e( 'Leave dates empty for an export of all payments.', 'paid-member-subscriptions' ); ?>
+                                    <?php esc_html_e( 'Leave dates empty for an export of all payments.', 'paid-member-subscriptions' ); ?>
                                 </p>
                                 <p>
-									<input type="submit" value="<?php _e( 'Generate CSV', 'paid-member-subscriptions' ); ?>" class="button-primary"/>
+									<input type="submit" value="<?php esc_html_e( 'Generate CSV', 'paid-member-subscriptions' ); ?>" class="button-primary"/>
 									<span class="spinner"></span>
 								</p>
                             </form>

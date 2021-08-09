@@ -14,11 +14,11 @@ function pms_is_https() {
 
     $is_secure = false;
 
-    if ( isset( $_SERVER['HTTPS'] ) && 'on' == strtolower( $_SERVER['HTTPS'] ) ) {
+    if ( isset( $_SERVER['HTTPS'] ) && 'on' === strtolower( sanitize_text_field( $_SERVER['HTTPS'] ) ) ) {
 
         $is_secure = true;
 
-    } elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || ! empty( $_SERVER['HTTP_X_FORWARDED_SSL'] ) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on' ) {
+    } elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' || ! empty( $_SERVER['HTTP_X_FORWARDED_SSL'] ) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on' ) {
 
         $is_secure = true;
 
@@ -63,7 +63,11 @@ function pms_get_current_page_url( $strip_query_args = false ) {
     $home_path       = trim( parse_url( $home_url, PHP_URL_PATH ), '/' );
     $home_path_regex = sprintf( '|^%s|i', preg_quote( $home_path, '|' ) );
 
-    $request_uri = preg_replace( $home_path_regex, '', ltrim( $_SERVER['REQUEST_URI'], '/' ) );
+    if( isset( $_SERVER['REQUEST_URI'] ) )
+        $request_uri = preg_replace( $home_path_regex, '', ltrim( sanitize_text_field( $_SERVER['REQUEST_URI'] ), '/' ) );
+    else
+        $request_uri = '';
+
     $page_url    = trim( $home_url, '/') . '/' . ltrim( $request_uri, '/' );
 
     // Remove query arguments
@@ -159,7 +163,7 @@ function pms_add_missing_http( $link = '' ) {
 
         $http = 'http';
 
-        if ( isset( $_SERVER['HTTPS'] ) && 'on' == strtolower( $_SERVER['HTTPS'] ) )
+        if ( isset( $_SERVER['HTTPS'] ) && 'on' == strtolower( sanitize_text_field( $_SERVER['HTTPS'] ) ) )
             $http .= "s";
 
         $http .= "://";
@@ -269,16 +273,16 @@ function _pms_deprecated_function( $function, $version, $replacement = null ) {
         if ( function_exists( '__' ) ) {
             if ( ! is_null( $replacement ) ) {
                 /* translators: 1: PHP function name, 2: version number, 3: alternative function name */
-                trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.'), $function, $version, $replacement ) );
+                trigger_error( wp_kses_post( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', 'paid-member-subscriptions'), $function, $version, $replacement ) ) );
             } else {
                 /* translators: 1: PHP function name, 2: version number */
-                trigger_error( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.'), $function, $version ) );
+                trigger_error( wp_kses_post( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', 'paid-member-subscriptions' ), $function, $version ) ) );
             }
         } else {
             if ( ! is_null( $replacement ) ) {
-                trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', $function, $version, $replacement ) );
+                trigger_error( wp_kses_post( sprintf( __('%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.', 'paid-member-subscriptions' ), $function, $version, $replacement ) ) );
             } else {
-                trigger_error( sprintf( '%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', $function, $version ) );
+                trigger_error( wp_kses_post( sprintf( __( '%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.', 'paid-member-subscriptions' ), $function, $version ) ) );
             }
         }
     }
@@ -380,7 +384,7 @@ function pms_get_current_post_type() {
     elseif ( isset( $_GET['post_type'] ) )
         return sanitize_key( $_GET['post_type'] );
     elseif ( isset( $_GET['post'] ) )
-        return get_post_type( $_GET['post'] );
+        return get_post_type( absint( $_GET['post'] ) );
     elseif( is_admin() && $pagenow == 'post-new.php' )
         return 'post';
 
@@ -455,7 +459,7 @@ function pms_count_users(){
 }
 
 function pms_icl_t( $context, $name, $value ){
-    
+
 	if( function_exists( 'icl_t' ) )
 		return icl_t( $context, $name, $value );
 	else

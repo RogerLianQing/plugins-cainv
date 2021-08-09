@@ -16,9 +16,9 @@
  * Plugin Name: Advanced Page Visit Counter
  * Plugin URI:        https://pagevisitcounter.com
  * Description:       This plugin will count the total visits of your website or ecommerce store.
- * Version:           4.4.0
+ * Version:          5.0.2
  * Author:            Ankit Panchal
- * Author URI:        https://iamankitp.com/
+ * Author URI:        https://iamankitpanchal.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       apvc
@@ -111,8 +111,9 @@ if ( function_exists( 'apvc_fs' ) ) {
     require plugin_dir_path( __FILE__ ) . 'includes/class-advanced-page-visit-counter-widget.php';
     require plugin_dir_path( __FILE__ ) . 'admin/partials/file-advanced-page-visit-counter-metaboxes.php';
     require plugin_dir_path( __FILE__ ) . 'includes/class-advanced-page-visit-counter-queries.php';
-    define( 'ADVANCED_PAGE_VISIT_COUNTER', '4.4.0' );
+    define( 'ADVANCED_PAGE_VISIT_COUNTER', '5.0.2' );
     define( 'APVC_DATA_TABLE', $wpdb->prefix . "avc_page_visit_history" );
+    define( 'APVC_USER_TABLE', $wpdb->prefix . "apvc_user_locations" );
     define( 'SECONDS_PER_DAY', 86400 );
     define( 'HOURLY_REFRESH', 10800 );
     define( 'APVC_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );

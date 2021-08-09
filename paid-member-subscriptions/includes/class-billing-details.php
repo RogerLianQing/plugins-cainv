@@ -24,7 +24,7 @@ Class PMS_Billing_Details {
         if( !isset( $_GET['member_id'] ) )
             return;
 
-        $member_id = (int)$_GET['member_id'];
+        $member_id = absint( $_GET['member_id'] );
 
         $fields_data = $this->get_billing_fields_data( $member_id );
 
@@ -35,7 +35,7 @@ Class PMS_Billing_Details {
 
         ?>
 
-        <h3><?php _e( 'Billing Details', 'paid-member-subscriptions' ); ?></h3>
+        <h3><?php esc_html_e( 'Billing Details', 'paid-member-subscriptions' ); ?></h3>
 
         <div id="pms-member-billing-details" class="postbox">
             <div class="inside">
@@ -44,8 +44,8 @@ Class PMS_Billing_Details {
                     <?php $this->format_billing_details( $fields_data ); ?>
 
                     <div class="billing-details__action">
-                        <a href="" id="edit" class="button button-secondary"><?php _e( 'Edit', 'paid-member-subscriptions' ); ?></a>
-                        <span><?php _e( 'Member details saved successfully !', 'paid-member-subscriptions' ); ?><span>
+                        <a href="" id="edit" class="button button-secondary"><?php esc_html_e( 'Edit', 'paid-member-subscriptions' ); ?></a>
+                        <span><?php esc_html_e( 'Member details saved successfully !', 'paid-member-subscriptions' ); ?><span>
                     </div>
                 </div>
 
@@ -54,9 +54,9 @@ Class PMS_Billing_Details {
                         <?php pms_output_form_field( $field ); ?>
                     <?php endforeach; ?>
 
-                    <input type="hidden" name="pms_member_id" value="<?php echo isset( $_GET['member_id'] ) ? $_GET['member_id'] : ''; ?>" />
+                    <input type="hidden" name="pms_member_id" value="<?php echo  isset( $_GET['member_id'] ) ? esc_attr( sanitize_text_field( $_GET['member_id'] ) ) : ''; ?>" />
 
-                    <a href="" id="save" class="button button-secondary"><?php _e( 'Save', 'paid-member-subscriptions' ); ?></a>
+                    <a href="" id="save" class="button button-secondary"><?php esc_html_e( 'Save', 'paid-member-subscriptions' ); ?></a>
 
                 </div>
             </div>
@@ -91,7 +91,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_first_name',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_first_name'] ) ? $_POST['pms_billing_first_name'] : ( !(empty($user_meta['pms_billing_first_name'])) ? $user_meta['pms_billing_first_name'][0] : ( ! empty( $user->first_name ) ? $user->first_name : '' ) ) ),
+                'value'           => ( isset( $_POST['pms_billing_first_name'] ) ? sanitize_text_field( $_POST['pms_billing_first_name'] ) : ( !(empty($user_meta['pms_billing_first_name'])) ? $user_meta['pms_billing_first_name'][0] : ( ! empty( $user->first_name ) ? $user->first_name : '' ) ) ),
                 'label'           => __( 'Billing First Name', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -103,7 +103,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_last_name',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_last_name'] ) ? $_POST['pms_billing_last_name'] : ( !(empty($user_meta['pms_billing_last_name'])) ? $user_meta['pms_billing_last_name'][0] : ( ! empty( $user->last_name ) ? $user->last_name : '' ) ) ),
+                'value'           => ( isset( $_POST['pms_billing_last_name'] ) ? sanitize_text_field( $_POST['pms_billing_last_name'] ) : ( !(empty($user_meta['pms_billing_last_name'])) ? $user_meta['pms_billing_last_name'][0] : ( ! empty( $user->last_name ) ? $user->last_name : '' ) ) ),
                 'label'           => __( 'Billing Last Name', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -115,7 +115,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_email',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_email'] ) ? $_POST['pms_billing_email'] : ( !(empty($user_meta['pms_billing_email'])) ? $user_meta['pms_billing_email'][0] : ( ! empty( $user->user_email ) ? $user->user_email : '' ) ) ),
+                'value'           => ( isset( $_POST['pms_billing_email'] ) ? sanitize_email( $_POST['pms_billing_email'] ) : ( !(empty($user_meta['pms_billing_email'])) ? $user_meta['pms_billing_email'][0] : ( ! empty( $user->user_email ) ? $user->user_email : '' ) ) ),
                 'label'           => __( 'Billing Email', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -127,7 +127,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_company',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_company'] ) ? $_POST['pms_billing_company'] : ( !(empty($user_meta['pms_billing_company'])) ? $user_meta['pms_billing_company'][0] : '') ),
+                'value'           => ( isset( $_POST['pms_billing_company'] ) ? sanitize_text_field( $_POST['pms_billing_company'] ) : ( !(empty($user_meta['pms_billing_company'])) ? $user_meta['pms_billing_company'][0] : '') ),
                 'label'           => __( 'Billing Company', 'paid-member-subscriptions' ),
                 'description'     => __( 'If entered, this will appear on the invoice, replacing the First and Last Name.', 'paid-member-subscriptions' ),
                 'element_wrapper' => 'li',
@@ -138,7 +138,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_address',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_address'] ) ? $_POST['pms_billing_address'] : ( !(empty($user_meta['pms_billing_address'])) ? $user_meta['pms_billing_address'][0] : '') ),
+                'value'           => ( isset( $_POST['pms_billing_address'] ) ? sanitize_text_field( $_POST['pms_billing_address'] ) : ( !(empty($user_meta['pms_billing_address'])) ? $user_meta['pms_billing_address'][0] : '') ),
                 'label'           => __( 'Billing Address', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -150,7 +150,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_city',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_city'] ) ? $_POST['pms_billing_city'] : ( !(empty($user_meta['pms_billing_city'])) ? $user_meta['pms_billing_city'][0] : '') ),
+                'value'           => ( isset( $_POST['pms_billing_city'] ) ? sanitize_text_field( $_POST['pms_billing_city'] ) : ( !(empty($user_meta['pms_billing_city'])) ? $user_meta['pms_billing_city'][0] : '') ),
                 'label'           => __( 'Billing City', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -162,7 +162,7 @@ Class PMS_Billing_Details {
                 'type'            => 'text',
                 'name'            => 'pms_billing_zip',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_zip']) ? $_POST['pms_billing_zip'] : ( !(empty($user_meta['pms_billing_zip'])) ? $user_meta['pms_billing_zip'][0] : '') ),
+                'value'           => ( isset( $_POST['pms_billing_zip']) ? sanitize_text_field( $_POST['pms_billing_zip'] ) : ( !(empty($user_meta['pms_billing_zip'])) ? $user_meta['pms_billing_zip'][0] : '') ),
                 'label'           => __( 'Billing Zip / Postal Code', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -173,7 +173,7 @@ Class PMS_Billing_Details {
                 'type'            => 'select',
                 'name'            => 'pms_billing_country',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_country'] ) ? $_POST['pms_billing_country'] : ( !(empty($user_meta['pms_billing_country'])) ? $user_meta['pms_billing_country'][0] : '') ),
+                'value'           => ( isset( $_POST['pms_billing_country'] ) ? sanitize_text_field( $_POST['pms_billing_country'] ) : ( !(empty($user_meta['pms_billing_country'])) ? $user_meta['pms_billing_country'][0] : '') ),
                 'label'           => __( 'Billing Country', 'paid-member-subscriptions' ),
                 'options'         => function_exists( 'pms_get_countries' ) ? pms_get_countries() : array(),
                 'description'     => '',
@@ -186,7 +186,7 @@ Class PMS_Billing_Details {
                 'type'            => 'select_state',
                 'name'            => 'pms_billing_state',
                 'default'         => '',
-                'value'           => ( isset( $_POST['pms_billing_state'] ) ? $_POST['pms_billing_state'] : ( !(empty($user_meta['pms_billing_state'])) ? $user_meta['pms_billing_state'][0] : '') ),
+                'value'           => ( isset( $_POST['pms_billing_state'] ) ? sanitize_text_field( $_POST['pms_billing_state'] ) : ( !(empty($user_meta['pms_billing_state'])) ? $user_meta['pms_billing_state'][0] : '') ),
                 'label'           => __( 'Billing State / Province', 'paid-member-subscriptions' ),
                 'description'     => '',
                 'element_wrapper' => 'li',
@@ -282,9 +282,9 @@ Class PMS_Billing_Details {
         $billing_details = wpautop( $billing_details );
 
         if( $return === true )
-            return $billing_details;
+            return wp_kses_post( $billing_details );
         else
-            echo $billing_details;
+            echo wp_kses_post( $billing_details );
 
     }
 
@@ -306,7 +306,7 @@ Class PMS_Billing_Details {
         if( !current_user_can( 'manage_options' ) || empty( $_POST['member_id'] ) )
             die( json_encode( array( 'status' => 'error' ) ) );
 
-        $user_id         = (int)$_POST['member_id'];
+        $user_id         = absint( $_POST['member_id'] );
         $billing_details = $this->get_billing_fields();
 
         foreach( $billing_details as $slug => $label ){
@@ -316,7 +316,7 @@ Class PMS_Billing_Details {
 
         }
 
-        die( json_encode( array( 'status' => 'success', 'address_output' => $this->format_billing_details( $_POST, true ) ) ) );
+        die( json_encode( array( 'status' => 'success', 'address_output' => $this->format_billing_details( array_map( 'sanitize_text_field', $_POST ), true ) ) ) );
 
     }
 

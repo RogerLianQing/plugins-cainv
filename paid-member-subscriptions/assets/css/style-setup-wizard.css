@@ -267,6 +267,7 @@
 .pms-setup-next a.button {
     display: flex;
     justify-content: center;
+    max-height: 46px;
 }
 
 .pms-setup-links {

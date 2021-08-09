@@ -224,7 +224,7 @@ function pms_output_form_field_heading( $field = array() ) {
     // Closing element tag of each section
     $output .= '</' . esc_attr( $field_element_wrapper ) . '>';
 
-    echo $output;
+    echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_heading', 'pms_output_form_field_heading' );
@@ -275,7 +275,7 @@ function pms_output_form_field_checkbox_single( $field = array() ) {
     // Closing element tag of each section
     $output .= '</' . esc_attr( $field_element_wrapper ) . '>';
 
-    echo $output;
+    echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_checkbox_single', 'pms_output_form_field_checkbox_single' );
@@ -351,7 +351,7 @@ function pms_output_form_field_card_expiration_date( $field = array() ) {
     // Closing element tag of each section
     $output .= '</' . esc_attr( $field_element_wrapper ) . '>';
 
-    echo $output;
+    echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_card_expiration_date', 'pms_output_form_field_card_expiration_date' );
@@ -377,7 +377,7 @@ function pms_output_form_field_inner_text( $field = array() ) {
 	// Field output
 	$output = '<input type="text" id="' . esc_attr( $field['name'] ) . '" name="' . esc_attr( $field['name'] ) . '" value="' . esc_attr( $value ) . '" />';
 
-	echo $output;
+	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_inner_text', 'pms_output_form_field_inner_text', 10, 2 );
@@ -412,7 +412,7 @@ function pms_output_form_field_inner_select( $field = array() ) {
 
 	$output .= '</select>';
 
-	echo $output;
+	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_inner_select', 'pms_output_form_field_inner_select', 10, 2 );
@@ -450,7 +450,7 @@ function pms_output_form_field_inner_checkbox( $field = array() ) {
 
 	}
 
-	echo $output;
+	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_inner_checkbox', 'pms_output_form_field_inner_checkbox', 10, 2 );
@@ -488,7 +488,7 @@ function pms_output_form_field_inner_radio( $field = array() ) {
 
 	}
 
-	echo $output;
+	echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_inner_radio', 'pms_output_form_field_inner_radio', 10, 2 );
@@ -504,9 +504,9 @@ function pms_output_form_field_empty( $field = array() ) {
 
     $id = $field['id'] ? $field['id'] : '';
 
-    $output = '<div id="'. $id .'"></div>';
+    $output = '<div id="'. esc_attr( $id ) .'"></div>';
 
-    echo $output;
+    echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_output_form_field_empty', 'pms_output_form_field_empty', 10, 2 );
@@ -528,7 +528,52 @@ function pms_output_form_field_select_state( $field = array() ) {
     $output  = '<select id="' . esc_attr( $field['name'] ) . '" name="' . esc_attr( $field['name'] ) . '" class="pms-billing-state__select"></select>';
     $output .= '<input type="text" id="' . esc_attr( $field['name'] ) . '" class="pms-billing-state__input" name="' . esc_attr( $field['name'] ) . '" value="' . esc_attr( $value ) . '" />';
 
-    echo $output;
+    echo $output; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+/**
+ * Add honeypot field to avoid spambot attacks
+ */
+$pms_misc_settings = get_option( 'pms_misc_settings', array() );
+
+if( isset( $pms_misc_settings, $pms_misc_settings['honeypot-field'] ) && $pms_misc_settings['honeypot-field'] == 1 ){
+
+    add_filter( 'pms_extra_form_sections', 'pms_honeypot_section' );
+    add_filter( 'pms_extra_form_fields', 'pms_honeypot_field', 999 );
+    add_action( 'pms_register_form_validation', 'pms_validate_honeypot_field' );
+
+}
+function pms_honeypot_section( $sections ) {
+
+    $sections['security'] = array(
+        'name'    => 'security',
+        'element' => 'ul',
+        'class'	  => ''
+    );
+
+    return $sections;
+
+}
+
+function pms_honeypot_field( $fields ){
+    // Adding a field type "text"
+    $fields['beehive'] = array(
+        'section'         => 'security',
+        'type'            => 'text',
+        'name'            => 'beehive',
+        'label'           => 'Custom Field',
+        'element_wrapper' => 'li',
+        'wrapper_class'   => 'beehive',
+    );
+
+    return $fields;
+}
+
+function pms_validate_honeypot_field(){
+
+    if( !empty( $_POST['beehive'] ) )
+        pms_errors()->add( 'beehive', __( 'Are you sure ? Try again.', 'paid-member-subscriptions' ) );
+
 }
 
 /*

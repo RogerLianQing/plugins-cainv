@@ -174,13 +174,13 @@ Class PMS_Plugin_Notifications {
 	 */
 	public function is_plugin_page() {
 
-		if( ! empty( $_GET['page'] ) && false !== strpos( $_GET['page'], 'pms-' ) )
+		if( ! empty( $_GET['page'] ) && false !== strpos( sanitize_text_field( $_GET['page'] ), 'pms-' ) )
 			return true;
 
-		if( ! empty( $_GET['post_type'] ) && false !== strpos( $_GET['post_type'], 'pms-' ) )
+		if( ! empty( $_GET['post_type'] ) && false !== strpos( sanitize_text_field( $_GET['post_type'] ), 'pms-' ) )
 			return true;
 
-		if( ! empty( $_GET['post'] ) && false !== strpos( get_post_type( (int)$_GET['post'] ), 'pms-' ) )
+		if( ! empty( $_GET['post'] ) && false !== strpos( get_post_type( absint( $_GET['post'] ) ), 'pms-' ) )
 			return true;
 
 		return false;

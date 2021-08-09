@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 
 <div class="pms-account-subscriptions-header pms-subscription-plans-header">
-	<span class="pms-subscription-plan-name"><?php echo apply_filters( 'pms_subscription_plans_header_plan_name', __( 'Subscription' , 'paid-member-subscriptions' ) ); ?></span>
-	<span class="pms-subscription-status"><?php echo apply_filters( 'pms_subscriptions_header_status', __( 'Status', 'paid-member-subscriptions' ) ); ?></span>
-	<span class="pms-subscription-plan-expiration"><?php echo apply_filters( 'pms_subscription_plans_header_plan_expiration', __( 'Expires', 'paid-member-subscriptions' ) ); ?></span>
+	<span class="pms-subscription-plan-name"><?php echo esc_html( apply_filters( 'pms_subscription_plans_header_plan_name', __( 'Subscription' , 'paid-member-subscriptions' ) ) ); ?></span>
+	<span class="pms-subscription-status"><?php echo esc_html( apply_filters( 'pms_subscriptions_header_status', __( 'Status', 'paid-member-subscriptions' ) ) ); ?></span>
+	<span class="pms-subscription-plan-expiration"><?php echo esc_html( apply_filters( 'pms_subscription_plans_header_plan_expiration', __( 'Expires', 'paid-member-subscriptions' ) ) ); ?></span>
 </div>
 
 <?php 
@@ -26,13 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 		<!-- Subscription plan name -->
 		<span class="pms-subscription-plan-name">
-			<?php echo $subscription_plan->name; ?>
+			<?php echo esc_html( $subscription_plan->name ); ?>
 		</span>
 
 		<!-- Subscription status -->
 		<span class="pms-subscription-status">
-			<?php echo ( ! empty( $subscription_statuses[$member_subscription->status] ) ? $subscription_statuses[$member_subscription->status] : '' ); ?>
-            <?php echo ( $member_subscription->is_trial_period() ? ' (' . __( 'Trial', 'paid-member-subscriptions' ) . ')' : '' ); ?>
+			<?php echo ( ! empty( $subscription_statuses[$member_subscription->status] ) ? esc_html( $subscription_statuses[$member_subscription->status] ) : '' ); ?>
+            <?php echo ( $member_subscription->is_trial_period() ? ' (' . esc_html__( 'Trial', 'paid-member-subscriptions' ) . ')' : '' ); ?>
 		</span>
 
 		<!-- Subscription expiration date -->
@@ -58,12 +58,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 		?>
 		<span class="pms-subscription-plan-expiration">
-			<?php echo apply_filters( 'pms_output_subscription_plan_expiration_date', $expiration_date_output, $subscription_plan, $member_subscription->to_array(), $member->user_id ); ?>
+			<?php echo esc_html( apply_filters( 'pms_output_subscription_plan_expiration_date', $expiration_date_output, $subscription_plan, $member_subscription->to_array(), $member->user_id ) ); ?>
 		</span>
 
 		<!-- Subscription details action -->
 		<span class="pms-subscription-details">
-			<a href="<?php echo add_query_arg( array( 'subscription_id' => $member_subscription->id ), pms_get_current_page_url( true ) ); ?>"><?php echo __( 'View Details', 'paid-member-subscriptions' ); ?></a>
+			<a href="<?php echo esc_url( add_query_arg( array( 'subscription_id' => $member_subscription->id ), pms_get_current_page_url( true ) ) ); ?>"><?php echo esc_html__( 'View Details', 'paid-member-subscriptions' ); ?></a>
 
 			<?php 
 			

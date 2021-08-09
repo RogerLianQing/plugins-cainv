@@ -48,7 +48,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
     public function admin_scripts() {
 
         wp_enqueue_script( 'jquery-ui-datepicker' );
-        wp_enqueue_style('jquery-style', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+        wp_enqueue_style( 'jquery-style', PMS_PLUGIN_DIR_URL . 'assets/css/admin/jquery-ui.min.css', array(), PMS_VERSION );
 
         global $wp_scripts;
 
@@ -78,7 +78,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
     protected function get_message_by_code( $code = 0 ) {
 
         $messages = array(
-            1 => __( 'Payment successfully added. The subscription was also added or updated for the selected user.', 'paid-member-subscriptions' )
+            1 => esc_html__( 'Payment successfully added. The subscription was also added or updated for the selected user.', 'paid-member-subscriptions' )
         );
 
         return ( ! empty( $messages[$code] ) ? $messages[$code] : '' );
@@ -93,11 +93,11 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
     public function process_data() {
 
         // Verify correct nonce
-        if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( $_REQUEST['_wpnonce'], 'pms_payment_nonce' ) )
+        if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['_wpnonce'] ), 'pms_payment_nonce' ) )
             return;
 
         // Get current actions
-        $action = !empty( $_REQUEST['pms-action'] ) ? $_REQUEST['pms-action'] : '';
+        $action = !empty( $_REQUEST['pms-action'] ) ? sanitize_text_field( $_REQUEST['pms-action'] ) : '';
 
         if( empty($action) )
             return;
@@ -116,7 +116,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
             $payment = pms_get_payment( $payment_id );
 
             if( $payment->remove() )
-                $this->add_admin_notice( __( 'Payment successfully deleted.', 'paid-member-subscriptions' ), 'updated' );
+                $this->add_admin_notice( esc_html__( 'Payment successfully deleted.', 'paid-member-subscriptions' ), 'updated' );
 
         }
 
@@ -168,7 +168,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
                 $updated = $payment->update( $payment_vars );
 
             if( $updated )
-                $this->add_admin_notice( __( 'Payment successfully updated.', 'paid-member-subscriptions' ), 'updated' );
+                $this->add_admin_notice( esc_html__( 'Payment successfully updated.', 'paid-member-subscriptions' ), 'updated' );
 
         }
 
@@ -290,8 +290,11 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
 
             $payment = pms_get_payment( $payment_id );
 
+            if( empty( $payment->id ) )
+                return;
+
             if( $payment->update( array( 'status' => 'completed' ) ) )
-                $this->add_admin_notice( __( 'Payment successfully completed.', 'paid-member-subscriptions' ), 'updated' );
+                $this->add_admin_notice( esc_html__( 'Payment successfully completed.', 'paid-member-subscriptions' ), 'updated' );
 
         }
     }
@@ -308,34 +311,34 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
 
         //Check to see if the a username was selected (not empty)
         if ( empty($request_data['user_id']) ) {
-            $this->add_admin_notice( __( 'Please select a user.', 'paid-member-subscriptions' ), 'error' );
+            $this->add_admin_notice( esc_html__( 'Please select a user.', 'paid-member-subscriptions' ), 'error' );
         }
         else {
-            $user_id = sanitize_text_field( $request_data['user_id'] );
 
             // Check to see if the username exists
-            $user = get_user_by( 'id', $user_id );
+            $user = get_user_by( 'id', absint( $request_data['user_id'] ) );
 
             if( !$user )
-                $this->add_admin_notice( __( 'It seems this user does not exist.', 'paid-member-subscriptions' ), 'error' );
+                $this->add_admin_notice( esc_html__( 'It seems this user does not exist.', 'paid-member-subscriptions' ), 'error' );
+
         }
 
         // Make sure a subscription plan was selected
         if ( empty($request_data['pms-payment-subscription-id']) ) {
-            $this->add_admin_notice( __( 'Please select a subscription plan.', 'paid-member-subscriptions' ), 'error' );
+            $this->add_admin_notice( esc_html__( 'Please select a subscription plan.', 'paid-member-subscriptions' ), 'error' );
         }
 
         // Make sure the payment date is not empty
         if ( empty($request_data['pms-payment-date']) ){
-            $this->add_admin_notice( __( 'Please enter a date for the payment.', 'paid-member-subscriptions' ), 'error' );
+            $this->add_admin_notice( esc_html__( 'Please enter a date for the payment.', 'paid-member-subscriptions' ), 'error' );
         }
 
         // Make sure we can add the selected subscription to this user (it doesn't already have one from the same group)
-        $member = pms_get_member( $request_data['user_id'] );
+        $member = pms_get_member( absint( $request_data['user_id'] ) );
 
-        if ( is_object($member) && !empty($member) ) {
+        if ( is_object($member) && !empty($member) && isset( $request_data['pms-payment-subscription-id'] ) ) {
 
-            $subscription_plan = pms_get_subscription_plan($request_data['pms-payment-subscription-id']);
+            $subscription_plan = pms_get_subscription_plan( absint( $request_data['pms-payment-subscription-id'] ) );
 
             if ( !empty($member->subscriptions) && !empty($subscription_plan) ) {
 
@@ -346,7 +349,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
 
                         $existing_subscription = new PMS_Subscription_Plan($member_subscription['subscription_plan_id']);
 
-                        $this->add_admin_notice( sprintf(__('This user already has a subscription (%s) from the same group with the one you selected. Select it or remove it to be able to complete this payment.', 'paid-member-subscriptions'), $existing_subscription->name), 'error');
+                        $this->add_admin_notice( sprintf(esc_html__('This user already has a subscription (%s) from the same group with the one you selected. Select it or remove it to be able to complete this payment.', 'paid-member-subscriptions'), $existing_subscription->name), 'error');
                         break;
                     }
 
@@ -390,13 +393,26 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
      */
     public function ajax_populate_subscription_price() {
 
-        $subscription_plan_id = (int)trim( $_POST['subscription_plan_id'] );
+        if( !isset( $_POST['subscription_plan_id'] ) )
+            echo '';
+
+        $subscription_plan_id = (int)sanitize_text_field( $_POST['subscription_plan_id'] );
 
         if( ! empty( $subscription_plan_id ) ) {
 
             $subscription_plan = pms_get_subscription_plan( $subscription_plan_id );
 
-            echo pms_sanitize_date( $subscription_plan->price );
+            // Apply tax when the payment is handled in backend via admin
+            if( class_exists( 'PMS_Tax' ) ){
+
+                $pms_tax = new PMS_Tax;
+                $tax_exempt = get_post_meta( $subscription_plan_id, 'pms_subscription_plan_tax_exempt', true );
+
+            }
+            if( isset( $pms_tax ) && isset( $tax_exempt ) && !$tax_exempt )
+                echo esc_html( pms_sanitize_date( $pms_tax->calculate_tax_rate( $subscription_plan->price ) ) );
+            else
+                echo esc_html( pms_sanitize_date( $subscription_plan->price ) );
 
         } else
             echo '';
@@ -415,7 +431,7 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
         $user = get_user_by( 'login', sanitize_text_field( $_POST['username'] ) );
 
         if( !empty( $user->ID ) ){
-            echo $user->ID;
+            echo esc_html( $user->ID );
             wp_die();
         }
 
@@ -443,5 +459,5 @@ Class PMS_Submenu_Page_Payments extends PMS_Submenu_Page {
 
 }
 
-$pms_submenu_page_payments = new PMS_Submenu_Page_Payments( 'paid-member-subscriptions', __( 'Payments', 'paid-member-subscriptions' ), __( 'Payments', 'paid-member-subscriptions' ), 'manage_options', 'pms-payments-page', 20, '', 'pms_payments_per_page' );
+$pms_submenu_page_payments = new PMS_Submenu_Page_Payments( 'paid-member-subscriptions', esc_html__( 'Payments', 'paid-member-subscriptions' ), esc_html__( 'Payments', 'paid-member-subscriptions' ), 'manage_options', 'pms-payments-page', 20, '', 'pms_payments_per_page' );
 $pms_submenu_page_payments->init();

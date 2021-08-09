@@ -3,8 +3,8 @@ Contributors: glenwpcoder, yordansoares
 Donate link : http://codedropz.com/donation
 Tags: drag and drop, contact form 7, ajax uploader, multiple file, upload, contact form 7 uploader
 Requires at least: 3.0.1
-Tested up to: 5.7.1
-Stable tag: 1.3.5.9
+Tested up to: 5.8
+Stable tag: 1.3.6.1
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -62,6 +62,7 @@ Checkout available features on **PRO version**.
 * **New** - Color Options (Filesize, ProgressBar, Filename etc)
 * **New** - Disable Button to Prevent Duplicate Submission
 * **New** - Image preview on email
+* **New** - File Remote Storage (Google Drive, Amazon S3, FTP, Dropbox)
 * Resize Image (ie: 800x800)
 * Improved Security
 * Optimized Code and Performance
@@ -146,6 +147,13 @@ To install this plugin see below:
 6. Multiple Drag and Drop Fields - Front
 
 == Changelog ==
+
+= 1.3.6.1 =
+- Fixed - Unable to delete if errors will show
+- Added “span” & “div” on heading tag option
+- Add spam filtering fixes
+- Added “Disable Auto Delete” option.
+
 
 = 1.3.5.9 =
 - Add accept types data attributes [See Here](https://wordpress.org/support/topic/the-user-sees-only-a-certain-type-of-files/)

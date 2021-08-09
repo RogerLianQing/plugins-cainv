@@ -3,7 +3,7 @@
  * Plugin Name: Paid Member Subscriptions - PayPal Pro and PayPal Express
  * Plugin URI: http://www.cozmoslabs.com/
  * Description: Accept one-time or recurring payments through PayPal Pro and PayPal Express.
- * Version: 1.4.4
+ * Version: 1.4.5
  * Author: Cozmoslabs, Mihai Iova, Adrian Spiac
  * Author URI: http://www.cozmoslabs.com/
  * Text Domain: paid-member-subscriptions
@@ -39,7 +39,7 @@ Class PMS_PayPal_Express_Pro {
      */
     public function __construct() {
 
-        define( 'PMSPP_VERSION', '1.4.4' );
+        define( 'PMSPP_VERSION', '1.4.5' );
         define( 'PMSPP_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
         define( 'PMSPP_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 

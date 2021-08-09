@@ -43,7 +43,7 @@ function pms_woo_content_restrict_add_purchasing_restricted_message( $post_id ){
         if ( !empty($post_type) && ($post_type == 'product') ) {
 
             // this is a WooCommerce product, so we will display the editor for customizing the purchasing restricted message.
-            echo '<p><strong>' . __( 'Messages for restricted product purchase', 'paid-member-subscriptions' ) . '</strong></p>';
+            echo '<p><strong>' . esc_html( __( 'Messages for restricted product purchase', 'paid-member-subscriptions' ) ) . '</strong></p>';
             wp_editor( wp_kses_post( get_post_meta( $post_id, 'pms-content-restrict-message-purchasing_restricted', true ) ), 'messages_purchasing_restricted', array( 'textarea_name' => 'pms-content-restrict-message-purchasing_restricted', 'editor_height' => 200 ) );
 
         }
@@ -60,11 +60,11 @@ add_action( 'pms_view_meta_box_content_restrict_restriction_messages_bottom', 'p
  */
 function pms_woo_settings_page_add_default_purchasing_restricted_message( $options ) {
 
-    echo '<h4 class="pms-subsection-title">' . __( 'WooCommerce Restriction Messages', 'paid-member-subscriptions' ) . '</h4>';
+    echo '<h4 class="pms-subsection-title">' . esc_html( __( 'WooCommerce Restriction Messages', 'paid-member-subscriptions' ) ) . '</h4>';
 
     echo '<div class="pms-form-field-wrapper">
 
-            <label class="pms-form-field-label">' . __( 'Messages for restricted product purchase', 'paid-member-subscriptions' ) . '</label>';
+            <label class="pms-form-field-label">' . esc_html(__( 'Messages for restricted product purchase', 'paid-member-subscriptions' ) ). '</label>';
     wp_editor( pms_get_restriction_content_message( 'purchasing_restricted' ), 'messages_purchasing_restricted', array( 'textarea_name' => 'pms_content_restriction_settings[purchasing_restricted]', 'editor_height' => 250 ) );
 
     echo '</div>';
@@ -100,19 +100,19 @@ add_filter('pms_get_restriction_content_message_default', 'pms_woo_set_default_p
  */
 function pms_woo_save_custom_purchasing_restricted_message( $post_id ) {
     //verify nonce
-    if ( empty($_POST['pmstkn']) || !wp_verify_nonce( $_POST['pmstkn'], 'pms_meta_box_single_content_restriction_nonce' ) )
+    if ( empty($_POST['pmstkn']) || !wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_meta_box_single_content_restriction_nonce' ) )
         return;
 
     delete_post_meta( $post_id, 'pms-purchase-restrict-subscription-plan' );
-    if( isset( $_POST['pms-purchase-restrict-subscription-plan'] ) ) {
-
-        foreach ( $_POST['pms-purchase-restrict-subscription-plan'] as $subscription_id )
-            add_post_meta( $post_id, 'pms-purchase-restrict-subscription-plan', (int) $subscription_id );
-
+    if( isset( $_POST['pms-purchase-restrict-subscription-plan'] ) && is_array( $_POST['pms-purchase-restrict-subscription-plan'] ) ) {
+        $subscription_ids = array_map( 'absint', $_POST['pms-purchase-restrict-subscription-plan'] );
+        foreach ( $subscription_ids as $subscription_id ) {
+            add_post_meta($post_id, 'pms-purchase-restrict-subscription-plan', $subscription_id);
+        }
     }
 
 
-    if( isset( $_POST['pms-purchase-restrict-user-status'] ) && $_POST['pms-purchase-restrict-user-status'] == 'loggedin' )
+    if( isset( $_POST['pms-purchase-restrict-user-status'] ) && $_POST['pms-purchase-restrict-user-status'] === 'loggedin' )
         update_post_meta( $post_id, 'pms-purchase-restrict-user-status', 'loggedin' );
     else
         delete_post_meta( $post_id, 'pms-purchase-restrict-user-status' );
@@ -257,7 +257,7 @@ add_action( 'woocommerce_before_shop_loop_item_title', 'pms_woo_maybe_remove_pro
 function pms_woo_template_loop_product_thumbnail_placeholder(){
     if ( wc_placeholder_img_src() ) {
 
-        echo wc_placeholder_img( 'shop_catalog' );
+        echo wp_kses_post( wc_placeholder_img( 'shop_catalog' ) );
     }
 }
 

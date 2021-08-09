@@ -86,9 +86,9 @@ Class PMS_Shortcodes {
         /*
          * Show a single plan based on an URL parameters
          */
-        if ( !empty( $_GET['subscription_plan'] ) && isset( $_GET['single_plan'] ) && $_GET['single_plan'] == 'yes' ) {
+        if ( !empty( $_GET['subscription_plan'] ) && isset( $_GET['single_plan'] ) && $_GET['single_plan'] === 'yes' ) {
 
-            $plan = pms_get_subscription_plan( (int)sanitize_text_field( $_GET['subscription_plan'] ) );
+            $plan = pms_get_subscription_plan( absint( sanitize_text_field( $_GET['subscription_plan'] ) ) );
 
             if ( $plan->is_valid() && $plan->is_active() )
                 $atts['subscription_plans'] = array( $plan->id );
@@ -115,17 +115,17 @@ Class PMS_Shortcodes {
             $exclude = '';
 
             if ( !empty( $atts['subscription_plans'] ) && $atts['subscription_plans'][0] != 'none' )
-                $plans = 'subscription_plans="'.implode( ',', $atts['subscription_plans'] ).'"';
+                $plans = 'subscription_plans="'. esc_attr( implode( ',', $atts['subscription_plans'] ) ).'"';
 
             if( !empty( $atts['exclude'] ) )
-                $exclude = 'exclude="'.implode( ',', $atts['exclude'] ).'"';
+                $exclude = 'exclude="'.esc_attr( implode( ',', $atts['exclude'] ) ).'"';
 
-            echo apply_filters( 'pms_register_form_already_a_user_message', do_shortcode( '[pms-subscriptions '. $plans .' selected="'.$atts['selected'].'" '. $exclude .']' ), $atts );
+            echo apply_filters( 'pms_register_form_already_a_user_message', do_shortcode( '[pms-subscriptions '. $plans .' selected="'. esc_attr( $atts['selected'] ).'" '. $exclude .']' ), $atts );//phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
         } else {
 
             if( !$users_can_register ) {
-                echo '<p>' . __( 'Only an administrator can add new users.', 'paid-member-subscriptions' ) . '</p>';
+                echo '<p>' . esc_html__( 'Only an administrator can add new users.', 'paid-member-subscriptions' ) . '</p>';
             } else {
 
                 if( !pms_success()->get_message( 'subscription_plans' ) )
@@ -180,7 +180,7 @@ Class PMS_Shortcodes {
 
             if( $member->is_member() ) {
 
-                echo apply_filters( 'pms_subscriptions_form_already_a_member', do_shortcode( '[pms-account show_tabs="no"]' ), $atts, $member );
+                echo apply_filters( 'pms_subscriptions_form_already_a_member', do_shortcode( '[pms-account show_tabs="no"]' ), $atts, $member ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
             } else {
 
@@ -191,7 +191,7 @@ Class PMS_Shortcodes {
 
         } else {
 
-            echo apply_filters( 'pms_subscriptions_form_not_logged_in_message', __( 'Only registered users can see this information.', 'paid-member-subscriptions' ) );
+            echo esc_html( apply_filters( 'pms_subscriptions_form_not_logged_in_message', __( 'Only registered users can see this information.', 'paid-member-subscriptions' ) ) );
 
         }
 
@@ -266,8 +266,8 @@ Class PMS_Shortcodes {
                 <nav class="pms-account-navigation">
                   <ul>
                       <?php foreach( $tabs as $slug => $name ) : ?>
-                          <li class="pms-account-navigation-link pms-account-navigation-link--<?php echo $slug; ?>">
-                              <a class="<?php echo ( $active_tab == $slug ? 'pms-account-navigation-link--active' : '' ); ?>" href="<?php echo esc_url( ( $slug != 'logout' ? pms_account_get_tab_url( $slug, $account_page ) : wp_logout_url( apply_filters( 'pms_member_account_logout_url', $args['logout_redirect_url'] ) ) ) ); ?>"><?php echo $name; ?></a>
+                          <li class="pms-account-navigation-link pms-account-navigation-link--<?php echo esc_attr( $slug ); ?>">
+                              <a class="<?php echo esc_attr( $active_tab == $slug ? 'pms-account-navigation-link--active' : '' ); ?>" href="<?php echo esc_url( ( $slug != 'logout' ? pms_account_get_tab_url( $slug, $account_page ) : wp_logout_url( apply_filters( 'pms_member_account_logout_url', $args['logout_redirect_url'] ) ) ) ); ?>"><?php echo esc_html( $name ); ?></a>
                           </li>
                       <?php endforeach; ?>
                   </ul>
@@ -294,9 +294,9 @@ Class PMS_Shortcodes {
                 $register_page = esc_url( pms_get_page( 'register', true ) );
 
                 if ( !empty( $register_page ) )
-                    $message .= sprintf( '<p>' . esc_html__( 'To purchase a subscription, you can %sclick here%s.', 'paid-member-subscriptions' ) . '</p>', '<a href="'.$register_page.'">', '</a>' );
+                    $message .= sprintf( '<p>' . __( 'To purchase a subscription, you can %sclick here%s.', 'paid-member-subscriptions' ) . '</p>', '<a href="'.$register_page.'">', '</a>' );
 
-                echo apply_filters( 'pms_member_account_not_member', $message, $member );
+                echo wp_kses_post( apply_filters( 'pms_member_account_not_member', $message, $member ) );
             } else {
                 include 'views/shortcodes/view-shortcode-account-subscription-details.php';
             }
@@ -420,7 +420,7 @@ Class PMS_Shortcodes {
             $args['lostpassword'] = $lostpassword_url;
 
             // Get login error
-            $login_error = ( isset( $_GET['login_error'] ) ? wp_kses_post( urldecode( base64_decode( $_GET['login_error'] ) ) ) : '' );
+            $login_error = ( isset( $_GET['login_error'] ) ? wp_kses_post( urldecode( base64_decode( $_GET['login_error'] ) ) ) : '' ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
             if( !empty($login_error) ) {
                 if ( !empty($args['lostpassword']) )  // replace the lost password error link with the "lostpassword_url" value from the shortcode
@@ -447,10 +447,15 @@ Class PMS_Shortcodes {
     }
 
     public static function pms_wp_login_form( $args = array() ) {
+
+        $default_redirect  = '';
+        if( isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) )
+            $default_redirect = ( is_ssl() ? 'https://' : 'http://' ) . sanitize_text_field( $_SERVER['HTTP_HOST'] ) . sanitize_text_field( $_SERVER['REQUEST_URI'] );
+
         $defaults = array(
             'echo'           => true,
             // Default 'redirect' value takes the user back to the request URI.
-            'redirect'       => ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+            'redirect'       => $default_redirect,
             'form_id'        => 'pms-loginform',
             'label_username' => __( 'Username or Email Address', 'paid-member-subscriptions' ),
             'label_password' => __( 'Password', 'paid-member-subscriptions' ),
@@ -488,8 +493,8 @@ Class PMS_Shortcodes {
 
         ob_start();
         ?>
-            <form name="<?php echo $args['form_id']; ?>" id="<?php echo $args['form_id']; ?>" action="" method="post">
-                <?php echo $login_form_top; ?>
+            <form name="<?php echo esc_attr( $args['form_id'] ); ?>" id="<?php echo esc_attr( $args['form_id'] ); ?>" action="" method="post">
+                <?php echo $login_form_top; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
                 <p class="login-username">
                     <label for="<?php echo esc_attr( $args['id_username'] ); ?>"><?php echo esc_html( $args['label_username'] ) ?></label>
@@ -501,12 +506,14 @@ Class PMS_Shortcodes {
                     <input type="password" name="pwd" id="<?php echo esc_attr( $args['id_password'] ); ?>" class="input" value="" size="20" />
                 </p>
 
-                <?php echo $login_form_middle; ?>
+                <?php echo $login_form_middle; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
                 <?php if ( $args['remember'] ) : ?>
                     <p class="login-remember">
-                        <label>
-                            <input name="rememberme" type="checkbox" id="<?php echo esc_attr( $args['id_remember'] ); ?>" value="forever" <?php echo ( $args['value_remember'] ? ' checked="checked"' : '' ) ?> /> <?php echo esc_html( $args['label_remember'] ); ?>
+                        <input name="rememberme" type="checkbox" id="<?php echo esc_attr( $args['id_remember'] ); ?>" value="forever" <?php echo ( $args['value_remember'] ? ' checked="checked"' : '' ) ?> />
+
+                        <label for="<?php echo esc_attr( $args['id_remember'] ); ?>">
+                            <?php echo esc_html( $args['label_remember'] ); ?>
                         </label>
                     </p>
                 <?php endif; ?>
@@ -516,7 +523,9 @@ Class PMS_Shortcodes {
                     <input type="hidden" name="redirect_to" value="<?php echo esc_url( $args['redirect'] ); ?>" />
                 </p>
 
-                <?php echo $login_form_bottom; ?>
+                <p class="login-extra">
+                    <?php echo $login_form_bottom; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </p>
             </form>
         <?php
 
@@ -524,7 +533,7 @@ Class PMS_Shortcodes {
         ob_end_clean();
 
         if ( $args['echo'] )
-            echo $form;
+            echo $form; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         else
             return $form;
     }
@@ -539,17 +548,17 @@ Class PMS_Shortcodes {
             return $string;
 
         $string .= '<input type="hidden" name="pms_login" value="1" />';
-        $string .= '<input type="hidden" name="pms_redirect" value="' . pms_get_current_page_url() . '" />';
+        $string .= '<input type="hidden" name="pms_redirect" value="' . esc_attr( pms_get_current_page_url() ) . '" />';
 
         // Add "Register" and "Lost your password" links below the form is shortcode arguments exist
         $i = 0;
         if ( !empty($args['register']) ) {
-            $string .= '<a href="' . esc_url($args['register']) . '">' . apply_filters('pms_login_register_text', __('Register', 'paid-member-subscriptions')) . '</a>';
+            $string .= '<a class="register" href="' . esc_url($args['register']) . '">' . apply_filters('pms_login_register_text', __('Register', 'paid-member-subscriptions')) . '</a>';
             $i++;
         }
         if ( !empty($args['lostpassword']) ) {
-            if ($i != 0) $string .= ' | ';
-            $string .= '<a href="' . esc_url($args['lostpassword']) . '">' . apply_filters('pms_login_lostpass_text', __('Lost your password?', 'paid-member-subscriptions')) . '</a>';
+            if ($i != 0) $string .= '<span class="separator">|</span>';
+            $string .= '<a class="lostpassword" href="' . esc_url($args['lostpassword']) . '">' . apply_filters('pms_login_lostpass_text', __('Lost your password?', 'paid-member-subscriptions')) . '</a>';
         }
 
         return $string;
@@ -618,7 +627,7 @@ Class PMS_Shortcodes {
         if ( is_user_logged_in() ) {
 
             $member = pms_get_member( get_current_user_id() );
-            echo( apply_filters ('pms_recover_password_form_logged_in_message', '<p>' .  __( 'You are already logged in.', 'paid-member-subscriptions' ) . '</p>', $atts, $member) );
+            echo( wp_kses_post( apply_filters ('pms_recover_password_form_logged_in_message', '<p>' .  __( 'You are already logged in.', 'paid-member-subscriptions' ) . '</p>', $atts, $member) ) );
 
         } else {
 
@@ -627,13 +636,13 @@ Class PMS_Shortcodes {
                 if ( !empty($_POST['pms_new_password']) && !empty($_POST['pms_repeat_password']) && ( count( pms_errors()->get_error_codes() ) == 0 )) {
 
                     // The new password form was submitted with no errors
-                    echo(apply_filters('pms_recover_password_form_password_changed_message', '<p>' . __('Your password was successfully changed!', 'paid-member-subscriptions') . '</p>'));
+                    echo( wp_kses_post( apply_filters('pms_recover_password_form_password_changed_message', '<p>' . __('Your password was successfully changed!', 'paid-member-subscriptions') . '</p>')) );
 
                     if ( ! empty($atts['redirect_url']) ) {// "redirect_url" shortcode parameter is set
                         $redirect_url = pms_add_missing_http( $atts['redirect_url'] );
 
                         $redirect_message = apply_filters( 'pms_recover_pass_redirect_message', __('You will soon be redirected automatically.', 'paid-member-subscriptions') );
-                        echo '<p class="pms_redirect_message">'. $redirect_message . '</p>' . '<meta http-equiv="Refresh" content="3;url=' . $redirect_url . '" />';
+                        echo wp_kses_post('<p class="pms_redirect_message">'. $redirect_message . '</p>' ) . '<meta http-equiv="Refresh" content="3;url=' . esc_url( $redirect_url ) . '" />';
                     }
 
                 }
@@ -646,12 +655,12 @@ Class PMS_Shortcodes {
 
                     $user = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE user_activation_key = %s AND user_login = %s", $key, $username ) );
 
-                    if ( !empty( $user ) && ( $user->user_activation_key == $_GET['key'] ) )
+                    if ( !empty( $user ) && ( $user->user_activation_key === $_GET['key'] ) )
                         // Display the new password form
                         include 'views/shortcodes/view-shortcode-new-password-form.php';
                     else
                         // Confirmation link has expired or activation key invalid
-                        echo( apply_filters ('pms_recover_password_form_invalid_key_message', '<p>' .  __( 'The confirmation link has expired. Invalid key.', 'paid-member-subscriptions' ) . '</p>') );
+                        echo( wp_kses_post( apply_filters ('pms_recover_password_form_invalid_key_message', '<p>' .  __( 'The confirmation link has expired. Invalid key.', 'paid-member-subscriptions' ) . '</p>') ) );
                 }
 
             } else

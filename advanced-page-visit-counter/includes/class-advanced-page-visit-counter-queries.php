@@ -1145,5 +1145,36 @@ class Advanced_Visit_Counter_Queries
         
         wp_die();
     }
+    
+    public function apvc_get_chart_data_single()
+    {
+        global  $wpdb ;
+        $table = APVC_DATA_TABLE;
+        $article = $_REQUEST["article"];
+        $days = sanitize_text_field( $_REQUEST["days"] );
+        $labels = array();
+        $dCount = array();
+        $vCount = array();
+        $andQuery = "";
+        if ( $days == 0 || $days == "" ) {
+            $days = 20;
+        }
+        for ( $i = 0 ;  $i < 20 ;  $i++ ) {
+            $labels[] = date( "d-M", strtotime( '-' . $i . ' days' ) );
+            $sDate = date( "Y-m-d 0:0:0", strtotime( '-' . $i . ' days' ) );
+            $eDate = date( "Y-m-d 23:59:59", strtotime( '-' . $i . ' days' ) );
+            $dCount[] = $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE date >= '{$sDate}' AND date <= '{$eDate}' AND article_id='{$article}' '{$andQuery}' " );
+            $vCount[] = $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE date >= '{$sDate}' AND date <= '{$eDate}' AND article_id='{$article}' GROUP BY ip_address" );
+        }
+        echo  wp_json_encode( [
+            "message" => "Success",
+            "chart"   => json_encode( [
+            "labels"   => $labels,
+            "visitors" => $vCount,
+            "visits"   => $dCount,
+        ] ),
+        ] ) ;
+        wp_die();
+    }
 
 }

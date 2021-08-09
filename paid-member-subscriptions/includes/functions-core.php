@@ -51,13 +51,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 
         // Start query string
-        $query_string = "SELECT {$wpdb->users}.ID, {$wpdb->users}.user_login ";
+        $query_string = "SELECT DISTINCT {$wpdb->users}.ID, {$wpdb->users}.user_login ";
 
         // Query string sections
         $query_from   = "FROM {$wpdb->users} ";
         $query_join   = "LEFT JOIN {$wpdb->prefix}pms_member_subscriptions ON {$wpdb->users}.ID = {$wpdb->prefix}pms_member_subscriptions.user_id ";
 
-        $query_where  = "WHERE {$wpdb->prefix}pms_member_subscriptions.user_id is null ";
+        $query_where  = "WHERE {$wpdb->prefix}pms_member_subscriptions.user_id is null OR ( {$wpdb->prefix}pms_member_subscriptions.status = 'abandoned' AND ( SELECT COUNT( {$wpdb->prefix}pms_member_subscriptions.user_id ) FROM {$wpdb->prefix}pms_member_subscriptions WHERE {$wpdb->prefix}pms_member_subscriptions.user_id = {$wpdb->users}.ID AND {$wpdb->prefix}pms_member_subscriptions.status != 'abandoned' ) = 0 ) ";
 
         $query_limit = '';
         if( !empty( $args['limit'] ) )
@@ -123,8 +123,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         // If there is a success message in the request add it directly
         if( isset( $_REQUEST['pmsscscd'] ) && isset( $_REQUEST['pmsscsmsg'] ) ) {
 
-            $message_code = esc_attr( base64_decode( trim($_REQUEST['pmsscscd']) ) );
-            $message      = esc_attr( base64_decode( trim($_REQUEST['pmsscsmsg']) ) );
+            $message_code =  base64_decode( sanitize_text_field($_REQUEST['pmsscscd']) );
+            $message      =  base64_decode( sanitize_text_field($_REQUEST['pmsscsmsg']) );
 
             pms_success()->add( $message_code, $message );
 
@@ -132,17 +132,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         // and add messages
         } elseif( isset( $_REQUEST['pmsscscd'] ) && !isset( $_REQUEST['pmsscsmsg'] ) ) {
 
-            $message_code = esc_attr( base64_decode( trim($_REQUEST['pmsscscd']) ) );
+            $message_code = base64_decode( sanitize_text_field($_REQUEST['pmsscscd']) );
 
             if( !isset( $_REQUEST['pms_gateway_payment_action'] ) )
                 return;
 
-            $payment_action = esc_attr( base64_decode( trim( $_REQUEST['pms_gateway_payment_action'] ) ) );
+            $payment_action = base64_decode( sanitize_text_field( $_REQUEST['pms_gateway_payment_action'] ) );
 
             if( isset( $_REQUEST['pms_gateway_payment_id'] ) ) {
 
-                $payment_id = esc_attr( base64_decode( trim( $_REQUEST['pms_gateway_payment_id'] ) ) );
-                $payment    = pms_get_payment( $payment_id );
+                $payment_id = base64_decode( sanitize_text_field( $_REQUEST['pms_gateway_payment_id'] ) );
+                $payment    = pms_get_payment( absint( $payment_id ) );
 
                 // If status of the payment is completed add a success message
                 if( $payment->status == 'completed' ) {
@@ -195,7 +195,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             return;
 
         echo '<div class="pms-form-errors-wrapper">';
-            echo '<p>' . $form_error . '</p>';
+            echo '<p>' . wp_kses_post( $form_error ) . '</p>';
         echo '</div>';
 
     }
@@ -213,7 +213,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
      */
     function pms_add_hidden_submit_button_loading_placeholder_text() {
 
-        echo '<span id="pms-submit-button-loading-placeholder-text" style="display: none;">' . apply_filters( 'pms_submit_button_loading_placeholder_text', __( 'Processing. Please wait...', 'paid-member-subscriptions' ) ) . '</span>';
+        echo '<span id="pms-submit-button-loading-placeholder-text" style="display: none;">' . esc_html( apply_filters( 'pms_submit_button_loading_placeholder_text', __( 'Processing. Please wait...', 'paid-member-subscriptions' ) ) ) . '</span>';
 
     }
     add_action( 'pms_register_form_bottom', 'pms_add_hidden_submit_button_loading_placeholder_text' );
@@ -244,9 +244,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         }
 
         if( $return )
-            return $output;
+            return wp_kses_post( $output );
         else
-            echo $output;
+            echo wp_kses_post( $output );
 
     }
 
@@ -278,9 +278,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         $hasRun = true;
 
         if( $return )
-            return $output;
+            return wp_kses_post( $output );
         else
-            echo $output;
+            echo wp_kses_post( $output );
 
     }
 
@@ -929,7 +929,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
      */
     function pms_get_current_user_id() {
         if( isset( $_GET['edit_user'] ) && !empty( $_GET['edit_user'] ) && current_user_can('edit_users') )
-            return (int)$_GET['edit_user'];
+            return absint( $_GET['edit_user'] );
         else
             return get_current_user_id();
     }
@@ -1137,7 +1137,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         $message = __( 'It looks like this website is a clone of another one. In order to not generate errors like double payments, the Plugin Scheduled Payments functionality from <strong>Paid Member Subscriptions</strong> has been disabled.', 'paid-member-subscriptions' ) . '<br>';
         $message .= __( 'In order to restore it, you need to put the plugin into <strong>Test Mode</strong>.', 'paid-member-subscriptions' );
 
-        if( isset( $_REQUEST['page'] ) && $_REQUEST['page'] == 'pms-settings-page' ) {
+        if( isset( $_REQUEST['page'] ) && $_REQUEST['page'] === 'pms-settings-page' ) {
 
             new PMS_Add_General_Notices( 'pms_psp_disabled_on_pms_pages',
                 $message,
@@ -1164,7 +1164,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         $message = __( 'Your website doesn\'t seem to have SSL enabled. Some functionality will not work without a valid SSL certificate. Please enable SSL and ensure your server has a valid SSL certificate.', 'paid-member-subscriptions' );
 
-        if( isset( $_REQUEST['page'] ) && $_REQUEST['page'] == 'pms-settings-page' ) {
+        if( isset( $_REQUEST['page'] ) && $_REQUEST['page'] === 'pms-settings-page' ) {
 
             new PMS_Add_General_Notices( 'pms_force_website_https_on_pms_pages',
                 $message,
@@ -1231,7 +1231,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
               $message = sprintf( __( 'Your <strong>PayPal API credentials</strong> are missing. In order to make payments you will need to add your API credentials %1$s here %2$s.', 'paid-member-subscriptions' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'">', '</a>' );
 
-              if( isset( $_REQUEST['page'] ) && $_REQUEST['page'] == 'pms-settings-page' ) {
+              if( isset( $_REQUEST['page'] ) && $_REQUEST['page'] === 'pms-settings-page' ) {
 
                   new PMS_Add_General_Notices( 'pms_paypal_api_credentials',
                       '<p>' . $message . '</p>',

@@ -1,18 +1,18 @@
 === Membership & Content Restriction - Paid Member Subscriptions ===
 Contributors: cozmoslabs, iova.mihai, madalin.ungureanu, adispiac, sareiodata, reflectionmedia, raster02
 Donate link: https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/
-Tags: membership, paid membership, membership plan, membership level, member, members, subscription plans, user payments, paying users, paid users, restrict content, restrict access, content protection, content restriction, recurring payments, woocommerce
+Tags: membership, paid membership, subscription, restrict content, membership plan, membership level, member, members, subscription plans, user payments, paying users, paid users, restrict access, content protection, content restriction, recurring payments, woocommerce
 Requires at least: 3.1
-Tested up to: 5.7
-Stable tag: 2.3.6
+Tested up to: 5.8
+Stable tag: 2.4.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Accept user payments, create subscription plans and restrict content on your membership website. Integrates with WooCommerce.
+Free WordPress membership plugin that lets you create subscription plans, accept payments and restrict content on your membership site. WooCommerce integration.
 
 == Description ==
 
-**[Paid Member Subscriptions](https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/?utm_source=wp.org&utm_medium=pms-description-page&utm_campaign=PMSFree) is membership made easy.**
+**[Paid Member Subscriptions](https://www.cozmoslabs.com/wordpress-paid-member-subscriptions/?utm_source=wp.org&utm_medium=pms-description-page&utm_campaign=PMSFree) is a robust WordPress membership plugin that's a joy to setup and use.**
 
 It offers a complete membership solution, allowing you to accept member payments, manage members, create subscription plans and restrict access to premium content.
 
@@ -42,7 +42,7 @@ https://www.youtube.com/watch?v=6AEIvvCOZHM&start=0&autoplay=1
  Restrict Content offers you options to:
 
  * display content based on logged in status
- * show content to members only, based on their subscription plan(s)
+ * show content to members only, setup [private pages for subscribers](https://www.cozmoslabs.com/251415-wordpress-private-pages-for-subscribers/)
  * partial content display by using the [pms-restrict][/pms-restrict] shortcode
  * display another template for restricted posts
 
@@ -62,7 +62,7 @@ Subscription plans can offer free and/or paid memberships on your website.
 = Members Management =
 Have an overview of all your members and their subscription plans. Easily add/remove members or edit their subscription details.
 
-= Member Emails and Messages =
+= Membership Emails and Messages =
 Customize default member emails and setup member messages sent/displayed on certain user actions.
 Admin emails can also be customized.
 
@@ -85,8 +85,9 @@ Paid Member Subscriptions integrates beautifully with [WooCommerce](https://www.
 * GDPR
 * automatically log users in
 * hide admin bar
-* [prevent account sharing](https://www.cozmoslabs.com/141224-prevent-account-sharing-membership-site/)
+* [prevent account sharing](https://www.cozmoslabs.com/141224-prevent-account-sharing-membership-site/?utm_source=wp.org&utm_medium=pms-description-page&utm_campaign=PMSFree)
 * redirect default WordPress pages
+* setup a [WordPress members area](https://www.cozmoslabs.com/177365-wordpress-members-area/?utm_source=wp.org&utm_medium=pms-description-page&utm_campaign=PMSFree)
 * reCAPTCHA
 
 = Powerful Add-ons =
@@ -142,7 +143,7 @@ For more information please visit our [documentation page](https://www.cozmoslab
 
 = What type of membership sites can I create ? =
 
-Here are some examples of what you could sell from your membership site: premium tutorials, newsletter, magazine, database, online community, software, apps, videos, ebooks, audio files, discount codes, fan clubs, consulting, coaching etc.
+Here are [some examples](https://www.cozmoslabs.com/188635-membership-websites-examples/?utm_source=wp.org&utm_medium=pms-description-page&utm_campaign=PMSFree) of what you could sell from your membership site: premium tutorials, newsletter, magazine, database, online community, software, apps, videos, ebooks, audio files, discount codes, fan clubs, consulting, coaching etc.
 
 = Can my members pay using a credit card ? =
 
@@ -193,11 +194,65 @@ For more information please check out [Paid Member Subscriptions documentation](
 
 
 == Changelog ==
+= 2.4.7 =
+* Feature: Apply tax to payments added from back-end if necessary billing data is available
+* Feature: Add option for a Honeypot field that can be used as an alternative to reCaptcha or alongside it. The option is found under Settings -> Misc
+* Fix: Issue with gateway display and refresh when a single plan was showing in the form
+* Fix: Compatibility issue with TranslatePress so the current language is not added to the plugin supplied IPN URL for PayPal
+* Fix: Show members with only Abandoned subscriptions under Members -> Add New
+
+= 2.4.6 =
+* Fix: Issue with Subscriptions form not appearing after Profile Builder Email Confirmation
+* Fix: Price couldn't be updated for Subscription Plans in some cases
+* Fix: Login form will now redirect back to the same page if no redirect_url parameter is set
+* Fix: Cases where back-end strings were escaped incorrectly
+
+= 2.4.5 =
+* Fix issues with login form
+
+= 2.4.4 =
+* Even more security changes
+
+= 2.4.3 =
+* Security audit
+
+= 2.4.2 =
+* Fix: Security issue on Members and Payments pages
+
+= 2.4.1 =
+* Fix: Compatibility issue between reCaptcha and new Stripe add-on version
+* Fix: For the Uninstall option to remove PMS metadata tables and other data
+* Misc: Do not let admins change the subscription plan on the back-end page for recurring subscriptions
+* Misc: Payment Retry interval is now saved in the log message data instead of being determined when the message is displayed. Thanks to Ionut Radu
+
+= 2.4.0 =
+* Misc: Small compatibility update for the new Stripe add-on
+
+= 2.3.9 =
+* Fix: Display free trial and sign-up fee information on the Profile Builder forms
+* Misc: CSS improvements to forms
+* Misc: Add class to login form register/reset password link separator
+* Misc: Added class to register form submit button
+* Misc: Changes necessary for upcoming Stripe add-on update
+
+= 2.3.8 =
+* Fix: A js error appearing in the console on the Login page
+* Fix: An issue with the Activation and Renewal emails both being set in a case
+* Fix: An issue where the bulk actions from different pages were disappearing when Paid Member Subscriptions was active
+* Misc: Use default website user role when the plugin adds an user role after removing the Subscription Plan role and the user is left without any other roles
+* Misc: Improve HTML/CSS for the Login form
+
+= 2.3.7 =
+* Fix: A potential notice with the content restriction messages
+* Fix: Do not apply limit concurrent logins feature to administrators
+* Misc: Added confirmation box for bulk delete members
+* Misc: Added subscription id as parameter to Payment Retry count and interval filters
+
 = 2.3.6 =
-* Fix: Some issues with the IPN Url message displayed in the back-end.
-* Fix: An issue with the Payments Retry functionality.
-* Misc: Added possibility to export failed payments.
-* Misc: Hide extra dismiss button from reviews notice.
+* Fix: A notice happening on the Add New Member or Payment pages
+* Fix: An issue with the `Custom` filter from the Members page
+* Fix: A couple instances where the text domain we were using for our strings was wrong
+* Misc: Implemented WPML support for the custom GDPR checkbox text from settings
 
 = 2.3.5 =
 * Fix: A notice happening on the Add New Member or Payment pages

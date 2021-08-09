@@ -61,7 +61,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
     public function admin_scripts() {
 
         wp_enqueue_script( 'jquery-ui-datepicker' );
-        wp_enqueue_style('jquery-style', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+        wp_enqueue_style( 'jquery-style', PMS_PLUGIN_DIR_URL . 'assets/css/admin/jquery-ui.min.css', array(), PMS_VERSION );
 
         global $wp_scripts;
 
@@ -113,11 +113,19 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
         if( ! ( current_user_can( 'manage_options' ) || current_user_can( 'pms_edit_capability' ) ) )
             return;
 
+        // Register script to display confirmation message in case of bulk delete
+        wp_register_script( 'pms-members-bulk-actions-script', PMS_PLUGIN_DIR_URL . 'assets/js/admin/submenu-page-members-page.js', array('jquery'), PMS_VERSION );
+        $confirmation_message = array(
+            'message'   => __( 'Are you sure you want to delete these Subscriptions? \nThis action is irreversible.', 'paid-member-subscriptions' )
+        );
+        wp_localize_script( 'pms-members-bulk-actions-script', 'pms_confirmation_message', $confirmation_message );
+        wp_enqueue_script( 'pms-members-bulk-actions-script' );
+
         /**
          * Handle add new subscription
          *
          */
-        if( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'pms_add_subscription_nonce' ) ) {
+        if( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_POST['_wpnonce'] ), 'pms_add_subscription_nonce' ) ) {
 
             if( ! $this->validate_subscription_data( $_POST ) )
                 return;
@@ -142,7 +150,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
          * Handle edit subscription
          *
          */
-        if( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'pms_edit_subscription_nonce' ) ) {
+        if( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_POST['_wpnonce'] ), 'pms_edit_subscription_nonce' ) ) {
 
             if( ! $this->validate_subscription_data( $_POST ) )
                 return;
@@ -150,21 +158,26 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
             if( ! $this->validate_subscription_data_edit_subscription() )
                 return;
 
-            $member_subscription = pms_get_member_subscription( (int)$_GET['subscription_id'] );
+            if( !isset( $_GET['subscription_id'] ) )
+                return;
+
+            $member_subscription = pms_get_member_subscription( (int)sanitize_text_field( $_GET['subscription_id'] ) );
 
             /* when changing a users subscription plan from the back-end change the billing amount as well */
             if( apply_filters( 'pms_update_billing_amount_from_backend_on_sub_change', true ) ) {
-                if ($member_subscription->subscription_plan_id != $_POST['subscription_plan_id']) {
-                    $new_subscription_plan = pms_get_subscription_plan($_POST['subscription_plan_id']);
-                    if (isset($new_subscription_plan->price)) {
+                if ( isset( $_POST['subscription_plan_id'] ) && $member_subscription->subscription_plan_id != $_POST['subscription_plan_id'] ) {
+
+                    $new_subscription_plan = pms_get_subscription_plan( (int)sanitize_text_field( $_POST['subscription_plan_id'] ) );
+
+                    if ( isset( $new_subscription_plan->price ) )
                         $_POST['billing_amount'] = $new_subscription_plan->price;
-                    }
                 }
+
             }
 
             // When an admin adds a subscription from the back-end, he can't add the time part so set it to 23:59:59 (full access for the expiration day)
             if( isset( $_POST['expiration_date'] ) )
-                $_POST['expiration_date'] = $_POST['expiration_date'] . ' 23:59:59';
+                $_POST['expiration_date'] = sanitize_text_field( $_POST['expiration_date'] ) . ' 23:59:59';
 
             $updated = $member_subscription->update( $_POST );
 
@@ -182,12 +195,12 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
          * Handle delete subscription
          *
          */
-        if( ! empty( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'pms_delete_subscription_nonce' ) ) {
+        if( ! empty( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'pms_delete_subscription_nonce' ) ) {
 
             if( empty( $_GET['subscription_id'] ) )
                 return;
 
-            $member_subscription = pms_get_member_subscription( (int)$_GET['subscription_id'] );
+            $member_subscription = pms_get_member_subscription( (int)sanitize_text_field( $_GET['subscription_id'] ) );
 
             if( is_null( $member_subscription ) )
                 return;
@@ -214,14 +227,16 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
          * Handle bulk delete subscriptions
          *
          */
-        if( ! empty( $_GET['_wpnonce'] ) && wp_verify_nonce( $_GET['_wpnonce'], 'pms_bulk_delete_subscription_nonce' ) ) {
+        if( ! empty( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'pms_bulk_delete_subscription_nonce' ) ) {
 
-            if( isset( $_REQUEST[ 'member_subscriptions' ] ) && !empty( $_REQUEST[ 'member_subscriptions' ] ) ){
+            $action = ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] != '-1' ? sanitize_text_field( $_REQUEST['action'] ) : ( isset( $_REQUEST['action2'] ) ? sanitize_text_field( $_REQUEST['action2'] ) : '' ) );
+
+            if( isset( $_REQUEST[ 'member_subscriptions' ] ) && !empty( $_REQUEST[ 'member_subscriptions' ] ) && $action == 'delete' ){
 
                 $deleted_subscriptions_count = 0;
-                $subscription_ids            = $_REQUEST[ 'member_subscriptions' ];
+                $subscription_ids            = array_map( 'sanitize_text_field', $_REQUEST[ 'member_subscriptions' ] );
 
-                foreach( $subscription_ids as $id){
+                foreach( $subscription_ids as $id ){
 
                     $member_subscription = pms_get_member_subscription( (int)$id );
 
@@ -235,7 +250,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
                 }
 
                 if( $deleted_subscriptions_count != 0 )
-                    $this->add_admin_notice( sprintf( __( '%d Member Subscriptions successfully deleted.', 'paid-member-subscriptions' ), $deleted_subscriptions_count ), 'updated' );
+                    $this->add_admin_notice( sprintf( _n( '%d Member Subscription successfully deleted.', '%d Member Subscriptions successfully deleted.', $deleted_subscriptions_count, 'paid-member-subscriptions' ), $deleted_subscriptions_count ), 'updated' );
 
             }
 
@@ -246,7 +261,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
          * Bulk add subscription plan to users
          *
          */
-        if( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'pms_add_new_members_bulk_nonce' ) ) {
+        if( ! empty( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_POST['_wpnonce'] ), 'pms_add_new_members_bulk_nonce' ) ) {
 
             if( ! $this->validate_subscription_data_bulk_add( $this->request_data ) )
                 return;
@@ -254,7 +269,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
             if( !empty( $this->request_data['subscription_plan_id'] ) && trim( $this->request_data['subscription_plan_id'] ) != -1 && !empty( $this->request_data['users'] ) ) {
 
                 // Get subscription plan object
-                $subscription_plan = pms_get_subscription_plan( trim( $this->request_data['subscription_plan_id'] ) );
+                $subscription_plan = pms_get_subscription_plan( absint( $this->request_data['subscription_plan_id'] ) );
 
                 $added_members_count = 0;
 
@@ -272,15 +287,20 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
                         'start_date'           => date( 'Y-m-d H:i:s' ),
                         'expiration_date'      => $subscription_plan->get_expiration_date(),
                         'expiration_date'      => !isset( $this->request_data['subscription_status'] ) || ( isset( $this->request_data['subscription_status'] ) && $this->request_data['subscription_status'] == 'active' ) ? $subscription_plan->get_expiration_date() : date( 'Y-m-d H:i:s' ),
-                        'status'               => !isset( $this->request_data['subscription_status'] ) ? 'active' : $this->request_data['subscription_status'],
+                        'status'               => !isset( $this->request_data['subscription_status'] ) ? 'active' : sanitize_text_field( $this->request_data['subscription_status'] ),
                     );
 
                     if( isset( $this->request_data[ 'subscription_expiration_date' ] ) && !empty( $this->request_data[ 'subscription_expiration_date' ] ) ){
-                        $data[ 'expiration_date' ] = date( 'Y-m-d 23:59:59', strtotime( $this->request_data[ 'subscription_expiration_date' ] ) );
+
+                        $data[ 'expiration_date' ] = date( 'Y-m-d 23:59:59', strtotime( sanitize_text_field( $this->request_data[ 'subscription_expiration_date' ] ) ) );
+
                         if( isset( $subscription_plan ) && isset( $subscription_plan->duration ) && isset( $subscription_plan->duration_unit ) ){
+
                             $time = '-' . $subscription_plan->duration . ' ' . $subscription_plan->duration_unit;
                             $data[ 'start_date' ] = date( 'Y-m-d H:i:s', strtotime( $data[ 'expiration_date' ] . $time ) );
+
                         }
+
                     }
 
                     $member_subscription = new PMS_Member_Subscription();
@@ -322,10 +342,8 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
 
         else {
 
-            $user_id = sanitize_text_field( $request_data['user_id'] );
-
             // Check to see if the username exists
-            $user = get_user_by( 'id', $user_id );
+            $user = get_user_by( 'id', absint( $request_data['user_id'] ) );
 
             if( !$user )
                 $this->add_admin_notice( __( 'It seems this user does not exist.', 'paid-member-subscriptions' ), 'error' );
@@ -342,11 +360,13 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
         /**
          * Check if user is already subscribed to a plan from this tier
          */
-        if( wp_verify_nonce( $_POST['_wpnonce'], 'pms_add_subscription_nonce' ) ){
-            $subscription = pms_get_current_subscription_from_tier( $request_data['user_id'], $request_data['subscription_plan_id'] );
+        if( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_POST['_wpnonce'] ), 'pms_add_subscription_nonce' ) && isset( $request_data['user_id'] ) && isset( $request_data['subscription_plan_id'] ) ){
+
+            $subscription = pms_get_current_subscription_from_tier( absint( $request_data['user_id'] ), absint( $request_data['subscription_plan_id'] ) );
 
             if( !empty( $subscription ) )
                 $this->add_admin_notice( __( 'This user is already subscribed to the selected plan or another plan from this tier. Select another one.', 'paid-member-subscriptions' ), 'error' );
+
         }
 
         /**
@@ -410,13 +430,13 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
                 $this->add_admin_notice( __( 'Something went wrong. Could not complete your request.', 'paid-member-subscriptions' ), 'error' );
 
             // Check to see if the subscription's attached user_id is the same with the provided user_id
-            elseif( $member_subscription->user_id != (int)$_POST['user_id'] )
+            elseif( isset( $_POST['user_id'] ) && $member_subscription->user_id != (int)$_POST['user_id'] )
                 $this->add_admin_notice( __( 'Something went wrong. Could not complete your request.', 'paid-member-subscriptions' ), 'error' );
 
             // Make sure that the user doesn't have another active subscription from the same tier
             elseif ( isset( $_POST['status'] ) && $_POST['status'] != 'abandoned' ){
 
-                $existing_subscription = pms_get_current_subscription_from_tier( (int)$_POST['user_id'], $member_subscription->subscription_plan_id );
+                $existing_subscription = pms_get_current_subscription_from_tier( (int)sanitize_text_field( $_POST['user_id'] ), $member_subscription->subscription_plan_id );
 
                 if( !empty( $existing_subscription ) && $existing_subscription->status != 'abandoned' && $existing_subscription->id != $member_subscription->id )
                     $this->add_admin_notice( __( 'The user already has a non-abandoned subscription with this plan.', 'paid-member-subscriptions' ), 'error'  );
@@ -511,8 +531,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
 
         ob_clean();
 
-        echo apply_filters( 'pms_submenu_page_members_output', $subpage_content );
-
+        echo apply_filters( 'pms_submenu_page_members_output', $subpage_content ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
 
 
@@ -522,13 +541,16 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
      */
     public function ajax_populate_expiration_date() {
 
-        $subscription_plan_id = (int)trim( $_POST['subscription_plan_id'] );
+        if( !isset( $_POST['subscription_plan_id'] ) )
+            die();
+
+        $subscription_plan_id = (int)sanitize_text_field( $_POST['subscription_plan_id'] );
 
         if( ! empty( $subscription_plan_id ) ) {
 
             $subscription_plan = pms_get_subscription_plan( $subscription_plan_id );
 
-            echo pms_sanitize_date( $subscription_plan->get_expiration_date() );
+            echo esc_html( pms_sanitize_date( $subscription_plan->get_expiration_date() ) );
 
         } else
             echo '';
@@ -581,7 +603,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
         $user = get_user_by( 'login', sanitize_text_field( $_POST['username'] ) );
 
         if( !empty( $user->ID ) ){
-            echo $user->ID;
+            echo esc_html( $user->ID );
             wp_die();
         }
 
@@ -627,11 +649,11 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
         <div class="pms-subscription-logs__row">
 
             <div class="pms-subscription-logs__date">
-                <?php echo ucfirst( date_i18n( 'F d, Y H:i:s', strtotime( $log['date'] ) + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) ) ?>
+                <?php echo esc_html( ucfirst( date_i18n( 'F d, Y H:i:s', strtotime( $log['date'] ) + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) ) ) ?>
             </div>
 
             <div class="pms-subscription-logs__message">
-                <?php echo $this->get_log_message( $log ); ?>
+                <?php echo wp_kses_post( $this->get_log_message( $log ) ); ?>
             </div>
 
         </div>
@@ -687,7 +709,13 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
                 $message = __( 'Tried to renew subscription automatically but failed. Subscription status set to <strong>expired</strong>.', 'paid-member-subscriptions' );
                 break;
             case 'subscription_renewal_failed_retry_enabled':
-                $message = sprintf( __( 'Tried to renew subscription automatically but failed. Subscription status set to <strong>expired</strong>. Payment will be retried in %s days.', 'paid-member-subscriptions' ), apply_filters( 'pms_retry_payment_interval', 3 ) );
+	            if( !empty( $log['data']['days'] ) ) {
+		            $message = sprintf( __( 'Tried to renew subscription automatically but failed. Subscription status set to <strong>expired</strong>. Payment will be retried in %s days.', 'paid-member-subscriptions' ), $log['data']['days'] );
+	            } else {
+		            $subscription_id = isset( $_GET['subscription_id'] ) ? (int)$_GET['subscription_id'] : 0;
+
+		            $message = sprintf( __( 'Tried to renew subscription automatically but failed. Subscription status set to <strong>expired</strong>. Payment will be retried in %s days.', 'paid-member-subscriptions' ), apply_filters( 'pms_retry_payment_interval', 3, $subscription_id ) );
+	            }
                 break;
             case 'subscription_renewal_failed_retry_disabled':
                 $message = __( 'Subscription could not be renewed. Payment retry was disabled.', 'paid-member-subscriptions' );
@@ -798,7 +826,7 @@ Class PMS_Submenu_Page_Members extends PMS_Submenu_Page {
             if( !empty( $subscription_logs ) ){
                 ob_start();
 
-                foreach( array_reverse( $subscription_logs ) as $log ) echo $this->get_logs_row( $log );
+                foreach( array_reverse( $subscription_logs ) as $log ) echo wp_kses_post( $this->get_logs_row( $log ) );
 
                 $output = ob_get_contents();
                 ob_end_clean();

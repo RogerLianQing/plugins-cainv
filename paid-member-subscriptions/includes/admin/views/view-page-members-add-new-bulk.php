@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 <div class="wrap">
 
     <h1>
-        <?php echo __( 'Bulk Add Subscription Plans to Users', 'paid-member-subscriptions' ); ?>
+        <?php echo esc_html__( 'Bulk Add Subscription Plans to Users', 'paid-member-subscriptions' ); ?>
     </h1>
 
     <form id="pms-form-add-new-member-bulk" method="POST" action="">

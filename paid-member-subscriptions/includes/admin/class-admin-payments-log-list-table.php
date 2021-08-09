@@ -94,6 +94,9 @@ Class PMS_Payments_Log_List_Table extends WP_List_Table {
      */
     public function get_table_data() {
 
+        if( !isset( $_REQUEST['payment_id'] ) )
+            return array();
+
         $this->payment_id = (int)sanitize_text_field( $_REQUEST['payment_id'] );
 
         $payment = pms_get_payment( $this->payment_id );
@@ -180,7 +183,7 @@ Class PMS_Payments_Log_List_Table extends WP_List_Table {
      *
      */
     public function no_items() {
-        _e( 'No logs found for this payment.', 'paid-member-subscriptions' );
+        esc_html_e( 'No logs found for this payment.', 'paid-member-subscriptions' );
     }
 
     /**
@@ -300,32 +303,32 @@ Class PMS_Payments_Log_List_Table extends WP_List_Table {
 
             <?php if ( !empty( $header ) ) : ?>
                 <div class="pms-modal__fullrow">
-                    <?php echo $header; ?>
+                    <?php echo esc_html( $header ); ?>
                 </div>
             <?php elseif ( !empty( $data['message'] ) ) : ?>
                 <div class="pms-modal__fullrow">
                     <h2>Payment Gateway Message</h2>
-                    <?php echo ( !empty( $data['message'] ) ? $data['message'] : '' ) ?>
+                    <?php echo ( !empty( $data['message'] ) ? esc_html( $data['message'] ) : '' ) ?>
                 </div>
             <?php endif; ?>
 
             <div class="pms-modal__halfrow">
                 <div class="pms-modal__half">
-                    <h2><?php echo $heading_left; ?></h2>
+                    <h2><?php echo esc_html( $heading_left ); ?></h2>
 
                     <ul>
                         <?php foreach( $data_left as $key => $value ) : ?>
-                            <li><strong><?php echo $key; ?></strong> => <?php echo $value ?></li>
+                            <li><strong><?php echo esc_html( $key ); ?></strong> => <?php echo esc_html( $value ) ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
 
                 <div class="pms-modal__half">
-                    <h2><?php echo $heading_right; ?></h2>
+                    <h2><?php echo esc_html( $heading_right ); ?></h2>
 
                     <ul>
                         <?php foreach( $data_right as $key => $value ) : ?>
-                            <li><strong><?php echo $key; ?></strong> => <?php echo $value ?></li>
+                            <li><strong><?php echo esc_html( $key ); ?></strong> => <?php echo esc_html( $value ); ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -358,25 +361,25 @@ Class PMS_Payments_Log_List_Table extends WP_List_Table {
 
             <?php if ( !empty( $header ) ) : ?>
                 <div class="pms-modal__fullrow">
-                    <?php echo $header; ?>
+                    <?php echo esc_html( $header ); ?>
                 </div>
             <?php elseif ( !empty( $data['message'] ) ) : ?>
                 <div class="pms-modal__fullrow">
                     <h2>Payment Gateway Message</h2>
 
-                    <?php echo ( !empty( $data['message'] ) ? $data['message'] : '' ) ?>
+                    <?php echo ( !empty( $data['message'] ) ? esc_html( $data['message'] ) : '' ); ?>
                 </div>
             <?php endif; ?>
 
             <div class="pms-modal__fullrow">
                 <?php if ( !empty( $data['desc'] ) ) : ?>
-                    <h2><?php echo ucwords( $data['desc'] ); ?></h2>
+                    <h2><?php echo esc_html( ucwords( $data['desc'] ) ); ?></h2>
                 <?php endif; ?>
 
                 <ul class="pms-modal__wrapped-list">
                     <?php foreach( $data['data'] as $key => $value ) : ?>
                         <li><span>
-                            <strong><?php echo $key; ?></strong> => <?php echo $value ?>
+                            <strong><?php echo esc_html( $key ); ?></strong> => <?php echo esc_html( $value ); ?>
                         </span></li>
                     <?php endforeach; ?>
                 </ul>

@@ -66,6 +66,9 @@ Class PMS_Members_List_Table extends WP_List_Table {
 
         add_filter( 'manage_' . $screen->id . ' _columns' , array( $this , 'manage_columns' ) );
 
+        // Register custom bulk actions
+        add_filter( 'bulk_actions-' . $screen->id, array( $this, 'register_bulk_actions' ) );
+
         // Set items per page
         $items_per_page = get_user_meta( get_current_user_id(), 'pms_members_per_page', true );
 
@@ -88,6 +91,22 @@ Class PMS_Members_List_Table extends WP_List_Table {
     }
 
     /*
+     * Register custom bulk actions
+     *
+     * @param array $actions actions.
+     *
+     * @return array
+     *
+     */
+    function register_bulk_actions( $actions ) {
+
+        if( !empty( $_GET['page'] == 'pms-members-page' ) && empty( $_GET['subpage'] ) )
+            $actions['delete'] = esc_html__( 'Delete Subscriptions', 'paid-member-subscriptions');
+
+        return $actions;
+    }
+
+    /*
      * Overwrites the parent class.
      * Define the columns for the members
      *
@@ -98,14 +117,14 @@ Class PMS_Members_List_Table extends WP_List_Table {
 
         $columns = array(
             'cb'                => '<input type="checkbox" />',
-            'user_id'           => __( 'User ID', 'paid-member-subscriptions' ),
-            'username'          => __( 'Username', 'paid-member-subscriptions' ),
-            'email'             => __( 'E-mail', 'paid-member-subscriptions' ),
-            'subscriptions'     => __( 'Subscribed to', 'paid-member-subscriptions' )
+            'user_id'           => esc_html__( 'User ID', 'paid-member-subscriptions' ),
+            'username'          => esc_html__( 'Username', 'paid-member-subscriptions' ),
+            'email'             => esc_html__( 'E-mail', 'paid-member-subscriptions' ),
+            'subscriptions'     => esc_html__( 'Subscribed to', 'paid-member-subscriptions' )
         );
 
         if( isset( $_GET['pms-view'] ) && $_GET['pms-view'] == 'abandoned' )
-            $columns['subscriptions'] = __( 'Abandoned subscriptions', 'paid-member-subscriptions' );
+            $columns['subscriptions'] = esc_html__( 'Abandoned subscriptions', 'paid-member-subscriptions' );
 
         return apply_filters( 'pms_members_list_table_columns', $columns );
 
@@ -124,8 +143,8 @@ Class PMS_Members_List_Table extends WP_List_Table {
             $subscription = $item[ 'subscriptions' ][ 0 ];
             if( isset( $subscription->id ) ){
                 ?>
-                <label class="screen-reader-text" for="cb-select-<?php echo $subscription->id; ?>"></label>
-                <input type="checkbox" name="member_subscriptions[]" id="cb-select-<?php echo $subscription->id; ?>" value="<?php echo esc_attr( $subscription->id ); ?>" />
+                <label class="screen-reader-text" for="cb-select-<?php echo esc_attr( $subscription->id ); ?>"></label>
+                <input type="checkbox" name="member_subscriptions[]" id="cb-select-<?php echo esc_attr( $subscription->id ); ?>" value="<?php echo esc_attr( $subscription->id ); ?>" />
                 <?php
             }
         }
@@ -191,6 +210,9 @@ Class PMS_Members_List_Table extends WP_List_Table {
 
         echo '<div class="tablenav ' . esc_attr( $which ) . '">';
 
+            $this->bulk_actions( $which );
+            wp_nonce_field( 'pms_bulk_delete_subscription_nonce' );
+
             $this->extra_tablenav( $which );
             if ( $which == 'bottom' )
                 $this->pagination( $which );
@@ -209,22 +231,6 @@ Class PMS_Members_List_Table extends WP_List_Table {
      *
      */
     public function extra_tablenav( $which ) {
-
-        if( $which == 'top' || $which == 'bottom' ){
-
-            /*
-             * Add Bulk Actions dropdown
-             *
-             */
-            echo '<div class="alignleft actions bulkactions">';
-
-                echo '<select name="pms-bulk-actions">';
-                    echo '<option value="">' . __( 'Bulk Actions', 'paid-member-subscriptions' ) . '</option>';
-                    echo '<option value="delete">' . __( 'Delete Subscription', 'paid-member-subscriptions' ) . '</option>';
-                echo '</select>';
-                echo '<input class="button button-secondary" type="submit" value="' . __( 'Apply', 'paid-member-subscriptions' ) . '" />';
-            echo '</div>';
-        }
 
         if( $which == 'bottom' || ( isset( $_GET['pms-view'] ) && $_GET['pms-view'] == 'abandoned' ) )
             return;
@@ -258,7 +264,7 @@ Class PMS_Members_List_Table extends WP_List_Table {
 
         // Search query
         if ( ! empty($_REQUEST['s']) ) {
-            $args['search'] = $_REQUEST['s'];
+            $args['search'] = sanitize_text_field( $_REQUEST['s'] );
         }
 
         // Order by query
@@ -270,7 +276,12 @@ Class PMS_Members_List_Table extends WP_List_Table {
             if( $_REQUEST['orderby'] == 'username' )
                 $args['orderby'] = 'user_login';
 
-            $args['order']   = sanitize_text_field( $_REQUEST['order'] );
+            $order = strtolower( sanitize_text_field( $_REQUEST['order'] ) );
+
+            if( $order == 'asc' )
+                $args['order'] = 'ASC';
+            elseif( $order == 'desc' )
+                $args['order'] = 'DESC';
 
         }
 
@@ -280,7 +291,7 @@ Class PMS_Members_List_Table extends WP_List_Table {
         }
 
         if( !empty( $_GET[ 'pms-filter-payment-gateway' ] ) ){
-            $args[ 'payment_gateway' ] = $_GET[ 'pms-filter-payment-gateway' ];
+            $args[ 'payment_gateway' ] = sanitize_text_field( $_GET[ 'pms-filter-payment-gateway' ] );
         }
 
         if( !empty( $_GET[ 'pms-filter-start-date' ] ) ){
@@ -302,10 +313,10 @@ Class PMS_Members_List_Table extends WP_List_Table {
             }
             else{
                 if( !empty( $_GET[ 'pms-datepicker-start-date-beginning' ] ) ){
-                    $args[ 'start_date_beginning' ] = $_GET[ 'pms-datepicker-start-date-beginning' ];
+                    $args[ 'start_date_beginning' ] = sanitize_text_field( $_GET[ 'pms-datepicker-start-date-beginning' ] );
                 }
                 if( !empty( $_GET[ 'pms-datepicker-start-date-end' ] ) ){
-                    $args[ 'start_date_end' ] = $_GET[ 'pms-datepicker-start-date-end' ];
+                    $args[ 'start_date_end' ] = sanitize_text_field( $_GET[ 'pms-datepicker-start-date-end' ] );
                 }
             }
         }
@@ -333,10 +344,10 @@ Class PMS_Members_List_Table extends WP_List_Table {
             }
             else{
                 if( !empty( $_GET[ 'pms-datepicker-expiration-date-beginning' ] ) ){
-                    $args[ 'expiration_date_beginning' ] = $_GET[ 'pms-datepicker-expiration-date-beginning' ];
+                    $args[ 'expiration_date_beginning' ] = sanitize_text_field( $_GET[ 'pms-datepicker-expiration-date-beginning' ] );
                 }
                 if( !empty( $_GET[ 'pms-datepicker-expiration-date-end' ] ) ){
-                    $args[ 'expiration_date_end' ] = $_GET[ 'pms-datepicker-expiration-date-end' ];
+                    $args[ 'expiration_date_end' ] = sanitize_text_field( $_GET[ 'pms-datepicker-expiration-date-end' ] );
                 }
             }
         }
@@ -443,7 +454,7 @@ Class PMS_Members_List_Table extends WP_List_Table {
         $actions = array();
 
         // Add an edit user action for each member
-        $actions['edit'] = '<a href="' . add_query_arg( array( 'subpage' => 'edit_member', 'member_id' => $item['user_id'] ) ) . '">' . __( 'Edit Member', 'paid-member-subscriptions' ) . '</a>';
+        $actions['edit'] = '<a href="' . add_query_arg( array( 'subpage' => 'edit_member', 'member_id' => $item['user_id'] ) ) . '">' . esc_html__( 'Edit Member', 'paid-member-subscriptions' ) . '</a>';
 
         // Return value saved for username and also the row actions
         return $item['username'] . $this->row_actions( apply_filters( 'pms_members_list_username_actions', $actions, $item ) );
@@ -485,22 +496,22 @@ Class PMS_Members_List_Table extends WP_List_Table {
                 $output .= '<a href="' . add_query_arg( array( 'subpage' => 'edit_subscription', 'subscription_id' => $member_subscription->id ) ) . '">';
                     $output .= apply_filters( 'pms_list_table_' . $this->_args['plural'] . '_show_status_dot', '<span class="pms-status-dot ' . esc_attr( $member_subscription->status ) . '"></span>' );
 
-                    $output .= ( !empty( $subscription_plan->id ) ? $subscription_plan->name : sprintf( __( 'Subscription Plan Not Found - ID: %s', 'paid-member-subscriptions' ), $member_subscription->subscription_plan_id ) );
+                    $output .= ( !empty( $subscription_plan->id ) ? $subscription_plan->name : sprintf( esc_html__( 'Subscription Plan Not Found - ID: %s', 'paid-member-subscriptions' ), $member_subscription->subscription_plan_id ) );
                 $output .= '</a>';
 
                 $output .= '<div class="pms-bubble">';
 
                     $statuses = pms_get_member_subscription_statuses();
 
-                    $output .= '<div><span class="alignleft">' . __( 'Start date', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . date( get_option( 'date_format' ), strtotime( pms_sanitize_date( $member_subscription->start_date ) ) ) . '</span></div>';
-                    $output .= '<div><span class="alignleft">' . __( 'Expiration date', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . ( ! empty( $member_subscription->expiration_date ) ? date( get_option( 'date_format' ), strtotime( pms_sanitize_date( $member_subscription->expiration_date ) ) ) : __( 'Unlimited', 'paid-member-subscriptions' ) ) . '</span></div>';
-                    $output .= '<div><span class="alignleft">' . __( 'Status', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . ( isset( $statuses[ $member_subscription->status ] ) ? $statuses[ $member_subscription->status ] : '' ) . '</span></div>';
+                    $output .= '<div><span class="alignleft">' . esc_html__( 'Start date', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . date( get_option( 'date_format' ), strtotime( pms_sanitize_date( $member_subscription->start_date ) ) ) . '</span></div>';
+                    $output .= '<div><span class="alignleft">' . esc_html__( 'Expiration date', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . ( ! empty( $member_subscription->expiration_date ) ? date( get_option( 'date_format' ), strtotime( pms_sanitize_date( $member_subscription->expiration_date ) ) ) : esc_html__( 'Unlimited', 'paid-member-subscriptions' ) ) . '</span></div>';
+                    $output .= '<div><span class="alignleft">' . esc_html__( 'Status', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . ( isset( $statuses[ $member_subscription->status ] ) ? $statuses[ $member_subscription->status ] : '' ) . '</span></div>';
 
                     if( pms_payment_gateways_support( pms_get_active_payment_gateways(), 'recurring_payments' ) )
-                        $output .= '<div><span class="alignleft">' . __( 'Auto-renewing', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . ( $member_subscription->is_auto_renewing() ? __( 'Yes', 'paid-member-subscriptions' ) : __( 'No', 'paid-member-subscriptions' ) ) . '</span></div>';
+                        $output .= '<div><span class="alignleft">' . esc_html__( 'Auto-renewing', 'paid-member-subscriptions' ) . '</span><span class="alignright">' . ( $member_subscription->is_auto_renewing() ? esc_html__( 'Yes', 'paid-member-subscriptions' ) : esc_html__( 'No', 'paid-member-subscriptions' ) ) . '</span></div>';
 
                     if( pms_payment_gateways_support( pms_get_active_payment_gateways(), 'subscription_free_trial' ) && !empty( $member_subscription->trial_end ) && strtotime( $member_subscription->trial_end ) > time() )
-                        $output .= '<div><span class="alignleft">' . __( 'Active Trial', 'paid-member-subscriptions' ) . '</span> <span class="alignright">'. __( 'Yes', 'paid-member-subscriptions' ) .'</span></div>';
+                        $output .= '<div><span class="alignleft">' . esc_html__( 'Active Trial', 'paid-member-subscriptions' ) . '</span> <span class="alignright">'. esc_html__( 'Yes', 'paid-member-subscriptions' ) .'</span></div>';
 
                 $output .= '</div>';
 
@@ -519,8 +530,8 @@ Class PMS_Members_List_Table extends WP_List_Table {
             if( $other_count > 0 )
                 $sign = '+';
 
-            $output .= '<a href="' . add_query_arg( array( 'subpage' => 'edit_member', 'member_id' => $user_id ) ) . '" title="'.__( 'View Abandoned Subscriptions', 'paid-member-subscriptions' ).'" class="pms-abandon-count">';
-                $output .= sprintf( _n( '%s %s abandoned subscription', '%s %s abandoned subscriptions', $abandon_count, 'paid-member-subscriptions' ), $sign, $abandon_count );
+            $output .= '<a href="' . add_query_arg( array( 'subpage' => 'edit_member', 'member_id' => $user_id ) ) . '" title="'.esc_html__( 'View Abandoned Subscriptions', 'paid-member-subscriptions' ).'" class="pms-abandon-count">';
+                $output .= sprintf( _n( '%1$s %2$s abandoned subscription', '%1$s %2$s abandoned subscriptions', $abandon_count, 'paid-member-subscriptions' ), $sign, $abandon_count );
             $output .= '</a>';
         }
 
@@ -535,7 +546,7 @@ Class PMS_Members_List_Table extends WP_List_Table {
      */
     public function no_items() {
 
-        echo __( 'No members found', 'paid-member-subscriptions' );
+        echo esc_html__( 'No members found', 'paid-member-subscriptions' );
 
     }
 

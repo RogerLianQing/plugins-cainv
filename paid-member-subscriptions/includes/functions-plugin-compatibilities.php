@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
          $user_data = array();
          $user_data['ID'] = $user_id;
          if (!empty($_POST['password'])) {
-             $user_data['user_pass'] = $_POST['password'];
+             $user_data['user_pass'] = $_POST['password']; //phpcs:ignore  WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
              add_filter('send_password_change_email', '__return_false');
          }
          $new_user_id = wp_update_user($user_data);
@@ -41,11 +41,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
              wp_set_auth_cookie($user_id);
              wp_new_user_notification($user_id, null, 'both');
 
-             if (isset($_POST['level']) && $_POST['level'] && isset($_POST['token']) && $_POST['token'] && isset($_POST['gateway']) && $_POST['gateway']) {
+             if (isset($_POST['level']) && $_POST['level'] && isset($_POST['token']) && $_POST['token'] && isset($_POST['gateway']) && $_POST['gateway']) {//phpcs:ignore  WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
                  return;
              }
 
-             if (isset($_REQUEST['level']) && $_REQUEST['level'] && isset($_REQUEST['review']) && $_REQUEST['review'] && isset($_REQUEST['token']) && $_REQUEST['token'] && isset($_REQUEST['PayerID']) && $_REQUEST['PayerID']) {
+             if (isset($_REQUEST['level']) && $_REQUEST['level'] && isset($_REQUEST['review']) && $_REQUEST['review'] && isset($_REQUEST['token']) && $_REQUEST['token'] && isset($_REQUEST['PayerID']) && $_REQUEST['PayerID']) { //phpcs:ignore  WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
                  return;
              }
 
@@ -53,18 +53,23 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                  return;
              } else {
                  if (!empty($_REQUEST['redirect_to'])) {
-                     wp_redirect($_REQUEST['redirect_to']);
+                     wp_redirect(wp_sanitize_redirect( $_REQUEST['redirect_to'] ));
                  } else {
                      $theme_options_data = get_theme_mods();
-                     if (!empty($_REQUEST['option']) && $_REQUEST['option'] == 'moopenid') {
+                     if (!empty($_REQUEST['option']) && $_REQUEST['option'] === 'moopenid') {
                          if (isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
                              $http = "https://";
                          } else {
                              $http = "http://";
                          }
-                         $redirect_url = urldecode(html_entity_decode(esc_url($http . $_SERVER["HTTP_HOST"] . str_replace('?option=moopenid', '', $_SERVER['REQUEST_URI']))));
-                         if (html_entity_decode(esc_url(remove_query_arg('ss_message', $redirect_url))) == wp_login_url() || strpos($_SERVER['REQUEST_URI'], 'wp-login.php') !== false || strpos($_SERVER['REQUEST_URI'], 'wp-admin') !== false) {
-                             $redirect_url = site_url() . '/';
+
+                         $redirect_url = site_url() . '/';
+                         if( isset( $_SERVER["HTTP_HOST"] ) && isset( $_SERVER['REQUEST_URI'] ) ) {
+                             $redirect_url = urldecode( html_entity_decode( esc_url( $http . sanitize_text_field( $_SERVER["HTTP_HOST"] ) . str_replace('?option=moopenid', '', sanitize_text_field( $_SERVER['REQUEST_URI'] ) ) ) ) );
+
+                             if ( html_entity_decode( esc_url( remove_query_arg('message', $redirect_url) ) ) == wp_login_url() || strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-login.php') !== false || strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-admin') !== false) {
+                                 $redirect_url = site_url() . '/';
+                             }
                          }
 
                          wp_redirect($redirect_url);
@@ -94,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         $message = sprintf( __( 'If you have issues with the styling of the submit button on <strong>Paid Member Subscriptions</strong> forms, <a href="%s" target="_blank">click here</a> for more info.', 'paid-member-subscriptions' ), 'https://www.cozmoslabs.com/docs/paid-member-subscriptions/developer-knowledge-base/style-submit-buttons-when-using-avada-theme/' );
         $message .= sprintf( __( ' %1$sDismiss%2$s', 'paid-member-subscriptions'), "<a href='" . esc_url( add_query_arg('pms_avada_styling_compatibility_dismiss_notification', '0') ) . "'>", "</a>" );
-        
+
         new PMS_Add_General_Notices(
             'pms_avada_styling_compatibility',
             $message,

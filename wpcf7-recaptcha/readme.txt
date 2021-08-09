@@ -2,8 +2,8 @@
 Contributors: iqcomputing
 Tags: contact-form-7, contact-form-7-recaptcha, recaptcha, spam
 Requires at least: 4.9
-Tested up to: 5.6
-Stable tag: 1.3.3
+Tested up to: 5.8
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,13 +60,13 @@ Should the above be correct, at this point it's time to open a support thread fo
 
 == Changelog ==
 
+= 1.3.5 (2020-06-14) =
+* Updated support for WordPress 5.8
+
+= 1.3.4 (2020-06-14) =
+* Updated the controls JS file to be encapsulated.
+* Added the reCaptcha error messages to the Contact Form 7 "Messages" screen so they may be changed.
+
 = 1.3.3 (2020-03-01) =
 * Updated reCaptcha HTML to be wrapped in span tag as Contact Form 7 expects.
 * Updated javascript to reflect HTML change above.
-
-= 1.3.2 (2020-02-25) =
-* Updated the remove action hook priority for wpcf7_recaptcha_enqueue_scripts from 10 to 20
-
-= 1.3.0 (2020-12-21) =
-* Removed `iqfix_wpcf7_recaptcha_callback_script()` function
-* Enqueued reCaptcha controls based on whether google reCaptcha is enqueued.

@@ -131,14 +131,157 @@
     };
 	var current_page = jQuery("#current_page").val();
 
+	jQuery(document).on("click","#apvc_update_db",function( e ){
+		e.preventDefault();
+		jQuery.ajax({
+			type : "post",
+			url : apvc_ajax.ajax_url,
+			data : { action: "apvc_upgrade_database"},
+			success: function(response) {
+				alert("Database upgraded successfully.");
+				window.location.reload();
+			}
+		});
+	});
+
+	// apvc_filter_chart_dash
+
+	jQuery(document).on("change","#apvc_filter_chart_dash",function( e ){
+		e.preventDefault();
+		var chFlag = jQuery("#apvc_chart_prem").val();
+		
+		if( chFlag == undefined ){
+			alert("This feature is only available with premium version.");
+		} else {
+			
+		}
+	});
+
+	if( current_page == 'detailed-reports-chart' ){
+		
+		var articleID = jQuery("#current_article").val();
+		
+		
+
+		jQuery.ajax({
+			type : "post",
+			url : apvc_ajax.ajax_url,
+			data : { action: "apvc_get_chart_data_single", article: articleID},
+			success: function( response ) {
+			  	let RLresponse = jQuery.parseJSON( response );
+			  	let Vchart = jQuery.parseJSON(RLresponse.chart);
+				new Chart(document.getElementById("detailed_chart_single"), {
+					type: 'line',
+					data: {
+					labels: Vchart.labels,
+					datasets: [ {	 
+							    data: Vchart.visitors,
+							    label: "Visitors",
+							    borderColor: primaryColor,
+							    backgroundColor: primaryColor,
+							    fill: false
+							},
+							{ 
+							    data: Vchart.visits,
+							    label: "Visits",
+							    borderColor: dangerColor,
+							    backgroundColor: dangerColor,
+							    fill: false
+							}
+						]
+					}
+				});
+			}
+		});
+
+
+		if ($(".countriesDropdown, .devicesDropdown, .browsersDropdown, .osDropdown").length) {
+			$(".countriesDropdown, .devicesDropdown, .browsersDropdown, .osDropdown").select2();
+		}
+		if ($(".countriesDropdownCL").length) {
+			$(".countriesDropdownCL").select2();
+		}
+	}
 
     
-/* Premium Code Stripped by Freemius */
-
 
     if ($(".apvc-counter-icon").length) {
 		$(".apvc-counter-icon").select2();
 	}
+
+
+	jQuery(document).on('click',".resetCloseBtn",function() { 
+		jQuery("#resetCnt").modal("hide"); 
+	});
+
+	jQuery(document).on('click',".reset_cnt",function() { 
+		var art_id = jQuery(this).attr("art_id");
+		jQuery("#art_id_btn").attr("art_id",art_id);
+	});
+
+	jQuery(document).on("click",".resetCnt", function( e ) {
+		e.preventDefault();
+		jQuery('body').css('cursor', 'progress');
+		var artID = jQuery(this).attr("art_id");
+		jQuery.ajax({
+		  type : "post",
+		  url : apvc_ajax.ajax_url,
+		  data : { action: "apvc_reset_count_art",artID:artID},
+		  success: function(response) {
+		  	if( response.success == true ){
+			  	jQuery('.resetCnt').text("Success");
+			  	jQuery('body').css('cursor', 'default');
+			  	setTimeout(function(){ window.location.reload(); }, 500);
+		 	}
+		  }
+		});
+	});
+
+	
+	jQuery(document).on("click",".set_start_cnt", function( e ) {
+		e.preventDefault();
+		var artID = jQuery(this).attr("art_id");
+		jQuery.ajax({
+		  type : "post",
+		  url : apvc_ajax.ajax_url,
+		  data : { action: "apvc_show_counter_options",artID:artID},
+		  success: function(response) {
+		  	jQuery( ".setCntPreview" ).html( response );
+		  }
+		});
+	});
+
+	jQuery(document).on("click",".setCntSaveBtn", function( e ) {
+		e.preventDefault();
+		jQuery('body').css('cursor', 'progress');
+
+		var cnt_act = jQuery("input[name=apvc_active_counter]:checked").val();
+		var start_from = jQuery("input[name=count_start_from]").val();
+		var wid_label = jQuery("input[name=widget_label]").val();
+		var art_id = jQuery("input[name=art_id]").val();
+
+		jQuery.ajax({
+		  type : "post",
+		  url : apvc_ajax.ajax_url,
+		  data : { action: "apvc_save_start_counter_op",cnt_act:cnt_act,start_from:start_from,wid_label:wid_label,art_id:art_id},
+		  success: function(response) {
+		  	console.log(response.success);
+		  	if( response.success == true ){
+		  		jQuery(".setCntSaveBtn").text("Saved..");
+		  		jQuery('body').css('cursor', 'default');
+		  		setTimeout(function(){
+		  			window.location.reload();
+		  		}, 500);
+		  	}
+		  }
+		});
+	});
+
+	jQuery(document).on('click',".setCntCloseBtn",function() { 
+		jQuery("#setCnt").modal("hide"); 
+		var reset = '<div class="loader-demo-box" style="border: none !important;"><div class="square-box-loader"><div class="square-box-loader-container"><div class="square-box-loader-corner-top"></div><div class="square-box-loader-corner-bottom"></div></div><div class="square-box-loader-square"></div></div></div>';
+		setTimeout(function(){ jQuery( ".setCntPreview" ).html( reset ); }, 500 );
+	});
 
 	/************************ Settings Page ***********************/
 	jQuery(document).on("click","#apvc_save_settings",function( e ){

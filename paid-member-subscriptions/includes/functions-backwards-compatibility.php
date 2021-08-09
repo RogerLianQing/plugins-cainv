@@ -146,16 +146,16 @@ function pms_add_settings_content_stripe_compatibility( $options ) {
 
     echo '<div class="pms-payment-gateway-wrapper">';
 
-        echo '<h4 class="pms-payment-gateway-title">' . __( 'Stripe', 'paid-member-subscriptions' ) . '</h4>';
+        echo '<h4 class="pms-payment-gateway-title">' . esc_html__( 'Stripe', 'paid-member-subscriptions' ) . '</h4>';
 
         foreach( $fields as $field_slug => $field_options ) {
             echo '<div class="pms-form-field-wrapper">';
 
-            echo '<label class="pms-form-field-label" for="stripe-' . str_replace( '_', '-', $field_slug ) . '">' . $field_options['label'] . '</label>';
-            echo '<input id="stripe-' . str_replace( '_', '-', $field_slug ) . '" type="text" name="pms_payments_settings[gateways][stripe][' . $field_slug . ']" value="' . ( isset( $options['gateways']['stripe'][$field_slug] ) ? $options['gateways']['stripe'][$field_slug] : '' ) . '" class="widefat" />';
+            echo '<label class="pms-form-field-label" for="stripe-' . esc_attr( str_replace( '_', '-', $field_slug ) ) . '">' . esc_html( $field_options['label'] ) . '</label>';
+            echo '<input id="stripe-' . esc_attr( str_replace( '_', '-', $field_slug ) ) . '" type="text" name="pms_payments_settings[gateways][stripe][' . esc_attr( $field_slug ). ']" value="' . esc_attr( isset( $options['gateways']['stripe'][$field_slug] ) ? $options['gateways']['stripe'][$field_slug] : '' ) . '" class="widefat" />';
 
             if( isset( $field_options['desc'] ) )
-                echo '<p class="description">' . $field_options['desc'] . '</p>';
+                echo '<p class="description">' . esc_html( $field_options['desc'] ) . '</p>';
 
             echo '</div>';
         }
@@ -168,8 +168,8 @@ function pms_add_settings_content_stripe_compatibility( $options ) {
 function pms_settings_gateway_paypal_express_extra_fields_compatibility( $options ) {
 
     echo '<div class="pms-form-field-wrapper pms-form-field-wrapper-checkbox">';
-        echo '<label class="pms-form-field-label" for="paypal-express-reference-transactions">' . __( 'Reference Transactions', 'paid-member-subscriptions' ) . '</label>';
-        echo '<p class="description"><input type="checkbox" id="paypal-express-reference-transactions" name="pms_payments_settings[gateways][paypal][reference_transactions]" value="1" ' . ( isset( $options['gateways']['paypal']['reference_transactions'] ) ? 'checked' : '' ) . '/>' . sprintf( __( 'Check if your PayPal account has Reference Transactions enabled. %1$sLearn how to enable reference transactions.%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/add-ons/paypal-pro-and-express-checkout/#Reference_Transactions" target="_blank">', '</a>' ) . '</p>';
+        echo '<label class="pms-form-field-label" for="paypal-express-reference-transactions">' . esc_html__( 'Reference Transactions', 'paid-member-subscriptions' ) . '</label>';
+        echo '<p class="description"><input type="checkbox" id="paypal-express-reference-transactions" name="pms_payments_settings[gateways][paypal][reference_transactions]" value="1" ' . ( isset( $options['gateways']['paypal']['reference_transactions'] ) ? 'checked' : '' ) . '/>' . sprintf( esc_html__( 'Check if your PayPal account has Reference Transactions enabled. %1$sLearn how to enable reference transactions.%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/add-ons/paypal-pro-and-express-checkout/#Reference_Transactions" target="_blank">', '</a>' ) . '</p>';
     echo '</div>';
 
 }
@@ -206,10 +206,10 @@ function pms_settings_gateway_paypal_extra_fields_compatiblity( $options ) {
     foreach( $fields as $field_slug => $field_details ) {
         echo '<div class="pms-form-field-wrapper">';
 
-        echo '<label class="pms-form-field-label" for="paypal-' . str_replace('_', '-', $field_slug) . '">' . $field_details['label'] . '</label>';
-        echo '<input id="paypal-' . str_replace('_', '-', $field_slug) . '" type="text" name="pms_payments_settings[gateways][paypal][' . $field_slug . ']" value="' . ( isset($options['gateways']['paypal'][$field_slug]) ? $options['gateways']['paypal'][$field_slug] : '' ) . '" class="widefat" />';
+        echo '<label class="pms-form-field-label" for="paypal-' . esc_attr( str_replace('_', '-', $field_slug) ) . '">' . esc_html( $field_details['label'] ) . '</label>';
+        echo '<input id="paypal-' . esc_attr( str_replace('_', '-', $field_slug) ). '" type="text" name="pms_payments_settings[gateways][paypal][' . esc_attr( $field_slug ). ']" value="' . esc_attr( isset($options['gateways']['paypal'][$field_slug]) ? $options['gateways']['paypal'][$field_slug] : '' ) . '" class="widefat" />';
 
-        echo '<p class="description">' . $field_details['desc'] . '</p>';
+        echo '<p class="description">' . esc_html( $field_details['desc'] ) . '</p>';
 
         echo '</div>';
     }

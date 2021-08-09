@@ -125,10 +125,12 @@ function pms_process_restriction_content_message( $type, $user_ID, $post_id = 0 
     $message    = pms_get_restriction_content_message( $type, $post_id );
     $user_info  = get_userdata( $user_ID );
 
-    if( pms_should_use_old_merge_tags() === true )
-        $message = PMS_Merge_Tags::pms_process_merge_tags( $message, $user_info, '' );
-    else
-        $message = PMS_Merge_Tags::process_merge_tags( $message, $user_info, '' );
+    if( class_exists( 'PMS_Merge_Tags' ) ){
+        if( pms_should_use_old_merge_tags() === true )
+            $message = PMS_Merge_Tags::pms_process_merge_tags( $message, $user_info, '' );
+        else
+            $message = PMS_Merge_Tags::process_merge_tags( $message, $user_info, '' );
+    }
 
     return $message;
 }

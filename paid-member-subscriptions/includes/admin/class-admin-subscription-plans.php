@@ -92,28 +92,28 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
     public function process_data() {
 
         // Verify nonce before anything
-        if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( $_REQUEST['_wpnonce'], 'pms_subscription_plan_nonce' ) )
+        if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['_wpnonce'] ), 'pms_subscription_plan_nonce' ) )
             return;
 
 
         // Activate subscription plan
         if( isset( $_REQUEST['pms-action'] ) && $_REQUEST['pms-action'] == 'activate_subscription_plan' && isset( $_REQUEST['post_id'] ) ) {
-            PMS_Subscription_Plan::activate( (int)esc_attr( $_REQUEST['post_id'] ) );
+            PMS_Subscription_Plan::activate( (int)sanitize_text_field( $_REQUEST['post_id'] ) );
         }
 
         // Deactivate subscription plan
         if( isset( $_REQUEST['pms-action'] ) && $_REQUEST['pms-action'] == 'deactivate_subscription_plan' && isset( $_REQUEST['post_id'] ) ) {
-            PMS_Subscription_Plan::deactivate( (int)esc_attr( $_REQUEST['post_id'] ) );
+            PMS_Subscription_Plan::deactivate( (int)sanitize_text_field( $_REQUEST['post_id'] ) );
         }
 
         // Duplicate subscription plan
         if( isset( $_REQUEST['pms-action'] ) && $_REQUEST['pms-action'] == 'duplicate_subscription_plan' && isset( $_REQUEST['post_id'] ) ) {
-            PMS_Subscription_Plan::duplicate( (int)esc_attr( $_REQUEST['post_id'] ) );
+            PMS_Subscription_Plan::duplicate( (int)sanitize_text_field( $_REQUEST['post_id'] ) );
         }
 
         // Delete subscription plan
         if( isset( $_REQUEST['pms-action'] ) && $_REQUEST['pms-action'] == 'delete_subscription_plan' && isset( $_REQUEST['post_id'] ) ) {
-            $plan_id = (int)esc_attr( $_REQUEST['post_id'] );
+            $plan_id = (int)sanitize_text_field( $_REQUEST['post_id'] );
 
             PMS_Subscription_Plan::remove( $plan_id );
 
@@ -129,7 +129,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             if( !isset( $_GET['post_type'] ) || $_GET['post_type'] != $this->post_type )
                 return;
 
-            $post_id      = (int)trim( $_GET['post_id'] );
+            $post_id      = (int)sanitize_text_field( $_GET['post_id'] );
             $current_post = get_post( $post_id );
 
             // If this post doesn't have a parent do nothing
@@ -161,7 +161,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             if( !isset( $_GET['post_type'] ) || $_GET['post_type'] != $this->post_type )
                 return;
 
-            $post_id      = trim( $_GET['post_id'] );
+            $post_id      = sanitize_text_field( $_GET['post_id'] );
             $current_post = get_post( $post_id );
 
             $children_posts = get_posts( array( 'post_type' => $this->post_type, 'post_status' => 'any', 'numberposts' => 1, 'post_parent' => $post_id ) );
@@ -260,9 +260,9 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         $subscription_plan = new PMS_Subscription_Plan( $post );
 
         if( $subscription_plan->is_active() )
-            $activate_deactivate = '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'deactivate_subscription_plan', 'post_id' => $post->ID ) ), 'pms_subscription_plan_nonce' ) ) . '">' . __( 'Deactivate', 'paid-member-subscriptions' ) . '</a>';
+            $activate_deactivate = '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'deactivate_subscription_plan', 'post_id' => $post->ID ) ), 'pms_subscription_plan_nonce' ) ) . '">' . esc_html__( 'Deactivate', 'paid-member-subscriptions' ) . '</a>';
         else
-            $activate_deactivate = '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'activate_subscription_plan', 'post_id' => $post->ID ) ), 'pms_subscription_plan_nonce' ) ) . '">' . __( 'Activate', 'paid-member-subscriptions' ) . '</a>';
+            $activate_deactivate = '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'activate_subscription_plan', 'post_id' => $post->ID ) ), 'pms_subscription_plan_nonce' ) ) . '">' . esc_html__( 'Activate', 'paid-member-subscriptions' ) . '</a>';
 
         $actions['change_status'] = $activate_deactivate;
 
@@ -270,7 +270,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         /*
          * Add the option to add a parent to a subscription plan
          */
-        $add_upgrade = '<a href="' . esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_upgrade' ), admin_url( 'post-new.php' ) ) ) . '">' . __( 'Add Upgrade', 'paid-member-subscriptions' ) . '</a>';
+        $add_upgrade = '<a href="' . esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_upgrade' ), admin_url( 'post-new.php' ) ) ) . '">' . esc_html__( 'Add Upgrade', 'paid-member-subscriptions' ) . '</a>';
 
         $actions['add_upgrade'] = $add_upgrade;
 
@@ -278,7 +278,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         /*
          * Add the options to add a child to a subscription plan
          */
-        $add_downgrade = '<a href="' . esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_downgrade' ), admin_url( 'post-new.php' ) ) ) . '">' . __( 'Add Downgrade', 'paid-member-subscriptions' ) . '</a>';
+        $add_downgrade = '<a href="' . esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_downgrade' ), admin_url( 'post-new.php' ) ) ) . '">' . esc_html__( 'Add Downgrade', 'paid-member-subscriptions' ) . '</a>';
 
         $actions['add_downgrade'] = $add_downgrade;
 
@@ -286,14 +286,14 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         /*
          * Add the option to duplicate a subscription plan
          */
-        $duplicate = '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'duplicate_subscription_plan', 'post_id' => $post->ID ) ), 'pms_subscription_plan_nonce' ) ) . '">' . __( 'Duplicate', 'paid-member-subscriptions' ) . '</a>';
+        $duplicate = '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'duplicate_subscription_plan', 'post_id' => $post->ID ) ), 'pms_subscription_plan_nonce' ) ) . '">' . esc_html__( 'Duplicate', 'paid-member-subscriptions' ) . '</a>';
 
         $actions['duplicate'] = $duplicate;
 
         /*
          * Add the option to delete a subscription plan
          */
-        $delete = '<span class="trash pms-delete-subscription"><a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'delete_subscription_plan', 'post_id' => $post->ID, 'deleted' => 1 ) ), 'pms_subscription_plan_nonce' ) ) . '">' . __( 'Delete', 'paid-member-subscriptions' ) . '</a></span>';
+        $delete = '<span class="trash pms-delete-subscription"><a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'delete_subscription_plan', 'post_id' => $post->ID, 'deleted' => 1 ) ), 'pms_subscription_plan_nonce' ) ) . '">' . esc_html__( 'Delete', 'paid-member-subscriptions' ) . '</a></span>';
 
         $actions['delete'] = $delete;
 
@@ -310,18 +310,18 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
      */
     public static function manage_posts_columns( $columns ) {
 
-        $columns['price']  = __( 'Price', 'paid-member-subscriptions' );
+        $columns['price']  = esc_html__( 'Price', 'paid-member-subscriptions' );
 
         if( pms_payment_gateways_support( pms_get_active_payment_gateways(), 'subscription_sign_up_fee' ) ) {
-            $columns['sign_up_fee'] = __( 'Sign Up Fee', 'paid-member-subscriptions' );
+            $columns['sign_up_fee'] = esc_html__( 'Sign Up Fee', 'paid-member-subscriptions' );
         }
 
         if( pms_payment_gateways_support( pms_get_active_payment_gateways(), 'subscription_free_trial' ) ) {
-            $columns['free_trial']  = __( 'Free Trial', 'paid-member-subscriptions' );
+            $columns['free_trial']  = esc_html__( 'Free Trial', 'paid-member-subscriptions' );
         }
 
-        $columns['status'] = __( 'Status', 'paid-member-subscriptions' );
-        $columns['id']     = __( 'ID', 'paid-member-subscriptions' );
+        $columns['status'] = esc_html__( 'Status', 'paid-member-subscriptions' );
+        $columns['id']     = esc_html__( 'ID', 'paid-member-subscriptions' );
         $columns['order']  = '';
 
         // Shift the order column after the checkbox column
@@ -358,12 +358,12 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             $post_children = get_children( array( 'post_parent' => $post_id, 'post_type' => 'pms-subscription' ) );
 
             if( $parent_id != false )
-                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_up_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-up" title="' . __( 'Move Subscription Plan Up', 'paid-member-subscriptions' ) . '">&uarr;</a>';
+                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_up_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-up" title="' . esc_html__( 'Move Subscription Plan Up', 'paid-member-subscriptions' ) . '">&uarr;</a>';
             else
                 echo '<span class="pms-subscription-plan-order-move-up pms-subscription-plan-order-placeholder ' . ( !empty( $post_children ) ? 'move-down' : '' ) . '"><span class="pms-inner">&uarr;</span></span>';
 
             if( !empty( $post_children ) )
-                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_down_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-down" title="' . __( 'Move Subscription Plan Down', 'paid-member-subscriptions' ) . '">&darr;</a>';
+                echo '<a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'move_down_subscription_plan', 'post_id' => $post_id ) ), 'pms_subscription_plan_nonce' ) ) . '" class="add-new-h2 pms-subscription-plan-order-move-down" title="' . esc_html__( 'Move Subscription Plan Down', 'paid-member-subscriptions' ) . '">&darr;</a>';
             else
                 echo '<span class="pms-subscription-plan-order-move-down pms-subscription-plan-order-placeholder ' . ( $parent_id != false ? 'move-up' : '' ) . '"><span class="pms-inner">&darr;</span></span>';
 
@@ -372,12 +372,12 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         // Information shown in the status column
 		if( $column == 'status' ) {
 
-			$subscription_plan_status_dot = apply_filters( 'pms_list_table_subscription_plans_show_status_dot', '<span class="pms-status-dot ' . $subscription_plan->status . '"></span>' );
+			$subscription_plan_status_dot = apply_filters( 'pms_list_table_subscription_plans_show_status_dot', '<span class="pms-status-dot ' . esc_attr( $subscription_plan->status ) . '"></span>' );
 
 			if( $subscription_plan->is_active() )
-				echo $subscription_plan_status_dot . '<span>' . __( 'Active', 'paid-member-subscriptions' ) . '</span>';
+				echo wp_kses_post( $subscription_plan_status_dot ) . '<span>' . esc_html__( 'Active', 'paid-member-subscriptions' ) . '</span>';
 			else
-				echo $subscription_plan_status_dot . '<span>' . __( 'Inactive', 'paid-member-subscriptions' ) . '</span>';
+				echo wp_kses_post( $subscription_plan_status_dot ) . '<span>' . esc_html__( 'Inactive', 'paid-member-subscriptions' ) . '</span>';
 		}
 
         // Information shown in the price column
@@ -403,10 +403,10 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             }
 
             if( $subscription_plan->price == 0 )
-                echo __( 'Free', 'paid-member-subscriptions' );
+                echo esc_html__( 'Free', 'paid-member-subscriptions' );
 
             else
-                echo apply_filters( 'pms_list_table_subscription_plans_column_price_output', pms_format_price( $subscription_plan->price, pms_get_active_currency() ) . $duration, $subscription_plan->id );
+                echo wp_kses_post( apply_filters( 'pms_list_table_subscription_plans_column_price_output', pms_format_price( $subscription_plan->price, pms_get_active_currency() ) . $duration, $subscription_plan->id ) );
 
         }
 
@@ -416,7 +416,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             if( $subscription_plan->sign_up_fee == 0 )
                 echo '-';
             else
-                echo pms_format_price( $subscription_plan->sign_up_fee, pms_get_active_currency() );
+                echo esc_html( pms_format_price( $subscription_plan->sign_up_fee, pms_get_active_currency() ) );
 
         }
 
@@ -445,7 +445,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
                         break;
                 }
 
-                echo $duration;
+                echo esc_html( $duration );
 
             }
 
@@ -453,7 +453,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
 
         // Information shown in the id column
         if( $column == 'id' ) {
-            echo $post_id;
+            echo esc_html( $post_id );
         }
 
 	}
@@ -480,8 +480,8 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
     public function get_custom_bulk_action() {
 
         return apply_filters( 'get_custom_bulk_actions_' . $this->post_type, array(
-            'activate'   => __( 'Activate', 'paid-member-subscriptions' ),
-            'deactivate' => __( 'Deactivate', 'paid-member-subscriptions' )
+            'activate'   => esc_html__( 'Activate', 'paid-member-subscriptions' ),
+            'deactivate' => esc_html__( 'Deactivate', 'paid-member-subscriptions' )
         ));
 
     }
@@ -503,8 +503,8 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
                     echo 'jQuery("#bulk-action-selector-bottom option[value=edit]").remove();';
 
                     foreach( $this->get_custom_bulk_action() as $action_slug => $action_name ) {
-                        echo 'jQuery("<option>").val("' . $action_slug . '").text("' . $action_name . '").appendTo("#bulk-action-selector-top");';
-                        echo 'jQuery("<option>").val("' . $action_slug . '").text("' . $action_name . '").appendTo("#bulk-action-selector-bottom");';
+                        echo 'jQuery("<option>").val("' . esc_attr( $action_slug ) . '").text("' . esc_html( $action_name ) . '").appendTo("#bulk-action-selector-top");';
+                        echo 'jQuery("<option>").val("' . esc_attr( $action_slug ) . '").text("' . esc_html( $action_name ) . '").appendTo("#bulk-action-selector-bottom");';
                     }
 
                 echo '});';
@@ -521,18 +521,17 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
      */
     public function process_custom_bulk_actions() {
 
-        if( !isset( $_REQUEST['post_type'] ) || trim($_REQUEST['post_type']) != $this->post_type )
+        if( !isset( $_REQUEST['post_type'] ) || sanitize_text_field( $_REQUEST['post_type'] ) != $this->post_type )
             return;
 
         // Verify nonce before anything
-        if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-posts' ) )
+        if( !isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( sanitize_text_field( $_REQUEST['_wpnonce'] ), 'bulk-posts' ) )
             return;
 
         if( !isset( $_REQUEST['action'] ) && !isset( $_REQUEST['action2'] ) )
             return;
 
-
-        $action = ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] != '-1' ? $_REQUEST['action'] : $_REQUEST['action2'] );
+        $action = ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] != '-1' ? sanitize_text_field( $_REQUEST['action'] ) : sanitize_text_field( $_REQUEST['action2'] ) );
 
         // Return if the action is not one of our custom actions
         if( !array_key_exists( $action, $this->get_custom_bulk_action() ) )
@@ -543,7 +542,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         if( $action == 'activate' || $action == 'deactivate' ) {
 
             if( isset( $_REQUEST['post'] ) && !empty( $_REQUEST['post'] ) ) {
-                $subscription_plan_ids = $_REQUEST['post'];
+                $subscription_plan_ids = array_map( 'sanitize_text_field', $_REQUEST['post'] );
 
                 foreach( $subscription_plan_ids as $subscription_plan_id ) {
 
@@ -587,7 +586,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             return false;
 
         echo '<div id="pms-delete-action">';
-            echo '<a class="submitdelete deletion" onclick="return confirm( \'' . __( "Are you sure you want to delete this Subscription Plan?", "paid-member-subscriptions" ) . ' \' )" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'delete_subscription_plan', 'post_id' => $post->ID, 'deleted' => 1 ), admin_url( 'edit.php?post_type=' . $this->post_type ) ), 'pms_subscription_plan_nonce' ) ) . '">' . __( 'Delete Plan', 'paid-member-subscriptions' ) . '</a>';
+            echo '<a class="submitdelete deletion" onclick="return confirm( \'' . esc_html__( "Are you sure you want to delete this Subscription Plan?", "paid-member-subscriptions" ) . ' \' )" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'pms-action' => 'delete_subscription_plan', 'post_id' => $post->ID, 'deleted' => 1 ), admin_url( 'edit.php?post_type=' . $this->post_type ) ), 'pms_subscription_plan_nonce' ) ) . '">' . esc_html__( 'Delete Plan', 'paid-member-subscriptions' ) . '</a>';
         echo '</div>';
 
     }
@@ -610,8 +609,8 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             return false;
 
         echo '<div id="pms-upgrade-downgrade-buttons-wrapper">';
-            echo '<a class="add-new-h2 page-title-action" href="' . esc_url( add_query_arg( array( 'post_type' => $this->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_upgrade' ), admin_url('post-new.php') ) ) . '">' . __( 'Add Upgrade', 'paid-member-subscriptions' ) . '</a>';
-            echo '<a class="add-new-h2 page-title-action" href="' . esc_url( add_query_arg( array( 'post_type' => $this->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_downgrade' ), admin_url('post-new.php') ) ) . '">' . __( 'Add Downgrade', 'paid-member-subscriptions' ) . '</a>';
+            echo '<a class="add-new-h2 page-title-action" href="' . esc_url( add_query_arg( array( 'post_type' => $this->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_upgrade' ), admin_url('post-new.php') ) ) . '">' . esc_html__( 'Add Upgrade', 'paid-member-subscriptions' ) . '</a>';
+            echo '<a class="add-new-h2 page-title-action" href="' . esc_url( add_query_arg( array( 'post_type' => $this->post_type, 'plan_id' => $post->ID, 'pms-action' => 'add_downgrade' ), admin_url('post-new.php') ) ) . '">' . esc_html__( 'Add Downgrade', 'paid-member-subscriptions' ) . '</a>';
         echo '</div>';
 
     }
@@ -630,7 +629,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         if( $_GET['post_type'] != $this->post_type )
             return;
 
-        if( empty( $_GET['pms-action'] ) )
+        if( empty( $_GET['pms-action'] ) || !isset( $_GET['plan_id'] ) )
             return;
 
         if( $_GET['pms-action'] != 'add_downgrade' && $_GET['pms-action'] != 'add_upgrade' )
@@ -642,7 +641,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         // Set the string in case of downgrade / upgrade
         $action = ( $_GET['pms-action'] == 'add_downgrade' ? __( 'a downgrade', 'paid-member-subscriptions' ) : __( 'an upgrade', 'paid-member-subscriptions' ) );
 
-        echo '<div id="pms-add-subscription-plan-subtitle">' . sprintf( __( 'This will be %s for the %s subscription plan.', 'paid-member-subscriptions' ), '<strong>' . esc_html( $action ) . '</strong>', '<strong>' . esc_html( $subscription_plan->name ) . '</strong>' ) . '</div>';
+        echo '<div id="pms-add-subscription-plan-subtitle">' . sprintf( esc_html__( 'This will be %s for the %s subscription plan.', 'paid-member-subscriptions' ), '<strong>' . esc_html( $action ) . '</strong>', '<strong>' . esc_html( $subscription_plan->name ) . '</strong>' ) . '</div>';
 
     }
 
@@ -659,11 +658,11 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         if( empty( $_GET['plan_id'] ) )
             return;
 
-        $pms_action = $_GET['pms-action'];
+        $pms_action = sanitize_text_field( $_GET['pms-action'] );
         $plan_id    = (int)$_GET['plan_id'];
 
         echo '<input type="hidden" name="pms-action" value="' . esc_attr( $pms_action ) . '" />';
-        echo '<input type="hidden" name="pms-subscription-plan-id" value="' . $plan_id . '" />';
+        echo '<input type="hidden" name="pms-subscription-plan-id" value="' . esc_attr( $plan_id ) . '" />';
 
     }
 
@@ -700,7 +699,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
         global $post_type;
 
         if( $post_type == $this->post_type ) {
-            return __( 'Enter Subscription Plan name here', 'paid-member-subscriptions' );
+            return esc_html__( 'Enter Subscription Plan name here', 'paid-member-subscriptions' );
         }
 
         return $input;
@@ -762,7 +761,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             return;
 
 
-        $pms_action = apply_filters( 'pms_action_add_new_subscription_plan', ( isset( $_POST['pms-action'] ) ? $_POST['pms-action'] : ( isset( $_GET['pms-action'] ) ? $_GET['pms-action'] : '' ) ) );
+        $pms_action = apply_filters( 'pms_action_add_new_subscription_plan', ( isset( $_POST['pms-action'] ) ? sanitize_text_field( $_POST['pms-action'] ) : ( isset( $_GET['pms-action'] ) ? sanitize_text_field( $_GET['pms-action'] ) : '' ) ) );
 
         // Exit if there is a custom action going on
         if( ! empty( $pms_action ) )
@@ -813,7 +812,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             return;
 
         // Check if plan is added by add downgrade row actions
-        $pms_action = isset( $_POST['pms-action'] ) ? $_POST['pms-action'] : '';
+        $pms_action = isset( $_POST['pms-action'] ) ? sanitize_text_field( $_POST['pms-action'] ) : '';
 
         if( $pms_action != 'add_downgrade' )
             return;
@@ -884,7 +883,7 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             return;
 
         // Check if plan is added by add upgrade row actions
-        $pms_action = isset( $_POST['pms-action'] ) ? $_POST['pms-action'] : '';
+        $pms_action = isset( $_POST['pms-action'] ) ? sanitize_text_field( $_POST['pms-action'] ) : '';
 
         if( $pms_action != 'add_upgrade' )
             return;
@@ -954,16 +953,16 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
 
 		$messages['pms-subscription'] = array(
 			0  => 	'',
-			1  => 	__( 'Subscription Plan updated.', 'paid-member-subscriptions' ),
-			2  => 	__( 'Custom field updated.', 'paid-member-subscriptions' ),
-			3  => 	__( 'Custom field deleted.', 'paid-member-subscriptions' ),
-			4  => 	__( 'Subscription Plan updated.', 'paid-member-subscriptions' ),
-			5  => 	isset( $_GET['revision'] ) ? sprintf( __( 'Subscription Plan' . ' restored to revision from %s', 'paid-member-subscriptions' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => 	__( 'Subscription Plan saved.', 'paid-member-subscriptions' ),
-			7  => 	__( 'Subscription Plan saved.', 'paid-member-subscriptions' ),
-			8  => 	__( 'Subscription Plan submitted.', 'paid-member-subscriptions' ),
-			9  => 	sprintf( __( 'Subscription Plan' . ' scheduled for: <strong>%1$s</strong>.', 'paid-member-subscriptions' ), date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ) ),
-			10 =>	__( 'Subscription Plan draft updated.', 'paid-member-subscriptions' ),
+			1  => 	esc_html__( 'Subscription Plan updated.', 'paid-member-subscriptions' ),
+			2  => 	esc_html__( 'Custom field updated.', 'paid-member-subscriptions' ),
+			3  => 	esc_html__( 'Custom field deleted.', 'paid-member-subscriptions' ),
+			4  => 	esc_html__( 'Subscription Plan updated.', 'paid-member-subscriptions' ),
+			5  => 	isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Subscription Plan restored to revision from %s', 'paid-member-subscriptions' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => 	esc_html__( 'Subscription Plan saved.', 'paid-member-subscriptions' ),
+			7  => 	esc_html__( 'Subscription Plan saved.', 'paid-member-subscriptions' ),
+			8  => 	esc_html__( 'Subscription Plan submitted.', 'paid-member-subscriptions' ),
+			9  => 	sprintf( esc_html__( 'Subscription Plan scheduled for: <strong>%1$s</strong>.', 'paid-member-subscriptions' ), date_i18n( esc_html__( 'M j, Y @ G:i', 'paid-member-subscriptions' ), strtotime( $post->post_date ) ) ),
+			10 =>	esc_html__( 'Subscription Plan draft updated.', 'paid-member-subscriptions' ),
 		);
 
 		return $messages;
@@ -1037,13 +1036,13 @@ Class PMS_Custom_Post_Type_Subscription extends PMS_Custom_Post_Type {
             $message = sprintf( _n( '%d subscription plan has been successfully deactivated', '%d subscription plans have been successfully deactivated', (int)$_REQUEST['bulk_deactivate'], 'paid-member-subscriptions' ), (int)$_REQUEST['bulk_deactivate'] );
 
         if( !empty( $message ) )
-            echo '<div class="updated"><p>' . $message . '</p></div>';
+            echo '<div class="updated"><p>' . esc_html( $message ) . '</p></div>';
 
         $messages = $this->get_admin_notices();
 
         if( isset( $_GET['pms-subscription-error'] ) && isset( $messages[ (int)$_GET['pms-subscription-error'] ] ) ){
             echo '<div class="error pms-admin-notice">';
-                echo '<p>' . $messages[ (int)$_GET['pms-subscription-error'] ] . '</p>';
+                echo '<p>' . esc_html( $messages[ (int)$_GET['pms-subscription-error'] ] ) . '</p>';
             echo '</div>';
         }
 
@@ -1068,5 +1067,5 @@ $args = array(
     'hierarchical'		 => true
 );
 
-$pms_cpt_subscribtion = new PMS_Custom_Post_Type_Subscription( 'pms-subscription', __( 'Subscription Plan', 'paid-member-subscriptions' ), __( 'Subscription Plans', 'paid-member-subscriptions' ), $args );
+$pms_cpt_subscribtion = new PMS_Custom_Post_Type_Subscription( 'pms-subscription', esc_html__( 'Subscription Plan', 'paid-member-subscriptions' ), esc_html__( 'Subscription Plans', 'paid-member-subscriptions' ), $args );
 $pms_cpt_subscribtion->init();

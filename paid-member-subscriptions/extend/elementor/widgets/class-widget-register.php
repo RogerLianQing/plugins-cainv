@@ -99,13 +99,13 @@ class PMS_Elementor_Register_Widget extends \Elementor\Widget_Base {
 		$settings = $this->get_settings_for_display();
 
 		if ( !empty( $settings['pms_subscription_plans'] ) )
-			$plans = 'subscription_plans="'.implode( ',', $settings['pms_subscription_plans'] ).'"';
+			$plans = 'subscription_plans="'.esc_attr( implode( ',', $settings['pms_subscription_plans'] ) ).'"';
 		else
 			$plans = '';
 
 
         //check why the subscription plans parameter one isn't workking
-		echo do_shortcode( '[pms-register '.$plans.' plans_position="'.$settings['pms_plans_position'].'" selected="'.$settings['pms_selected_plan'].'"]');
+		echo do_shortcode( '[pms-register '.$plans.' plans_position="'. esc_attr( $settings['pms_plans_position'] ).'" selected="'. esc_attr( $settings['pms_selected_plan'] ).'"]');
 
 	}
 

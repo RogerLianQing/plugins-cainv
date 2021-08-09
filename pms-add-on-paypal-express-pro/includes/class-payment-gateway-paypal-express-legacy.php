@@ -613,7 +613,7 @@ Class PMS_Payment_Gateway_PayPal_Express_Legacy extends PMS_Payment_Gateway {
                 $member              = pms_get_member( $payment_data['user_id'] );
                 $member_subscription = $member->get_subscription( $payment_data['subscription_id'] );
 
-                if( !empty( $member_subscription ) && $member_subscription['status'] != 'canceled' ){
+                if( !empty( $member_subscription ) && !in_array( $member_subscription['status'], array( 'canceled', 'pending' ) ) ){
                     $member->update_subscription( $member_subscription['subscription_plan_id'], $member_subscription['start_date'], $member_subscription['expiration_date'], 'canceled' );
 
                     if( function_exists( 'pms_add_member_subscription_log' ) && !empty( $current_subscription->id ) )

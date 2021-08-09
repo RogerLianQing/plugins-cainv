@@ -214,7 +214,7 @@ function pms_payment_gateways_process_confirmation() {
     if( empty( $_REQUEST['pms-gateway'] ) )
         return;
 
-    $gateway_slug = base64_decode( $_REQUEST['pms-gateway'] );
+    $gateway_slug = base64_decode( sanitize_text_field( $_REQUEST['pms-gateway'] ) );
 
     /**
      * Skip verifying nonce if automatically login is set to "Yes"
@@ -223,10 +223,10 @@ function pms_payment_gateways_process_confirmation() {
      *
      */
 
-    if ( !pms_is_autologin_active() && !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_payment_process_confirmation' ) )
+    if ( !pms_is_autologin_active() && !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_payment_process_confirmation' ) )
         return;
 
-    if ( ( $gateway_slug != 'paypal_express' ) && !wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_payment_process_confirmation' ) )
+    if ( ( $gateway_slug != 'paypal_express' ) && !wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_payment_process_confirmation' ) )
         return;
 
     $active_payment_gateways = pms_get_active_payment_gateways();
@@ -353,7 +353,7 @@ function pms_get_output_payment_gateways( $pms_settings = array(), $form_locatio
 
         // Set default payment gateway
         $default_gateway  = ( !empty( $pms_settings['default_payment_gateway'] ) ? ( in_array( $pms_settings['default_payment_gateway'], $active_gateways ) ? $pms_settings['default_payment_gateway'] : $active_gateways[0] ) : 'paypal_standard' );
-        $default_gateway  = ( !empty( $_POST['pay_gate'] ) ? esc_attr( $_POST['pay_gate'] ) : $default_gateway );
+        $default_gateway  = ( !empty( $_POST['pay_gate'] ) ? sanitize_text_field( $_POST['pay_gate'] ) : $default_gateway );
 
         // Output content for the payment gateways
         $output .= '<div id="pms-paygates-wrapper">';

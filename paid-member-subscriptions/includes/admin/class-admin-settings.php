@@ -47,13 +47,13 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
             <h1>
                 <?php
                     $tabs = $this->get_tabs();
-                    echo $tabs[$this->active_tab];
+                    echo esc_html( $tabs[$this->active_tab] );
                 ?>
 
                     <div class="pms-payments-status-wrap pms-payments-status-wrap--<?php echo ( pms_is_payment_test_mode() ? 'test' : 'live' ); ?>">
                         <div class="pms-payments-status pms-payments-status--<?php echo ( pms_is_payment_test_mode() ? 'test' : 'live' ); ?>"></div>
 
-                        <div><?php echo ( pms_is_payment_test_mode() ? __( 'Test payments are enabled', 'paid-member-subscriptions' ) : __( 'Live payments are enabled', 'paid-member-subscriptions' ) ); ?></div>
+                        <div><?php echo ( pms_is_payment_test_mode() ? esc_html__( 'Test payments are enabled', 'paid-member-subscriptions' ) : esc_html__( 'Live payments are enabled', 'paid-member-subscriptions' ) ); ?></div>
                     </div>
 
             </h1>
@@ -61,7 +61,7 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
             <h3 class="nav-tab-wrapper">
                 <?php
                     foreach( $this->get_tabs() as $tab_slug => $tab_name )
-                        echo '<a href="' . admin_url( add_query_arg( array( 'page' => 'pms-settings-page', 'tab' => $tab_slug ), 'admin.php' ) ) . '" class="nav-tab ' . ( $this->active_tab == $tab_slug ? 'nav-tab-active' : '' ) . '">' . $tab_name . '</a>';
+                        echo '<a href="' . esc_url( admin_url( add_query_arg( array( 'page' => 'pms-settings-page', 'tab' => $tab_slug ), 'admin.php' ) ) ) . '" class="nav-tab ' . ( $this->active_tab == $tab_slug ? 'nav-tab-active' : '' ) . '">' . esc_html( $tab_name ) . '</a>';
                 ?>
             </h3>
 
@@ -78,9 +78,9 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
 
                     $output = ob_get_clean();
 
-                    echo apply_filters( 'pms_settings_tab_content', $output, $this->active_tab, $this->options );
+                    echo apply_filters( 'pms_settings_tab_content', $output, $this->active_tab, $this->options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-                    submit_button( __( 'Save Settings', 'paid-member-subscriptions' ) );
+                    submit_button( esc_html__( 'Save Settings', 'paid-member-subscriptions' ) );
                 ?>
             </form>
 
@@ -193,11 +193,11 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
     private function get_tabs() {
 
         $tabs = array(
-            'general'              => __( 'General', 'paid-member-subscriptions' ),
-            'payments'             => __( 'Payments', 'paid-member-subscriptions' ),
-            'content_restriction'  => __( 'Content Restriction', 'paid-member-subscriptions' ),
-            'emails'               => __( 'E-Mails', 'paid-member-subscriptions' ),
-            'misc'                 => __( 'Misc', 'paid-member-subscriptions' )
+            'general'              => esc_html__( 'General', 'paid-member-subscriptions' ),
+            'payments'             => esc_html__( 'Payments', 'paid-member-subscriptions' ),
+            'content_restriction'  => esc_html__( 'Content Restriction', 'paid-member-subscriptions' ),
+            'emails'               => esc_html__( 'E-Mails', 'paid-member-subscriptions' ),
+            'misc'                 => esc_html__( 'Misc', 'paid-member-subscriptions' )
         );
 
         return apply_filters( $this->menu_slug . '_tabs', $tabs );
@@ -215,7 +215,7 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
     public function admin_scripts() {
 
         wp_enqueue_script( 'jquery-ui-datepicker' );
-        wp_enqueue_style('jquery-style', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+        wp_enqueue_style( 'jquery-style', PMS_PLUGIN_DIR_URL . 'assets/css/admin/jquery-ui.min.css', array(), PMS_VERSION );
 
         global $wp_scripts;
 
@@ -237,5 +237,5 @@ Class PMS_Submenu_Page_Settings extends PMS_Submenu_Page {
 
 }
 
-$pms_submenu_page_settings = new PMS_Submenu_Page_Settings( 'paid-member-subscriptions', __( 'Settings', 'paid-member-subscriptions' ), __( 'Settings', 'paid-member-subscriptions' ), 'manage_options', 'pms-settings-page', 30, 'pms_settings' );
+$pms_submenu_page_settings = new PMS_Submenu_Page_Settings( 'paid-member-subscriptions', esc_html__( 'Settings', 'paid-member-subscriptions' ), esc_html__( 'Settings', 'paid-member-subscriptions' ), 'manage_options', 'pms-settings-page', 30, 'pms_settings' );
 $pms_submenu_page_settings->init();

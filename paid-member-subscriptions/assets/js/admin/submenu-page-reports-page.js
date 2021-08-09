@@ -24,7 +24,7 @@ jQuery( function($) {
             datasets : [
                 {
                     label : 'Earnings',
-                    yAxisID : 'y-axis-earnings',
+                    yAxisID : 'y',
                     borderColor : 'rgba(39,174,96,0.5)',
                     backgroundColor : 'rgba(39,174,96,0.1)',
                     pointBackgroundColor : 'rgba(39,174,96,1)',
@@ -33,7 +33,7 @@ jQuery( function($) {
                 },
                 {
                     label : 'Payments',
-                    yAxisID : 'y-axis-payments',
+                    yAxisID : 'y1',
                     borderColor : 'rgba(230,126,34,0.5)',
                     backgroundColor : 'rgba(230,126,34,0.1)',
                     pointBackgroundColor : 'rgba(230,126,34,1)',
@@ -72,28 +72,28 @@ jQuery( function($) {
 
             // Two y-axes for the revenue and for the payments count
             scales : {
-                yAxes : [
-                    {
-                        type : 'linear',
-                        position: 'right',
-                        id : 'y-axis-earnings',
-                        ticks : {
-                            beginAtZero : true
-                        }
-                    },
-                    {
-                        type : 'linear',
-                        position: 'right',
-                        id : 'y-axis-payments',
-                        ticks : {
-                            beginAtZero : true,
-                            stepSize : 1
-                        },
-                        gridLines : {
-                            drawOnChartArea : false
-                        }
+                y : {
+                    display : true,
+                    type : 'linear',
+                    position: 'right',
+                    id : 'y-axis-earnings',
+                    ticks : {
+                        beginAtZero : true
                     }
-                ]
+                },
+                y1 : {
+                    display : true,
+                    type : 'linear',
+                    position: 'left',
+                    id : 'y-axis-payments',
+                    ticks : {
+                        beginAtZero : true,
+                        stepSize : 1
+                    },
+                    grid : {
+                        drawOnChartArea : false
+                    }
+                }
             }
         }
     });

@@ -25,37 +25,37 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <?php do_action( 'pms_edit_profile_form_before_fields' ); ?>
 
         <li class="pms-field pms-user-login-field">
-            <label for="pms_user_login"><?php echo apply_filters( 'pms_edit_profile_form_label_user_login', __( 'Username *', 'paid-member-subscriptions' ) ); ?></label>
-            <input id="pms_user_login" name="user_login" type="text" value="<?php echo sanitize_text_field( $user->user_login ); ?>" disabled />
+            <label for="pms_user_login"><?php echo esc_html( apply_filters( 'pms_edit_profile_form_label_user_login', __( 'Username *', 'paid-member-subscriptions' ) ) ); ?></label>
+            <input id="pms_user_login" name="user_login" type="text" value="<?php echo esc_attr( $user->user_login ); ?>" disabled />
         </li>
 
         <?php $field_errors = pms_errors()->get_error_messages('user_email'); ?>
         <li class="pms-field pms-user-email-field <?php echo ( !empty( $field_errors ) ? 'pms-field-error' : '' ); ?>">
-            <label for="pms_user_email"><?php echo apply_filters( 'pms_register_form_label_user_email', __( 'E-mail *', 'paid-member-subscriptions' ) ); ?></label>
-            <input id="pms_user_email" name="user_email" type="text" value="<?php echo sanitize_email( $user->user_email ); ?>" />
+            <label for="pms_user_email"><?php echo esc_html( apply_filters( 'pms_register_form_label_user_email', __( 'E-mail *', 'paid-member-subscriptions' ) ) ); ?></label>
+            <input id="pms_user_email" name="user_email" type="text" value="<?php echo esc_attr( $user->user_email ); ?>" />
 
             <?php pms_display_field_errors( $field_errors ); ?>
         </li>
 
         <?php $field_errors = pms_errors()->get_error_messages('first_name'); ?>
         <li class="pms-field pms-first-name-field <?php echo ( !empty( $field_errors ) ? 'pms-field-error' : '' ); ?>">
-            <label for="pms_first_name"><?php echo apply_filters( 'pms_register_form_label_first_name', __( 'First Name', 'paid-member-subscriptions' ) ); ?></label>
-            <input id="pms_first_name" name="first_name" type="text" value="<?php echo sanitize_text_field( $user->first_name ); ?>" />
+            <label for="pms_first_name"><?php echo esc_html( apply_filters( 'pms_register_form_label_first_name', __( 'First Name', 'paid-member-subscriptions' ) ) ); ?></label>
+            <input id="pms_first_name" name="first_name" type="text" value="<?php echo esc_attr( $user->first_name ); ?>" />
 
             <?php pms_display_field_errors( $field_errors ); ?>
         </li>
 
         <?php $field_errors = pms_errors()->get_error_messages('last_name'); ?>
         <li class="pms-field pms-last-name-field <?php echo ( !empty( $field_errors ) ? 'pms-field-error' : '' ); ?>">
-            <label for="pms_last_name"><?php echo apply_filters( 'pms_register_form_label_last_name', __( 'Last Name', 'paid-member-subscriptions' ) ); ?></label>
-            <input id="pms_last_name" name="last_name" type="text" value="<?php echo sanitize_text_field( $user->last_name ); ?>" />
+            <label for="pms_last_name"><?php echo esc_html( apply_filters( 'pms_register_form_label_last_name', __( 'Last Name', 'paid-member-subscriptions' ) ) ); ?></label>
+            <input id="pms_last_name" name="last_name" type="text" value="<?php echo esc_attr( $user->last_name ); ?>" />
 
             <?php pms_display_field_errors( $field_errors ); ?>
         </li>
 
         <?php $field_errors = pms_errors()->get_error_messages('pass1'); ?>
         <li class="pms-field pms-pass1-field <?php echo ( !empty( $field_errors ) ? 'pms-field-error' : '' ); ?>">
-            <label for="pms_pass1"><?php echo apply_filters( 'pms_register_form_label_pass1', __( 'Password', 'paid-member-subscriptions' ) ); ?></label>
+            <label for="pms_pass1"><?php echo esc_html( apply_filters( 'pms_register_form_label_pass1', __( 'Password', 'paid-member-subscriptions' ) ) ); ?></label>
             <input id="pms_pass1" name="pass1" type="password" />
 
             <?php pms_display_field_errors( $field_errors ); ?>
@@ -63,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         <?php $field_errors = pms_errors()->get_error_messages('pass2'); ?>
         <li class="pms-field pms-pass2-field <?php echo ( !empty( $field_errors ) ? 'pms-field-error' : '' ); ?>">
-            <label for="pms_pass2"><?php echo apply_filters( 'pms_register_form_label_pass2', __( 'Repeat Password', 'paid-member-subscriptions' ) ); ?></label>
+            <label for="pms_pass2"><?php echo esc_html( apply_filters( 'pms_register_form_label_pass2', __( 'Repeat Password', 'paid-member-subscriptions' ) ) ); ?></label>
             <input id="pms_pass2" name="pass2" type="password" />
 
             <?php pms_display_field_errors( $field_errors ); ?>
@@ -76,8 +76,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             if( !empty( $gdpr_settings['gdpr_delete'] ) && $gdpr_settings['gdpr_delete'] === 'enabled' ){
                  ?>
                 <li class="pms-field">
-                    <label for="pms-delete-account"><?php _e( 'Delete account and data', 'paid-member-subscriptions' ) ?>
-                        <input id="pms-delete-account" type="submit" value=<?php _e( "Delete", 'paid-member-subscriptions' ) ?> />
+                    <label for="pms-delete-account"><?php esc_html_e( 'Delete account and data', 'paid-member-subscriptions' ) ?>
+                        <input id="pms-delete-account" type="submit" value=<?php esc_attr_e( "Delete", 'paid-member-subscriptions' ) ?> />
                     </label>
                 </li>
                 <?php
@@ -89,7 +89,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <?php do_action( 'pms_edit_profile_form_after_fields' ); ?>
 
         <li>
-            <input name="pms_edit_profile" type="submit" value="<?php echo apply_filters( 'pms_edit_profile_form_submit_text', __( 'Edit Profile', 'paid-member-subscriptions' ) ); ?>" />
+            <input name="pms_edit_profile" type="submit" value="<?php echo esc_attr( apply_filters( 'pms_edit_profile_form_submit_text', __( 'Edit Profile', 'paid-member-subscriptions' ) ) ); ?>" />
         </li>
     </ul>
 

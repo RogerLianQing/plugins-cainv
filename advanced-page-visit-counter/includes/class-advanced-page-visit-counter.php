@@ -172,6 +172,10 @@ class Advanced_Visit_Counter
         $this->loader->add_action( 'wp_ajax_apvc_get_top_posts_data', $plugin_admin, 'apvc_get_top_posts_data' );
         $this->loader->add_action( 'wp_ajax_apvc_get_top_countries_data', $plugin_admin, 'apvc_get_top_countries_data' );
         $this->loader->add_action( 'wp_ajax_apvc_get_top_ip_address_data', $plugin_admin, 'apvc_get_top_ip_address_data' );
+        $this->loader->add_action( 'wp_ajax_apvc_show_counter_options', $plugin_admin, 'apvc_show_counter_options' );
+        $this->loader->add_action( 'wp_ajax_apvc_save_start_counter_op', $plugin_admin, 'apvc_save_start_counter_op' );
+        $this->loader->add_action( 'wp_ajax_apvc_reset_count_art', $plugin_admin, 'apvc_reset_count_art' );
+        $this->loader->add_action( 'wp_ajax_apvc_upgrade_database', $plugin_admin, 'apvc_upgrade_database' );
         $this->loader->add_action( 'wp_ajax_apvc_get_total_counts_of_the_year_data', $plugin_admin, 'apvc_get_total_counts_of_the_year_data' );
         $this->loader->add_action( 'wp_ajax_apvc_get_total_counts_of_the_month_data', $plugin_admin, 'apvc_get_total_counts_of_the_month_data' );
         $this->loader->add_action( 'wp_ajax_apvc_get_total_counts_of_the_week_data', $plugin_admin, 'apvc_get_total_counts_of_the_week_data' );
@@ -185,6 +189,7 @@ class Advanced_Visit_Counter
         $this->loader->add_action( 'wp_ajax_apvc_post_views_per_user', $plugin_admin, 'apvc_get_page_views_per_visitor' );
         $this->loader->add_action( 'wp_ajax_apvc_dashboard_updated', $plugin_admin, 'apvc_dashboard_updated' );
         $this->loader->add_action( 'wp_ajax_apvc_get_visit_stats', $plugin_admin, 'apvc_get_visit_stats' );
+        $this->loader->add_action( 'wp_ajax_apvc_get_chart_data_single', $plugin_admin, 'apvc_get_chart_data_single' );
         $apvPtypes = get_post_types();
         foreach ( $apvPtypes as $pList ) {
             $this->loader->add_filter( 'manage_' . $pList . '_posts_columns', $plugin_admin, 'apvc_columns_label' );
@@ -199,6 +204,7 @@ class Advanced_Visit_Counter
         $this->loader->add_action( 'wp_ajax_apvc_generate_shortcode', $plugin_admin, 'apvc_generate_shortcode' );
         $this->loader->add_action( 'wp_ajax_apvc_get_all_articles_sh', $plugin_admin, 'apvc_get_all_articles_sh' );
         $this->loader->add_action( 'apvc_daily_cleanup', $plugin_admin, 'apvc_daily_cleanup_method' );
+        $this->loader->add_action( 'admin_head', $plugin_admin, 'apvc_admin_head' );
         /**************************************************************/
         // $this->loader->add_action('wp_ajax_apvc_refresh_live_visitors', $plugin_admin, 'apvc_refresh_live_visitors');
     }

@@ -130,8 +130,8 @@ Class PMS_Member_Subscription_List_Table extends WP_List_Table {
         if( !$this->member->is_member() )
             $row_classes .= ' pms-add-new edit-active';
 
-        echo '<tr class="' . $row_classes . '">';
-        $this->single_row_columns( $item );
+        echo '<tr class="' . esc_attr( $row_classes ) . '">';
+            $this->single_row_columns( $item );
         echo '</tr>';
     }
 
@@ -236,7 +236,7 @@ Class PMS_Member_Subscription_List_Table extends WP_List_Table {
      */
     public function column_subscription_plan( $item ) {
 
-        $output = '<span>' . ( !empty( $item['subscription_plan'] ) ? $item['subscription_plan'] : sprintf( __( 'Not Found - ID: %s', 'paid-member-subscriptions' ), $item['subscription_plan_id'] ) ) . '</span>';
+        $output = '<span>' . ( !empty( $item['subscription_plan'] ) ? esc_html( $item['subscription_plan'] ) : sprintf( __( 'Not Found - ID: %s', 'paid-member-subscriptions' ), $item['subscription_plan_id'] ) ) . '</span>';
 
         return $output;
 
@@ -253,7 +253,7 @@ Class PMS_Member_Subscription_List_Table extends WP_List_Table {
      */
     public function column_start_date( $item ) {
 
-        $output = '<span>' . $item['start_date'] . '</span>';
+        $output = '<span>' . esc_html( $item['start_date'] ) . '</span>';
 
         return $output;
 
@@ -270,7 +270,7 @@ Class PMS_Member_Subscription_List_Table extends WP_List_Table {
      */
     public function column_expiration_date( $item ) {
 
-        $output = '<span>' . ( ! empty( $item['expiration_date'] ) ? $item['expiration_date'] : ( !empty( $item['next_payment_date'] ) ? $item['next_payment_date'] : __( 'Unlimited', 'paid-member-subscriptions' ) ) ) . '</span>';
+        $output = '<span>' . ( ! empty( $item['expiration_date'] ) ? esc_html( $item['expiration_date'] ) : ( !empty( $item['next_payment_date'] ) ? esc_html( $item['next_payment_date'] ) : __( 'Unlimited', 'paid-member-subscriptions' ) ) ) . '</span>';
 
         return $output;
 
@@ -289,7 +289,7 @@ Class PMS_Member_Subscription_List_Table extends WP_List_Table {
 
         $statuses = pms_get_member_subscription_statuses();
 
-        $output = '<span>' . ( isset($statuses[ $item['status'] ]) ? $statuses[ $item['status'] ] : '' ) . '</span>';
+        $output = '<span>' . ( isset($statuses[ $item['status'] ]) ? esc_html( $statuses[ $item['status'] ] ) : '' ) . '</span>';
 
         return $output;
 

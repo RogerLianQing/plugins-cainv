@@ -3,13 +3,13 @@
  * Plugin Name: Paid Member Subscriptions
  * Plugin URI: http://www.cozmoslabs.com/
  * Description: Accept payments, create subscription plans and restrict content on your membership website.
- * Version: 2.3.6
+ * Version: 2.4.7
  * Author: Cozmoslabs
  * Author URI: http://www.cozmoslabs.com/
  * Text Domain: paid-member-subscriptions
  * License: GPL2
  * WC requires at least: 3.0.0
- * WC tested up to: 5.2
+ * WC tested up to: 5.5
  *
  * == Copyright ==
  * Copyright 2015 Cozmoslabs (www.cozmoslabs.com)
@@ -36,7 +36,7 @@ Class Paid_Member_Subscriptions {
 
     public function __construct() {
 
-        define( 'PMS_VERSION', '2.3.6' );
+        define( 'PMS_VERSION', '2.4.7' );
         define( 'PMS_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
         define( 'PMS_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
         define( 'PMS_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -940,7 +940,9 @@ Class Paid_Member_Subscriptions {
 
         wp_localize_script( 'pms-front-end', 'pmsGdpr', array(
             'delete_url'        => $delete_url,
+            /* translators: %s the word DELETE */
             'delete_text'       => sprintf(__('Type %s to confirm deleting your account and all data associated with it:', 'paid-member-subscriptions'), 'DELETE' ),
+            /* translators: %s the word DELETE */
             'delete_error_text' => sprintf(__('You did not type %s. Try again!', 'paid-member-subscriptions'), 'DELETE' ),
         ));
 
@@ -955,7 +957,7 @@ Class Paid_Member_Subscriptions {
                 wp_enqueue_script( 'pms-chosen', PMS_PLUGIN_DIR_URL . 'assets/libs/chosen/chosen.jquery.min.js', array( 'jquery' ), PMS_VERSION );
                 wp_enqueue_style( 'pms-chosen', PMS_PLUGIN_DIR_URL . 'assets/libs/chosen/chosen.css', array(), PMS_VERSION );
 
-                wp_add_inline_script( 'pms-front-end', 'PMS_ChosenStrings', json_encode( array(
+                wp_localize_script( 'pms-front-end', 'PMS_ChosenStrings', json_encode( array(
                     'search_contains'  => true,
                     'placeholder_text' => __( 'Select an option', 'paid-member-subscriptions' ),
                     'no_results_text'  => __( 'No results match', 'paid-member-subscriptions' )

@@ -14,7 +14,7 @@ function pms_get_user_ip_address() {
 
     foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key){
         if (array_key_exists($key, $_SERVER) === true) {
-            foreach ( array_map('trim', explode( ',', $_SERVER[$key]) ) as $ip ) {
+            foreach ( array_map('trim', explode( ',', $_SERVER[$key]) ) as $ip ) {//phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
                 if ( filter_var($ip, FILTER_VALIDATE_IP) !== false ) {
                     return $ip;
                 }
@@ -63,8 +63,7 @@ function pms_get_current_session(){
  */
 function pms_disable_concurrent_logins(){
 
-    if ( !pms_user_has_concurrent_sessions() )
-
+    if ( !pms_user_has_concurrent_sessions() || current_user_can( 'manage_options' ) )
         return;
 
     $user_id = pms_get_current_user_id();
@@ -121,12 +120,12 @@ function pms_redirect_default_wp_pages(){
         exit;
     }
 
-    else if ( ($pagenow == "wp-login.php") && ( isset( $_GET['action'] ) && ( $_GET['action'] == 'register' ) ) && $register_page ) {
+    else if ( ($pagenow == "wp-login.php") && ( isset( $_GET['action'] ) && ( $_GET['action'] === 'register' ) ) && $register_page ) {
         wp_redirect($register_page);
         exit;
     }
 
-    else if ( ($pagenow == "wp-login.php") && ( isset( $_GET['action'] ) && ( $_GET['action'] == 'lostpassword' ) ) && $lost_password_page ) {
+    else if ( ($pagenow == "wp-login.php") && ( isset( $_GET['action'] ) && ( $_GET['action'] === 'lostpassword' ) ) && $lost_password_page ) {
         wp_redirect($lost_password_page);
         exit;
     }
@@ -146,15 +145,15 @@ function pms_gdpr_delete_user() {
     $gdpr_settings = pms_get_gdpr_settings();
     if( !empty( $gdpr_settings ) ) {
         if (!empty($gdpr_settings['gdpr_delete']) && $gdpr_settings['gdpr_delete'] === 'enabled') {
-            if (isset($_REQUEST['pms_action']) && $_REQUEST['pms_action'] == 'pms_delete_user' && wp_verify_nonce($_REQUEST['pms_nonce'], 'pms-user-own-account-deletion') && isset($_REQUEST['pms_user']) && get_current_user_id() == $_REQUEST['pms_user']) {
+            if (isset($_REQUEST['pms_action']) && $_REQUEST['pms_action'] === 'pms_delete_user' && isset( $_REQUEST['pms_nonce'] ) && wp_verify_nonce( sanitize_text_field( $_REQUEST['pms_nonce'] ), 'pms-user-own-account-deletion') && isset($_REQUEST['pms_user']) && get_current_user_id() === $_REQUEST['pms_user']) {
                 require_once(ABSPATH . 'wp-admin/includes/user.php');
-                $user = new WP_User($_REQUEST['pms_user']);
+                $user = new WP_User(absint( $_REQUEST['pms_user'] ));
 
                 if (!empty($user->roles)) {
                     foreach ($user->roles as $role) {
                         if ($role != 'administrator') {
-                            wp_delete_user($_REQUEST['pms_user']);
-                            pms_member_delete_user_subscription_cancel($_REQUEST['pms_user']);
+                            wp_delete_user( absint( $_REQUEST['pms_user'] ));
+                            pms_member_delete_user_subscription_cancel( absint( $_REQUEST['pms_user'] ) );
                         }
                     }
                 }

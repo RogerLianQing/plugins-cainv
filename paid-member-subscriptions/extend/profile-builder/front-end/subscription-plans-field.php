@@ -45,8 +45,8 @@ function pms_pb_subscription_plans_handler( $output, $form_location, $field, $us
             // Subscription plans
             if( !empty( $field['subscription-plans'] ) ) {
 
-                if( !empty( $_GET['subscription_plan'] ) && isset( $_GET['single_plan'] ) && $_GET['single_plan'] == 'yes' ) {
-                    $plan = pms_get_subscription_plan( (int)sanitize_text_field( $_GET['subscription_plan'] ) );
+                if( !empty( $_GET['subscription_plan'] ) && isset( $_GET['single_plan'] ) && $_GET['single_plan'] === 'yes' ) {
+                    $plan = pms_get_subscription_plan( absint( sanitize_text_field( $_GET['subscription_plan'] ) ) );
 
                     if( $plan->is_valid() && $plan->is_active() )
                         $field['subscription-plans'] = $plan->id;
@@ -79,7 +79,7 @@ function pms_pb_subscription_plans_handler( $output, $form_location, $field, $us
                 /* compatibility with conditional logic on edit profile forms */
                 if( !empty( $member->subscriptions ) ){
                     foreach( $member->subscriptions as $sub_plan ){
-                        $output .= '<input type="hidden" value="'.$sub_plan['subscription_plan_id'].'">';
+                        $output .= '<input type="hidden" value="'. esc_attr( $sub_plan['subscription_plan_id'] ).'">';
                     }
                 }
 

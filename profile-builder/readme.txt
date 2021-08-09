@@ -3,8 +3,8 @@ Contributors: cozmoslabs, reflectionmedia, sareiodata, adispiac, madalin.ungurea
 Donate link: http://www.cozmoslabs.com/wordpress-profile-builder/
 Tags: user registration, user profile, user registration form, user fields, registration, edit profile, user custom fields, front-end login, front-end edit profile, front-end user registration, email confirmation, login form, content restriction, restrict content, profile
 Requires at least: 3.1
-Tested up to: 5.7
-Stable tag: 3.4.5
+Tested up to: 5.8
+Stable tag: 3.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -169,6 +169,37 @@ This plugin adds/removes user fields in the front-end. Both default and extra pr
 15. Edit or Add New User Role
 
 == Changelog ==
+= 3.5.0 =
+* Fix: Issue with missing dependency for a script
+* Fix: Issue with Multiple Admin Emails
+* Misc: Added Advanced Setting to allow admins to disable the Multiple User Roles selector field from the back-end Add/Edit User pages
+* Misc: Don't show Paid Member Subscriptions cross promotion if the plugin is already active
+* Misc: Removed period after the Activation URL in the default Email Confirmation email
+
+= 3.4.9 =
+* Fix: Security issue with Reset Password form. Thanks to Stiofan O'connor
+* Fix: Added option in Advanced Settings -> Fields for display password feature. It's disabled by default now. Display and positioning corrected
+* Misc: Added Empty Username/Password login messages in our code so they can be changed using the Labels Edit add-on
+
+= 3.4.8 =
+* Feature: Add a visibility toggle to Profile Builder password fields. Similar to WordPress default form functionality
+* Fix: Issue with Labels Edit showing the incorrect original string in the back-end
+* Fix: Improved sanitization on the Toolbox settings page
+* Misc: Usermeta shortcodes now supports the `ID` key which will return the currently logged in users ID
+* Misc: Added a language field that can be used to store the selected website language at the time of registration
+
+= 3.4.7 =
+* Fix: Default placeholder for URL field so it can be replaced using the general filter
+* Fix: HTML for the Login form Remember Me checkbox. Improved CSS
+* Fix: A notice in relation to Elementor
+* Misc: Use WP Timzeone when saving users last profile update date with the Toolbox option
+* Misc: Allow Login form strings to be changed using the Labels Edit functionality
+* Misc: Added a filter over the Content Restriction redirect url
+
+= 3.4.6 =
+* Misc: Added a wrapper to the content restriction message
+* Misc: Added individual classes to the register and lost password links from the login form
+
 = 3.4.5 =
 * Fix: Error triggered with Elementor coming from the latest update
 

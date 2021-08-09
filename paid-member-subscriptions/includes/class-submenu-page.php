@@ -201,14 +201,14 @@ Class PMS_Submenu_Page {
             return;
 
         // Return if the current page is not the one accessed
-        if( $_GET['page'] != $this->menu_slug )
+        if( $_GET['page'] !== $this->menu_slug )
             return;
 
         // Return if no message exists
         if( empty( $_GET['message'] ) )
             return;
 
-        $message_code = (int)$_GET['message'];
+        $message_code = absint( $_GET['message'] );
 
         $type = '';
 
@@ -327,8 +327,8 @@ Class PMS_Submenu_Page {
             return;
 
         foreach( $this->admin_notices as $notice ) {
-            echo '<div class="' . $notice['type'] . ' pms-admin-notice">';
-                echo '<p>' . $notice['message'] . '</p>';
+            echo '<div class="' . esc_attr( $notice['type'] ) . ' pms-admin-notice">';
+                echo '<p>' . esc_html( $notice['message'] ) . '</p>';
             echo '</div>';
         }
 

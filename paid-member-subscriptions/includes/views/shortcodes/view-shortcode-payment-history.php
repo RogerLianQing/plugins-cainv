@@ -34,10 +34,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
     <thead>
         <tr>
-            <th class="pms-payment-id"><?php _e( 'ID', 'paid-member-subscriptions' ); ?></th>
-            <th class="pms-payment-amount"><?php _e( 'Amount', 'paid-member-subscriptions' ); ?></th>
-            <th class="pms-payment-date"><?php _e( 'Date / Time', 'paid-member-subscriptions' ); ?></th>
-            <th class="pms-payment-status"><?php _e( 'Status', 'paid-member-subscriptions' ); ?></th>
+            <th class="pms-payment-id"><?php esc_html_e( 'ID', 'paid-member-subscriptions' ); ?></th>
+            <th class="pms-payment-amount"><?php esc_html_e( 'Amount', 'paid-member-subscriptions' ); ?></th>
+            <th class="pms-payment-date"><?php esc_html_e( 'Date / Time', 'paid-member-subscriptions' ); ?></th>
+            <th class="pms-payment-status"><?php esc_html_e( 'Status', 'paid-member-subscriptions' ); ?></th>
 
             <?php do_action( 'pms_payment_history_table_header', $user_id, $payments ); ?>
         </tr>
@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <tr>
                 <td class="pms-payment-id"><?php echo '#' . esc_html( apply_filters( 'pms_payment_history_id', $payment->id, $payment ) ); ?></td>
                 <td class="pms-payment-amount" title='<?php apply_filters( 'pms_payment_history_amount_row_title', '', $payment ); ?>'><?php echo esc_html( pms_format_price( $payment->amount, pms_get_active_currency() ) ); ?></td>
-                <td class="pms-payment-date"><?php echo ucfirst( date_i18n( apply_filters( 'pms_payment_history_date_format', 'j F, Y H:i' ), strtotime( $payment->date ) + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) ); ?></td>
+                <td class="pms-payment-date"><?php echo esc_html( ucfirst( date_i18n( apply_filters( 'pms_payment_history_date_format', 'j F, Y H:i' ), strtotime( $payment->date ) + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ) ) ); ?></td>
                 <td class="pms-payment-status"><?php echo ( ! empty( $payment_statuses[$payment->status] ) ? esc_html( $payment_statuses[$payment->status] ) : '' ); ?></td>
 
                 <?php do_action( 'pms_payment_history_table_row', $user_id, $payment ); ?>
@@ -60,8 +60,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 </table>
 
-<?php echo pms_paginate_links( apply_filters( 'pms_payment_history_table_paginate_links', array( 'id' => 'pms-payment-history', 'current' => max( 1, $page ), 'total'   => ceil( pms_get_member_payments_count( $user_id ) / $number_per_page )  ) ) ); ?>
+<?php echo pms_paginate_links( apply_filters( 'pms_payment_history_table_paginate_links', array( 'id' => 'pms-payment-history', 'current' => max( 1, $page ), 'total'   => ceil( pms_get_member_payments_count( $user_id ) / $number_per_page )  ) ) ); /*phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */ ?>
 
 <?php else: // Add payments ?>
-    <p class="pms-no-payments"><?php _e( 'No payments found', 'paid-member-subscriptions' ); ?></p>
+    <p class="pms-no-payments"><?php esc_html_e( 'No payments found', 'paid-member-subscriptions' ); ?></p>
 <?php endif; // End of payments ?>

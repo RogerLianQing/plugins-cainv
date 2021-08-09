@@ -40,12 +40,17 @@ Class PMS_Submenu_Page_Export extends PMS_Submenu_Page {
         require_once PMS_PLUGIN_DIR_PATH . 'includes/admin/export/class-batch-export-members.php';
         require_once PMS_PLUGIN_DIR_PATH . 'includes/admin/export/class-batch-export-payments.php';
 
-        parse_str( $_POST['form'], $form );
+        if( !isset( $_POST['form'] ) )
+            die();
 
-        $_REQUEST = $form = (array) $form;
+        parse_str( $_POST['form'], $form ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+        $_REQUEST = $form = (array) pms_array_sanitize_text_field( $form );
 
-        if( ! wp_verify_nonce( $_REQUEST['pms_ajax_export'], 'pms_ajax_export' ) ) {
+        if( !isset( $_REQUEST['pms_ajax_export'] ) || !isset( $_POST['step'] ) )
+            die();
+
+        if( ! wp_verify_nonce( sanitize_text_field( $_REQUEST['pms_ajax_export'] ), 'pms_ajax_export' ) ) {
             die( '-2' );
         }
 
@@ -58,7 +63,7 @@ Class PMS_Submenu_Page_Export extends PMS_Submenu_Page {
         }
 
         if ( ! $export->is_writable ) {
-            echo json_encode( array( 'error' => true, 'message' => __( 'Export location or file not writable', 'paid-member-subscriptions' ) ) ); exit;
+            echo json_encode( array( 'error' => true, 'message' => esc_html__( 'Export location or file not writable', 'paid-member-subscriptions' ) ) ); exit;
         }
 
         $export->set_properties( $_REQUEST );
@@ -77,11 +82,11 @@ Class PMS_Submenu_Page_Export extends PMS_Submenu_Page {
 
         } elseif ( true === $export->is_empty ) {
 
-            echo json_encode( array( 'error' => true, 'message' => __( 'No data found for export parameters', 'paid-member-subscriptions' ) ) ); exit;
+            echo json_encode( array( 'error' => true, 'message' => esc_html__( 'No data found for export parameters', 'paid-member-subscriptions' ) ) ); exit;
 
         } elseif ( true === $export->done && true === $export->is_void ) {
 
-            $message = ! empty( $export->message ) ? $export->message : __( 'Batch Processing Complete', 'paid-member-subscriptions' );
+            $message = ! empty( $export->message ) ? $export->message : esc_html__( 'Batch Processing Complete', 'paid-member-subscriptions' );
             echo json_encode( array( 'success' => true, 'message' => $message ) ); exit;
 
         } else {
@@ -102,22 +107,25 @@ Class PMS_Submenu_Page_Export extends PMS_Submenu_Page {
 
     public function pms_process_batch_export_download() {
 
-        $key = ! empty( $_GET['pms_action'] ) && $_GET['pms_action'] == 'download_batch_export' ? sanitize_key( $_GET['pms_action'] ) : false;
-
-        if ( empty( $key ) ) {
+        if( !isset( $_REQUEST['nonce'] ) || !isset( $_REQUEST['class'] ) )
             return;
-        }
 
-        if( ! wp_verify_nonce( $_REQUEST['nonce'], 'pms-batch-export' ) ) {
-            wp_die( __( 'Nonce verification failed', 'paid-member-subscriptions' ), __( 'Error', 'paid-member-subscriptions' ), array( 'response' => 403 ) );
-        }
+        $key = ! empty( $_GET['pms_action'] ) && $_GET['pms_action'] == 'download_batch_export' ? sanitize_text_field( $_GET['pms_action'] ) : false;
+
+        if ( empty( $key ) )
+            return;
+
+        if( ! wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ), 'pms-batch-export' ) )
+            wp_die( esc_html__( 'Nonce verification failed', 'paid-member-subscriptions' ), esc_html__( 'Error', 'paid-member-subscriptions' ), array( 'response' => 403 ) );
 
         require_once PMS_PLUGIN_DIR_PATH . 'includes/admin/export/class-export.php';
         require_once PMS_PLUGIN_DIR_PATH . 'includes/admin/export/class-batch-export.php';
         require_once PMS_PLUGIN_DIR_PATH . 'includes/admin/export/class-batch-export-members.php';
         require_once PMS_PLUGIN_DIR_PATH . 'includes/admin/export/class-batch-export-payments.php';
 
-        $export = new $_REQUEST['class'];
+        $class_name = sanitize_text_field( $_REQUEST['class'] );
+
+        $export = new $class_name;
         $export->export();
 
     }
@@ -175,5 +183,5 @@ Class PMS_Submenu_Page_Export extends PMS_Submenu_Page {
 
 }
 
-$pms_submenu_page_basic_info = new PMS_Submenu_Page_Export( 'paid-member-subscriptions', __( 'Export Data', 'paid-member-subscriptions' ), __( 'Export Data', 'paid-member-subscriptions' ), 'manage_options', 'pms-export-page', 9);
+$pms_submenu_page_basic_info = new PMS_Submenu_Page_Export( 'paid-member-subscriptions', esc_html__( 'Export Data', 'paid-member-subscriptions' ), esc_html__( 'Export Data', 'paid-member-subscriptions' ), 'manage_options', 'pms-export-page', 9);
 $pms_submenu_page_basic_info->init();

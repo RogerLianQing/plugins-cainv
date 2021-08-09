@@ -29,7 +29,7 @@ Class PMS_Dashboard_Payments_Summary {
         if( !current_user_can( 'manage_options' ) )
             return;
 
-        wp_add_dashboard_widget( 'pms_payments_summary', __( 'Paid Member Subscriptions Payments Summary', 'paid-member-subscriptions' ), array( $this, 'output_payments_summary' ) );
+        wp_add_dashboard_widget( 'pms_payments_summary', esc_html__( 'Paid Member Subscriptions Payments Summary', 'paid-member-subscriptions' ), array( $this, 'output_payments_summary' ) );
 
     }
 

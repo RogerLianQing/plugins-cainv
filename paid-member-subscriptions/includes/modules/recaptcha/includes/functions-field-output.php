@@ -23,8 +23,8 @@ function pms_recaptcha_get_field_output( $form_location = 'register' ) {
 
     $field_errors = pms_errors()->get_error_messages( 'recaptcha-' . $form_location );
 
-    $output = '<div id="pms-recaptcha-' . $form_location . '-wrapper" class="pms-field">';
-        $output .= '<div id="pms-recaptcha-' . $form_location . '" class="pms-recaptcha g-recaptcha" data-sitekey="' . ( !empty( $settings['site_key'] ) ? $settings['site_key'] : '' ) . '" data-theme="' . apply_filters( 'pms_recaptcha_theme', 'light' ) . '" data-size="' . apply_filters( 'pms_recaptcha_size', 'normal' ) . '"></div>';
+    $output = '<div id="pms-recaptcha-' . esc_attr( $form_location ) . '-wrapper" class="pms-field">';
+        $output .= '<div id="pms-recaptcha-' . esc_attr( $form_location ) . '" class="pms-recaptcha g-recaptcha" data-sitekey="' . ( !empty( $settings['site_key'] ) ? esc_attr( $settings['site_key'] ) : '' ) . '" data-theme="' . apply_filters( 'pms_recaptcha_theme', 'light' ) . '" data-size="' . apply_filters( 'pms_recaptcha_size', 'normal' ) . '"></div>';
 
         if( false === strpos( $form_location, 'wp_' ) )
             $output .= pms_display_field_errors( $field_errors, true );
@@ -44,7 +44,7 @@ function pms_recaptcha_get_field_output( $form_location = 'register' ) {
  */
 function pms_recaptcha_field_register_form_bottom( $shortcode_atts ) {
 
-    echo pms_recaptcha_get_field_output( 'register' );
+    echo pms_recaptcha_get_field_output( 'register' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_register_form_bottom', 'pms_recaptcha_field_register_form_bottom', 100 );
@@ -62,7 +62,7 @@ function pms_recaptcha_field_login_form_middle( $string, $args ) {
     if( $args['form_id'] != 'pms_login' )
         return $string;
 
-    $string .= pms_recaptcha_get_field_output( 'login' );
+    $string .= pms_recaptcha_get_field_output( 'login' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
     return $string;
 }
@@ -75,7 +75,7 @@ add_filter( 'login_form_middle', 'pms_recaptcha_field_login_form_middle', 9, 2 )
  */
 function pms_recaptcha_field_recover_password_form_bottom() {
 
-    echo pms_recaptcha_get_field_output( 'recover_password' );
+    echo pms_recaptcha_get_field_output( 'recover_password' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 }
 add_action( 'pms_recover_password_form_bottom', 'pms_recaptcha_field_recover_password_form_bottom', 100 );
@@ -88,7 +88,7 @@ add_action( 'pms_recover_password_form_bottom', 'pms_recaptcha_field_recover_pas
 function pms_recaptcha_field_default_wp_register_form() {
 
     echo '<div style="margin-left: -15px; margin-bottom: 15px;">';
-        echo pms_recaptcha_get_field_output( 'default_wp_register' );
+        echo pms_recaptcha_get_field_output( 'default_wp_register' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo '</div>';
 
 }
@@ -102,7 +102,7 @@ add_action( 'register_form', 'pms_recaptcha_field_default_wp_register_form' );
 function pms_recaptcha_field_default_wp_login_form() {
 
     echo '<div style="margin-left: -15px; margin-bottom: 15px;">';
-        echo pms_recaptcha_get_field_output( 'default_wp_login' );
+        echo pms_recaptcha_get_field_output( 'default_wp_login' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo '</div>';
 
 }
@@ -116,7 +116,7 @@ add_action( 'login_form', 'pms_recaptcha_field_default_wp_login_form' );
 function pms_recaptcha_field_default_wp_recover_password_form() {
 
     echo '<div style="margin-left: -15px; margin-bottom: 15px;">';
-        echo pms_recaptcha_get_field_output( 'default_wp_recover_password' );
+        echo pms_recaptcha_get_field_output( 'default_wp_recover_password' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo '</div>';
 
 }

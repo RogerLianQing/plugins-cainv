@@ -88,7 +88,7 @@ class PMS_Elementor_Account_Widget extends \Elementor\Widget_Base {
 
 		$settings = $this->get_settings_for_display();
 
-		echo do_shortcode( '[pms-account show_tabs='.$settings['pms_show_tabs'].' logout_redirect_url='.$settings['pms_after_logout_redirect_url'].']');
+		echo do_shortcode( '[pms-account show_tabs='.esc_attr( $settings['pms_show_tabs'] ).' logout_redirect_url='.esc_url( $settings['pms_after_logout_redirect_url'] ).']');
 
 	}
 

@@ -501,6 +501,23 @@ jQuery( function($) {
 
     }
 
+    // Display confirmation prompt on bulk delete members
+    $(document).off( 'click', '#doaction' ).on( 'click', '#doaction', function(e){
+        message = pms_confirmation_message.message.split("\\n").join("\n");
+        if ( $('#bulk-action-selector-top').val() == 'delete' || $('#bulk-action-selector-bottom').val() == 'delete' ){
+            return confirm(message);
+        }
+
+    });
+
+    $(document).off( 'click', '#doaction2' ).on( 'click', '#doaction2', function(e){
+        message = pms_confirmation_message.message.split("\\n").join("\n");
+        if ( $('#bulk-action-selector-top').val() == 'delete' || $('#bulk-action-selector-bottom').val() == 'delete' ){
+            return confirm(message);
+        }
+
+    });
+
 
     //Handle the display of datepicker when Custom intervals are selected on Members page
     $('#pms-start-date-interval').hide();
@@ -528,5 +545,10 @@ jQuery( function($) {
             $('#pms-expiration-date-interval').hide();
         }
     });
+
+    // Handle the display of Bulk Actions dropdown to appear only on Members page and not on Bulk Add New Members
+    // if( $('#pms_add_member_bulk_subscription_plan')){
+    //     $('.bulkactions').hide();
+    // }
 
 });

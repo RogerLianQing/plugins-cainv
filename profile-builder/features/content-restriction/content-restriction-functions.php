@@ -49,6 +49,8 @@ function wppb_get_restriction_content_message( $message_type = '', $post_id = 0 
         $wppb_content_restriction_message = apply_filters( 'wppb_get_restriction_content_message_default', $wppb_content_restriction_message, $message_type, $wppb_content_restriction_settings );
     }
 
+    $wppb_content_restriction_message = '<span class="wppb-content-restriction-message">' . $wppb_content_restriction_message . '</span>';
+
     $custom_message_enabled = get_post_meta( $post_id, 'wppb-content-restrict-messages-enabled', true );
 
     if( ! empty( $post_id ) && ! empty( $custom_message_enabled ) ) {
@@ -174,9 +176,9 @@ function wppb_content_restriction_post_redirect() {
 
     // Redirect
     nocache_headers();
-    wp_redirect( wppb_add_missing_http( $redirect_url ) );
+    wp_redirect( apply_filters( 'wppb_restricted_post_redirect_url', wppb_add_missing_http( $redirect_url ) ) );
     exit;
-
+    
 }
 add_action( 'template_redirect', 'wppb_content_restriction_post_redirect' );
 
@@ -309,4 +311,3 @@ function wppb_content_restriction_shortcode( $atts, $content = null ) {
 
 }
 add_shortcode( 'wppb-restrict', 'wppb_content_restriction_shortcode' );
-

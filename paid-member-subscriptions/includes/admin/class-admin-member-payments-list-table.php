@@ -97,8 +97,11 @@ Class PMS_Member_Payments_List_Table extends WP_List_Table {
 
         $data = array();
 
+        if( !isset( $_REQUEST['member_id'] ) )
+            return $data;
+
         $args = array(
-            'user_id' => (int)trim($_REQUEST['member_id']),
+            'user_id' => (int)sanitize_text_field( $_REQUEST['member_id'] ),
             'number'   => 10
         );
 
@@ -182,7 +185,7 @@ Class PMS_Member_Payments_List_Table extends WP_List_Table {
      */
     public function no_items() {
 
-        echo __( 'No payments found', 'paid-member-subscriptions' );
+        echo esc_html__( 'No payments found', 'paid-member-subscriptions' );
 
     }
 

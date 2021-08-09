@@ -27,14 +27,16 @@ class PMS_WPBakery_Widgets {
                     'holder'      => 'div',
                     'heading'     => __( 'Subscription Plans', 'paid-member-subscriptions' ),
                     'param_name'  => 'subscription_plans',
-                    'description' => sprintf( __( 'Comma separated list of subscription plans ids to show. %sRead more%s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters">', '</a>')
+                    /* translators: %s: anchor tags */
+                    'description' => sprintf( __( 'Comma separated list of subscription plans ids to show. %1$sRead more%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters">', '</a>')
                 ),
                 array(
                     'type'        => 'textfield',
                     'holder'      => 'div',
                     'heading'     => __( 'Selected plan', 'paid-member-subscriptions' ),
                     'param_name'  => 'selected_subscription_plan',
-                    'description' => sprintf( __( 'ID of the plan which should be selected by default. %sRead more%s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters">', '</a>')
+                    /* translators: %s: anchor tags */
+                    'description' => sprintf( __( 'ID of the plan which should be selected by default. %1$sRead more%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters">', '</a>')
                 ),
                 array(
                     'type'       => 'dropdown',
@@ -79,14 +81,16 @@ class PMS_WPBakery_Widgets {
                     'holder'      => 'div',
                     'heading'     => __( 'After Login redirect URL', 'paid-member-subscriptions' ),
                     'param_name'  => 'redirect_url',
-                    'description' => sprintf( __( 'Enter the URL where users should be redirected after logging in. %sRead more%s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters-2">', '</a>')
+                    /* translators: %s: anchor tags */
+                    'description' => sprintf( __( 'Enter the URL where users should be redirected after logging in. %1$sRead more%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters-2">', '</a>')
                 ),
                 array(
                     'type'        => 'textfield',
                     'holder'      => 'div',
                     'heading'     => __( 'After Logout redirect URL', 'paid-member-subscriptions' ),
                     'param_name'  => 'logout_redirect_url',
-                    'description' => sprintf( __( 'Enter the URL where users should be redirected after logging out. %sRead more%s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters-2">', '</a>')
+                    /* translators: %s: anchor tags */
+                    'description' => sprintf( __( 'Enter the URL where users should be redirected after logging out. %1$sRead more%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters-2">', '</a>')
                 ),
             )
         ) );
@@ -104,7 +108,8 @@ class PMS_WPBakery_Widgets {
                     'holder'      => 'div',
                     'heading'     => __( 'After recovery redirect URL', 'paid-member-subscriptions' ),
                     'param_name'  => 'after_recovery_redirect_url',
-                    'description' => sprintf( __( 'Enter the URL where users should be redirected after a sucessful password reset. %sRead more%s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters-6">', '</a>')
+                    /* translators: %s: anchor tags */
+                    'description' => sprintf( __( 'Enter the URL where users should be redirected after a sucessful password reset. %1$sRead more%2$s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/shortcodes/#Parameters-6">', '</a>')
                 ),
             )
         ) );
@@ -118,11 +123,11 @@ class PMS_WPBakery_Widgets {
         ), $atts );
 
         if ( !empty( $atts['subscription_plans'] ) )
-            $plans = 'subscription_plans="'.$atts['subscription_plans'].'"';
+            $plans = 'subscription_plans="'.esc_attr( $atts['subscription_plans'] ).'"';
         else
             $plans = '';
 
-        return do_shortcode( '[pms-register '.$plans.' selected="'.$atts['selected_subscription_plan'].'" plans_position="'.$atts['plans_position'].'"]' );
+        return do_shortcode( '[pms-register '.$plans.' selected="'.esc_attr( $atts['selected_subscription_plan'] ).'" plans_position="'.esc_attr( $atts['plans_position'] ).'"]' );
     }
 
 

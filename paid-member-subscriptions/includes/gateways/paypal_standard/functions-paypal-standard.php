@@ -13,23 +13,23 @@ function pms_add_settings_content_paypal_standard( $options ) {
     ?>
 
     <div class="pms-payment-gateway-wrapper">
-        
-        <h4 class="pms-payment-gateway-title"><?php echo apply_filters( 'pms_settings_page_payment_gateway_paypal_title', __( 'Paypal Standard', 'paid-member-subscriptions' ) ); ?></h4>
+
+        <h4 class="pms-payment-gateway-title"><?php echo esc_html( apply_filters( 'pms_settings_page_payment_gateway_paypal_title', esc_html__( 'Paypal Standard', 'paid-member-subscriptions' ) ) ); ?></h4>
 
         <div class="pms-form-field-wrapper">
-            <label class="pms-form-field-label" for="paypal-standard-email"><?php _e( 'PayPal E-mail Address', 'paid-member-subscriptions' ); ?></label>
-            <input id="paypal-standard-email" type="text" name="pms_payments_settings[gateways][paypal_standard][email_address]" value="<?php echo isset( $options['gateways']['paypal_standard']['email_address' ]) ? $options['gateways']['paypal_standard']['email_address'] : ''; ?>" class="widefat" />
+            <label class="pms-form-field-label" for="paypal-standard-email"><?php esc_html_e( 'PayPal E-mail Address', 'paid-member-subscriptions' ); ?></label>
+            <input id="paypal-standard-email" type="text" name="pms_payments_settings[gateways][paypal_standard][email_address]" value="<?php echo isset( $options['gateways']['paypal_standard']['email_address' ]) ? esc_attr( $options['gateways']['paypal_standard']['email_address'] ) : ''; ?>" class="widefat" />
 
             <input type="hidden" name="pms_payments_settings[gateways][paypal_standard][name]" value="PayPal" />
 
-            <p class="description"><?php _e( 'Enter your PayPal e-mail address', 'paid-member-subscriptions' ); ?></p>
+            <p class="description"><?php esc_html_e( 'Enter your PayPal e-mail address', 'paid-member-subscriptions' ); ?></p>
         </div>
 
         <div class="pms-form-field-wrapper">
-            <label class="pms-form-field-label" for="paypal-standard-email"><?php _e( 'Test PayPal E-mail Address', 'paid-member-subscriptions' ); ?></label>
-            <input id="paypal-standard-email" type="text" name="pms_payments_settings[gateways][paypal_standard][test_email_address]" value="<?php echo isset( $options['gateways']['paypal_standard']['test_email_address' ]) ? $options['gateways']['paypal_standard']['test_email_address'] : ''; ?>" class="widefat" />
+            <label class="pms-form-field-label" for="paypal-standard-email"><?php esc_html_e( 'Test PayPal E-mail Address', 'paid-member-subscriptions' ); ?></label>
+            <input id="paypal-standard-email" type="text" name="pms_payments_settings[gateways][paypal_standard][test_email_address]" value="<?php echo isset( $options['gateways']['paypal_standard']['test_email_address' ]) ? esc_attr( $options['gateways']['paypal_standard']['test_email_address'] ) : ''; ?>" class="widefat" />
 
-            <p class="description"><?php _e( 'PayPal E-mail address to use for test transactions', 'paid-member-subscriptions' ); ?></p>
+            <p class="description"><?php esc_html_e( 'PayPal E-mail address to use for test transactions', 'paid-member-subscriptions' ); ?></p>
         </div>
 
         <?php do_action( 'pms_settings_page_payment_gateway_paypal_extra_fields', $options ); ?>
@@ -37,17 +37,17 @@ function pms_add_settings_content_paypal_standard( $options ) {
         <!-- IPN Message -->
         <?php if( in_array( 'paypal_standard', $options['active_pay_gates'] ) || in_array( 'paypal_express', $options['active_pay_gates'] ) ) : ?>
             <p class="pms-ipn-notice" style="margin-bottom:16px;">
-                <?php printf( __( 'In order for <strong>PayPal payments to work correctly</strong>, you need to setup the IPN Url in your PayPal account. %sMore info%s', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/member-payments/#IPN_for_PayPal_gateways">', '</a>' ); ?>
+                <?php printf( wp_kses_post( __( 'In order for <strong>PayPal payments to work correctly</strong>, you need to setup the IPN Url in your PayPal account. %sMore info%s', 'paid-member-subscriptions' ) ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/member-payments/#IPN_for_PayPal_gateways">', '</a>' ); ?>
             </p>
             <p class="pms-ipn-notice">
-                <?php printf( __( 'Use the following URL for the IPN:', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/member-payments/#IPN_for_PayPal_gateways">', '</a>' ); ?>
+                <?php printf( esc_html__( 'Use the following URL for the IPN:', 'paid-member-subscriptions' ), '<a href="https://www.cozmoslabs.com/docs/paid-member-subscriptions/member-payments/#IPN_for_PayPal_gateways">', '</a>' ); ?>
             </p>
 
             <div class="pms-ipn-url">
                 <?php if( in_array( 'paypal_standard', $options['active_pay_gates'] ) ) : ?>
-                    <?php echo add_query_arg( 'pay_gate_listener', 'paypal_ipn', trailingslashit( home_url() ) ); ?>
+                    <?php echo esc_url( add_query_arg( 'pay_gate_listener', 'paypal_ipn', trailingslashit( home_url() ) ) ); ?>
                 <?php elseif( in_array( 'paypal_express', $options['active_pay_gates'] ) ) : ?>
-                    <?php echo add_query_arg( 'pay_gate_listener', 'paypal_epipn', trailingslashit( home_url() ) ); ?>
+                    <?php echo esc_url( add_query_arg( 'pay_gate_listener', 'paypal_epipn', trailingslashit( home_url() ) ) ); ?>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -72,8 +72,8 @@ function pms_paypal_email_address_admin_warning() {
     if( !empty( $are_active ) && pms_get_paypal_email() === false ) {
 
         echo '<div class="pms-warning-message-wrapper">';
-            echo '<p>' . sprintf( __( 'Your <strong>PayPal Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your PayPal account %1$s here %2$s.', 'paid-member-subscriptions' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) . '</p>';
-            echo '<p><em>' . __( 'This message is visible only by Administrators.', 'paid-member-subscriptions' ) . '</em></p>';
+            echo '<p>' . wp_kses_post( sprintf( __( 'Your <strong>PayPal Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your PayPal account %1$s here %2$s.', 'paid-member-subscriptions' ), '<a href="' . esc_url( admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) ) .'" target="_blank">', '</a>' ) ) . '</p>';
+            echo '<p><em>' . esc_html__( 'This message is visible only by Administrators.', 'paid-member-subscriptions' ) . '</em></p>';
         echo '</div>';
 
     }
@@ -100,8 +100,8 @@ function pms_wppb_paypal_email_address_admin_warning() {
     foreach( $fields as $field ) {
         if ( $field['field'] == 'Subscription Plans' && !empty( $are_active ) && pms_get_paypal_email() === false ) {
             echo '<div class="pms-warning-message-wrapper">';
-                echo '<p>' . sprintf( __( 'Your <strong>PayPal Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your PayPal account %1$s here %2$s.', 'paid-member-subscriptions' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) . '</p>';
-                echo '<p><em>' . __( 'This message is visible only by Administrators.', 'paid-member-subscriptions' ) . '</em></p>';
+                echo '<p>' . wp_kses_post( sprintf( __( 'Your <strong>PayPal Email Address</strong> is missing. In order to make payments you will need to add the Email Address of your PayPal account %1$s here %2$s.', 'paid-member-subscriptions' ), '<a href="' . admin_url( 'admin.php?page=pms-settings-page&tab=payments' ) .'" target="_blank">', '</a>' ) ) . '</p>';
+                echo '<p><em>' . esc_html__( 'This message is visible only by Administrators.', 'paid-member-subscriptions' ) . '</em></p>';
             echo '</div>';
 
             break;
@@ -158,7 +158,18 @@ function pms_paypal_payment_logs_system_error_messages( $message, $log ) {
             break;
     }
 
-    return apply_filters( 'pms_paypal_payment_logs_system_error_messages', wp_kses( $message, $kses_args ), $log );
+    return apply_filters( 'pms_paypal_payment_logs_system_error_messages', wp_kses_post( $message, $kses_args ), $log );
 
 }
 add_filter( 'pms_payment_logs_system_error_messages', 'pms_paypal_payment_logs_system_error_messages', 10, 2 );
+
+/**
+ * Used to remove the current language from the home_url when
+ * TranslatePress is active and we generate the IPN URL
+ *
+ */
+function pms_trp_paypal_return_absolute_home( $new_url, $absolute_home ){
+
+    return $absolute_home;
+
+}

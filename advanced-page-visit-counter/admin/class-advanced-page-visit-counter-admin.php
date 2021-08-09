@@ -95,7 +95,7 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
          * class.
          */
         
-        if ( isset( $_GET['page'] ) && $_GET['page'] === 'apvc-dashboard-page' ) {
+        if ( isset( $_GET['page'] ) && ($_GET['page'] === 'apvc-dashboard-page' || $_GET['page'] === 'apvc-smart-notifications-page') ) {
             wp_enqueue_style(
                 'apvc_material_icons',
                 plugin_dir_url( __FILE__ ) . 'css/mdi/css/materialdesignicons.min.css',
@@ -204,7 +204,7 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
             true
         );
         
-        if ( isset( $_GET['page'] ) && $_GET['page'] === 'apvc-dashboard-page' ) {
+        if ( isset( $_GET['page'] ) && ($_GET['page'] === 'apvc-dashboard-page' || $_GET['page'] === 'apvc-smart-notifications-page') ) {
             wp_enqueue_script(
                 'apvc_js_base',
                 plugin_dir_url( __FILE__ ) . 'js/vendor.bundle.base.js',
@@ -367,6 +367,7 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
      */
     public function avc_settings_page_init()
     {
+        global  $wpdb ;
         add_menu_page(
             __( 'Advanced Page Visit Counter', 'apvc' ),
             __( 'Advanced Page Visit Counter', 'apvc' ),
@@ -375,54 +376,67 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
             array( $this, 'apvc_dashboard_page' ),
             plugin_dir_url( __FILE__ ) . "images/a-logo-1.png"
         );
-        add_submenu_page(
-            'apvc-dashboard-page',
-            __( 'Dashboard', 'apvc' ),
-            __( 'Dashboard', 'apvc' ),
-            'manage_options',
-            'apvc-dashboard-page',
-            array( $this, 'apvc_dashboard_page' )
-        );
-        add_submenu_page(
-            'apvc-dashboard-page',
-            __( 'Trending', 'apvc' ),
-            __( 'Trending', 'apvc' ),
-            'manage_options',
-            'apvc-visits-page',
-            'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
-        );
-        add_submenu_page(
-            'apvc-dashboard-page',
-            __( 'Reports', 'apvc' ),
-            __( 'Reports', 'apvc' ),
-            'manage_options',
-            'apvc-visits-page',
-            'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
-        );
-        add_submenu_page(
-            'apvc-dashboard-page',
-            __( 'Shortcode Generator', 'apvc' ),
-            __( 'Shortcode Generator', 'apvc' ),
-            'manage_options',
-            'apvc-visits-page',
-            'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
-        );
-        add_submenu_page(
-            'apvc-dashboard-page',
-            __( 'Shortcode Templates', 'apvc' ),
-            __( 'Shortcode Templates', 'apvc' ),
-            'manage_options',
-            'apvc-visits-page',
-            'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
-        );
-        add_submenu_page(
-            'apvc-dashboard-page',
-            __( 'Settings', 'apvc' ),
-            __( 'Settings', 'apvc' ),
-            'manage_options',
-            'apvc-visits-page',
-            'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
-        );
+        $history_table = $wpdb->prefix . "avc_page_visit_history";
+        $rows = $wpdb->get_results( "SHOW COLUMNS FROM {$history_table} LIKE 'article_title'" );
+        
+        if ( count( $rows ) == 0 ) {
+            add_submenu_page(
+                'apvc-dashboard-page',
+                __( 'Dashboard', 'apvc' ),
+                __( 'Dashboard', 'apvc' ),
+                'manage_options',
+                'apvc-dashboard-page',
+                array( $this, 'apvc_dashboard_page' )
+            );
+            add_submenu_page(
+                'apvc-dashboard-page',
+                __( 'Trending', 'apvc' ),
+                __( 'Trending', 'apvc' ),
+                'manage_options',
+                'apvc-visits-page',
+                'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
+            );
+            add_submenu_page(
+                'apvc-dashboard-page',
+                __( 'Reports', 'apvc' ),
+                __( 'Reports', 'apvc' ),
+                'manage_options',
+                'apvc-visits-page',
+                'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
+            );
+            add_submenu_page(
+                'apvc-dashboard-page',
+                __( 'Shortcode Generator', 'apvc' ),
+                __( 'Shortcode Generator', 'apvc' ),
+                'manage_options',
+                'apvc-visits-page',
+                'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
+            );
+            add_submenu_page(
+                'apvc-dashboard-page',
+                __( 'Shortcode Templates', 'apvc' ),
+                __( 'Shortcode Templates', 'apvc' ),
+                'manage_options',
+                'apvc-visits-page',
+                'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
+            );
+            add_submenu_page(
+                'apvc-dashboard-page',
+                __( 'Settings', 'apvc' ),
+                __( 'Settings', 'apvc' ),
+                'manage_options',
+                'apvc-visits-page',
+                'Advanced_Visit_Counter_Admin::apvc_dashboard_page'
+            );
+        }
+    
+    }
+    
+    public function apvc_admin_head()
+    {
+        global  $wpdb ;
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'apvc-dashboard-page' ) {
+        }
     }
     
     /**
@@ -1080,9 +1094,6 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 	    <div class="container-fluid page-body-wrapper">
 		    <div class="main-panel container">
 			      <div class="content-wrapper">
-			        <?php 
-        $this->apvc_get_version_info_block();
-        ?>
 			        <div class="row">
 			        	<div class="col-lg-12">
 							<div class="hm_dash_heading">
@@ -1204,10 +1215,35 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 		            <div class="col-lg-12 grid-margin stretch-card">
 		                <div class="card">
 		                  <div class="p-4 border-bottom">
-		                    <h4 class="card-title mb-0"><?php 
-        echo  _e( "Visit Statistics - Last 20 Days Statistics", "apvc" ) ;
+		                  	<div class="col-lg-8 float-left">
+		                    	<h4 class="card-title mb-0"><?php 
+        _e( "Visit Statistics - <span id='duration_change'>Last 20 Days Statistics</span>", "apvc" );
         ?></h4>
+		                    	<span style="font-size: 10px; color: red; font-style: italic;">*It can take some time to render chart based on size of the data.</span>
+		                	</div>
+		                	<div class="col-lg-4 float-right">
+		                		<?php 
+        ?>
+		                    	<select class="float-right" id="apvc_filter_chart_dash">
+		                    		<option selected="selected"><?php 
+        _e( "Filter Data", "apvc" );
+        ?></option>
+		                    		<option value="7_days"><?php 
+        _e( "1 Week", "apvc" );
+        ?></option>
+		                    		<option value="1_month"><?php 
+        _e( "1 Month", "apvc" );
+        ?></option>
+		                    		<option value="3_months"><?php 
+        _e( "3 Months", "apvc" );
+        ?></option>
+		                    		<option value="6_month"><?php 
+        _e( "6 Months", "apvc" );
+        ?></option>
+		                    	</select>
+		                  	</div>
 		                  </div>
+
 		                  <div class="card-body visitStatsChart">
 		                    <canvas id="visitStatsChart" style="position: relative; height:50vh; width:80vw"></canvas>
 		                 	<div class="c-loader"><?php 
@@ -1288,33 +1324,7 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
             return;
         }
         ?>
-		<div class="row add-block grid-margin">
-          <div class="col-12 d-none d-lg-block">
-            <div class="intro-banner">
-              <div class="content-area">
-                <h3 class="mb-0"><?php 
-        echo  __( "Welcome back, " . $current_user->display_name . "!", "apvc" ) ;
-        ?></h3>
-                <?php 
-        
-        if ( apvc_fs()->is_not_paying() ) {
-            ?>
-                <p class="mb-0"><?php 
-            _e( "Checkout our website for special promo offers and discounts. <a href='https://pagevisitcounter.com' target='_blank'>Visit</a>", "apvc" );
-            ?></p>
-            	<?php 
-        }
-        
-        ?>
-              </div>
-              	<?php 
-        echo  '<a target="_blank" href="' . apvc_fs()->get_upgrade_url() . '" class="btn btn-light">' . __( 'Upgrade Now!', 'apvc' ) . '</a>' ;
-        echo  '<h6 class="mb-0 apvc_version">' . __( "Free Version " . $this->version, "apvc" ) . '</h6>' ;
-        ?>
-
-            </div>
-          </div>
-        </div>
+		
 		<?php 
     }
     
@@ -1621,9 +1631,6 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 		<div class="container-fluid page-body-wrapper trending">
 			<div class="main-panel container">
 				<div class="content-wrapper">
-					<?php 
-        $this->apvc_get_version_info_block();
-        ?>
 					<div class="row">
 						<?php 
         ?>
@@ -1702,9 +1709,6 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 		<div class="container-fluid page-body-wrapper general-reports">
 			<div class="main-panel container">
 			  <div class="content-wrapper">
-			  	<?php 
-        $this->apvc_get_version_info_block();
-        ?>
 			  	<div class="row grid-margin">
 			  		<?php 
         ?>
@@ -1776,6 +1780,15 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 			                  <th><?php 
         echo  __( "Detailed Report", "apvc" ) ;
         ?></th>
+			                  <th><?php 
+        echo  __( "Chart", "apvc" ) ;
+        ?></th>
+			                  <th><?php 
+        echo  __( "Set Starting Count", "apvc" ) ;
+        ?></th>
+			                  <th><?php 
+        echo  __( "Reset Count", "apvc" ) ;
+        ?></th>
 			                </tr>
 			              </thead>
 			              <tbody>
@@ -1787,7 +1800,16 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 						                  <td><div class="apvc_title">' . __( $reports->title, "apvc" ) . '</div></td>
 						                  <td>' . $this->apvc_number_format( $reports->count ) . '</td>
 						                  <td>
-						                    <a href="' . get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=detailed-reports&article_id=" . $reports->article_id . $dropDown . "" ) . '" class="btn btn-outline-primary">' . __( 'Detailed Report', "apvc" ) . '</a>
+						                    <a href="' . get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=detailed-reports&article_id=" . $reports->article_id . $dropDown . "" ) . '" class="btn btn-outline-primary">' . __( 'View', "apvc" ) . '</a>
+						                  </td>
+						                  <td>
+						                    <a href="' . get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=detailed-reports-chart&article_id=" . $reports->article_id . $dropDown . "" ) . '" class="btn btn-outline-primary">' . __( 'View Chart', "apvc" ) . '</a>
+						                  </td>
+						                  <td>
+						                    <a href="javascript:void(0);" art_id="' . $reports->article_id . '" class="btn btn-outline-primary set_start_cnt" data-toggle="modal" data-target="#setCnt"><i class="link-icon mdi mdi-clock"></i></a>
+						                  </td>
+						                  <td>
+						                    <a href="javascript:void(0);" art_id="' . $reports->article_id . '" class="btn btn-outline-primary btn-red reset_cnt" data-toggle="modal" data-target="#resetCnt">X</a>
 						                  </td>
 						                </tr>' ;
         }
@@ -1856,7 +1878,138 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 			  </div>
 			</div>
 		</div>
+
+
+		<div class="modal fade" id="setCnt" style="top:10%;" tabindex="-1" role="dialog" aria-labelledby="setCnt" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header text-center">
+                <h5 class="modal-title"><?php 
+        _e( "Set Starting Count", "apvc" );
+        ?></h5>
+              </div>
+              <div class="modal-body setCntPreview" style="padding: 10px 25px;">
+              	<?php 
+        $this->apvc_loader_control();
+        ?>
+              </div>
+              <div class="modal-footer text-center">
+              	<button type="button" class="btn btn-primary setCntSaveBtn"><?php 
+        _e( "Save Changes", "apvc" );
+        ?></button>
+                <button type="button" class="setCntCloseBtn btn btn-warning"><?php 
+        _e( "Cancel", "apvc" );
+        ?></button>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="resetCnt" style="top:10%;" tabindex="-1" role="dialog" aria-labelledby="resetCnt" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-body text-center" style="padding: 50px">
+
+              	<?php 
+        _e( "Are you sure to delete/reset count for this article? <Br />(This is impossible to revert.)", "apvc" );
+        ?><Br /><Br />
+              	<button type="button" id="art_id_btn" art_id="" class="btn btn-primary resetCnt"><?php 
+        _e( "Yes", "apvc" );
+        ?></button>
+                <button type="button" class="resetCloseBtn btn btn-warning"><?php 
+        _e( "No", "apvc" );
+        ?></button>
+                <Br />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
 		<?php 
+    }
+    
+    public function apvc_reset_count_art()
+    {
+        global  $wpdb ;
+        $history_table = $wpdb->prefix . "avc_page_visit_history";
+        $art_id = $_REQUEST["artID"];
+        
+        if ( $wpdb->query( "DELETE FROM {$history_table} WHERE article_id={$art_id}" ) ) {
+            echo  wp_send_json_success( "success" ) ;
+        } else {
+            echo  wp_send_json_error() ;
+        }
+        
+        wp_die();
+    }
+    
+    public function apvc_show_counter_options()
+    {
+        global  $wpdb ;
+        $art_id = $_REQUEST['artID'];
+        $active = get_post_meta( $art_id, "apvc_active_counter", true );
+        $base_count = get_post_meta( $art_id, "count_start_from", true );
+        $widget_label = get_post_meta( $art_id, "widget_label", true );
+        ?>
+		<style>p{ margin: 15px 0px 10px 0px; }</style>
+      	<div class="apvc_meta_box_fields">
+      		<input type="hidden" name="art_id" value="<?php 
+        echo  $art_id ;
+        ?>">
+	        <div class="apvc_start_cnt">
+	            <p><?php 
+        echo  __( "Active Page Visit Counter for this Article?" ) ;
+        ?></p>
+	            <input type="radio" value="Yes" <?php 
+        if ( $active == "Yes" ) {
+            echo  "checked" ;
+        }
+        ?> name="apvc_active_counter"><?php 
+        echo  __( "Yes" ) ;
+        ?>
+	            <input type="radio" value="No" <?php 
+        if ( $active == "No" ) {
+            echo  "checked" ;
+        }
+        ?> name="apvc_active_counter"><?php 
+        echo  __( "No" ) ;
+        ?>
+	        </div>
+	        <div class="apvc_base_count">
+	            <p><?php 
+        echo  __( "Start Counting from. Enter any number from where you want to start counting." ) ;
+        ?></p>
+	            <input style="width: 100%" type="number" name="count_start_from" value="<?php 
+        echo  $base_count ;
+        ?>" placeholder="Enter Base Count to start">
+	        </div>
+	        <div class="apvc_label">
+	            <p><?php 
+        echo  __( "Widget Label" ) ;
+        ?></p>
+	            <input style="width: 100%" type="text" name="widget_label" value="<?php 
+        echo  $widget_label ;
+        ?>" placeholder="Enter Label for Widget">
+	        </div>
+	    </div>
+		<?php 
+        wp_die();
+    }
+    
+    public function apvc_save_start_counter_op()
+    {
+        global  $wpdb ;
+        $post_id = $_REQUEST['art_id'];
+        $apvc_active_counter = ( $_REQUEST['cnt_act'] ? $_REQUEST['cnt_act'] : "Yes" );
+        $count_start_from = $_REQUEST['start_from'];
+        $widget_label = $_REQUEST['wid_label'];
+        update_post_meta( $post_id, "apvc_active_counter", $apvc_active_counter );
+        update_post_meta( $post_id, "count_start_from", $count_start_from );
+        update_post_meta( $post_id, "widget_label", $widget_label );
+        echo  wp_send_json_success( "success" ) ;
+        wp_die();
     }
     
     /**
@@ -1895,9 +2048,6 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 		<div class="container-fluid page-body-wrapper">
 			<div class="main-panel container">
 			  <div class="content-wrapper">
-			  	<?php 
-        $this->apvc_get_version_info_block();
-        ?>
 			  	
 			  	<?php 
         ?>
@@ -1998,6 +2148,8 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
         
         if ( count( $apvcDetailed->list ) > 0 ) {
             foreach ( $apvcDetailed->list as $reports ) {
+                $preBlock = "";
+                $preBlock = '<br/><span style="color:red;">' . __( "State: ", "apvc" ) . '</span><span>Premium</span><br/><span style="color:red;">' . __( "City: ", "apvc" ) . '</span><span>Premium</span>';
                 echo  '<tr>
 						                  <td>' . $cnt++ . '</td>
 						                  <td><div class="ap_width">' . __( $reports->title, "apvc" ) . '</div></td>
@@ -2005,7 +2157,7 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 						                  <td>' . __( $reports->user_type, "apvc" ) . '</td>
 						                  <td>' . __( $reports->date, "apvc" ) . '</td>
 						                  <td><div class="ap_width">' . __( $reports->ip_address, "apvc" ) . '</div></td>
-						                  <td class="apvc_geo_stats"><span style="color:#007bff;">' . __( "Browser: ", "apvc" ) . '</span>' . ucwords( $reports->browser_short_name ) . '<br /><span style="color:#d84545;">' . __( "OS: ", "apvc" ) . '</span>' . ucwords( $reports->operating_system ) . '<br /><span style="color:#b93db5;">' . __( "Device: ", "apvc" ) . '</span>' . ucwords( $reports->device_type ) . '<br /><span style="color:#d84545;">' . __( "Country: ", "apvc" ) . '</span>' . ucwords( $reports->country ) . ' <br /><img style="border-radius: 0px; width: 20px; height: 20px; margin-top: 5px; min-width:20px;" src="' . plugin_dir_url( __FILE__ ) . "/images/flags/" . strtolower( $this->get_country_name( $reports->country ) ) . '.svg" alt="' . $reports->country . '" title="' . $reports->country . '"></td>
+						                  <td class="apvc_geo_stats"><span style="color:#007bff;">' . __( "Browser: ", "apvc" ) . '</span>' . ucwords( $reports->browser_short_name ) . '<br /><span style="color:#d84545;">' . __( "OS: ", "apvc" ) . '</span>' . ucwords( $reports->operating_system ) . '<br /><span style="color:#b93db5;">' . __( "Device: ", "apvc" ) . '</span>' . ucwords( $reports->device_type ) . '<br /><span style="color:#d84545;">' . __( "Country: ", "apvc" ) . '</span>' . ucwords( $reports->country ) . '' . $preBlock . '</td>
 						                  <td><div class="ap_width">' . __( $reports->http_referer_clean, "apvc" ) . '<br/><a href="' . $reports->http_referer . '" target="_blank"><small class="text-muted" styword-break: break-word;">' . __( $reports->http_referer, "apvc" ) . '</small></a></div></td>
 						                </tr>' ;
             }
@@ -2094,182 +2246,197 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
     {
         global  $wpdb ;
         $noticeBoard = trim( get_option( "apvc_notice" ) );
-        // if( empty($noticeBoard) && !isset($_GET['clr']) ) {
-        /*
-        		?>
-        		<div class="content-wrapper">
-        <div class="row">
-        	<div class="col-lg-12 grid-margin stretch-card">
-        		<div class="card"  style="border: 2px solid #2196f3; border-radius: 5px;">
-        			<div class="card-body">
-        				<h4 style="color: #2196f3;">What's new in 4.3.0</h4>
-        				<h6>Exclude IP Addresses by adding ranges.</h6>
-        				<ul>
-        					<li>1. 192.168.0.* (This exclude ip address range from 192.168.0.0 to 192.168.0.255)</li>
-        					<li>2. 192.168.0.10/20 (This exclude ip address range from 192.168.0.10 to 192.168.0.20)</li>
-        					
-        					<li>Many premium features are coming in upcoming updates.</li>
-        					<li><span style="color: red; font-weight: bold;">After Plugin update / install kindly clear cache (If you are using any caching plugins) and refresh your permalink ( Setting -> permalinks ).</span></li>
-        				</ul>
-        				<a href="<?php echo admin_url();?>admin.php?page=apvc-dashboard-page&clr=yes" class="btn btn-icons btn-primary float-right" style="width: 200px">Close</a>
-        			</div>
-        		</div>
-        	</div>
-        </div>
-        		</div>
-        		<?php 
-        */
-        // }
-        if ( isset( $_GET['clr'] ) && $_GET['clr'] == 'yes' ) {
-            update_option( 'apvc_notice', 'yes' );
-        }
-        ?>
-			
-		<div class="container-scroller hidden-xs">
-			<nav class="navbar horizontal-layout col-lg-12 col-12 p-0">
-		        <div class="container d-flex flex-row nav-top">
-		          <div class="text-center navbar-brand-wrapper d-flex align-items-top">
-		            <a class="navbar-brand brand-logo" href="admin.php?page=apvc-dashboard-page">
-		              <img src="<?php 
-        echo  plugin_dir_url( __FILE__ ) . "/images/apvc-logo-large.png" ;
-        ?>" alt="logo"> </a>
-		          </div>
-		        </div>
-		        <div class="nav-bottom">
-		          <div class="container">
-		            <ul class="nav page-navigation">
-		              <li class="nav-item <?php 
-        echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == '' ? "menu-active" : "" ) ;
-        ?>">
-		                <a href="<?php 
-        echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page" ) ;
-        ?>" class="nav-link">
-		                  <i class="link-icon mdi mdi-airplay"></i>
-		                  <span class="menu-title"><?php 
-        echo  __( "Dashboard", "apvc" ) ;
-        ?></span>
-		                </a>
-		              </li>
-		              <li class="nav-item <?php 
-        echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'trending' ? "menu-active" : "" ) ;
-        ?>">
-		                <a href="<?php 
-        echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=trending" ) ;
-        ?>" class="nav-link">
-		                  <i class="link-icon mdi mdi-chart-line"></i>
-		                  <span class="menu-title"><?php 
-        echo  __( "Trending", "apvc" ) ;
-        ?></span>
-		                </a>
-		              </li>
-		              <li class="nav-item <?php 
-        echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'reports' || $_GET['apvc_page'] == 'detailed-reports' ? "menu-active" : "" ) ;
-        ?>">
-		                <a href="<?php 
-        echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=reports" ) ;
-        ?>" class="nav-link">
-		                  <i class="link-icon mdi mdi-content-copy"></i>
-		                  <span class="menu-title"><?php 
-        echo  __( "Reports", "apvc" ) ;
-        ?></span>
-		                </a>
-		                <?php 
-        ?>
-		              </li>
-		              <li class="nav-item <?php 
-        echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'shortcode_generator' || $_GET['apvc_page'] == 'shortcode_library' ? "menu-active" : "" ) ;
-        ?>">
-		                <a href="<?php 
-        echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=shortcode_generator" ) ;
-        ?>" class="nav-link">
-		                  <i class="link-icon mdi mdi-palette"></i>
-		                  <span class="menu-title"><?php 
-        echo  __( "Shortcode Generator", "apvc" ) ;
-        ?></span>
-		                </a>
-		                <div class="submenu ">
-		                  <ul class="submenu-item ">
-		                    <li class="nav-item ">
-		                      <a href="<?php 
-        echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=shortcode_library" ) ;
-        ?>" class="nav-link">
-			                  <?php 
-        echo  __( "Shortcode Library", "apvc" ) ;
-        ?>
-			                </a>
-		                    </li>
-		                  </ul>
-		                </div>
-		              </li>
-		              <li class="nav-item <?php 
-        echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'settings' ? "menu-active" : "" ) ;
-        ?>">
-		                <a href="<?php 
-        echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=settings" ) ;
-        ?>" class="nav-link">
-		                  <i class="link-icon mdi mdi-settings-box"></i>
-		                  <span class="menu-title"><?php 
-        echo  __( "Settings", "apvc" ) ;
-        ?></span>
-		                </a>
-		              </li>
-		              <?php 
-        ?>
-		            </ul>
-		          </div>
-		        </div>
-		      </nav>
+        $history_table = $wpdb->prefix . "avc_page_visit_history";
+        $rows = $wpdb->get_results( "SHOW COLUMNS FROM {$history_table} LIKE 'article_title'" );
+        
+        if ( count( $rows ) > 0 ) {
+            ?>
+		<div class="content-wrapper">
+			<div class="row">
+				<div class="col-lg-8 grid-margin stretch-card">
+					<div class="card"  style="border: 2px solid #2196f3; border-radius: 5px;">
+						<div class="card-body">
+							<h4 style="color: red;">Database Upgrade required...</h4>
+							<h6>Click on below button to upgrade the database.</h6>
+							<button id="apvc_update_db" class="btn btn-icons btn-primary float-left" style="width: 200px">Click to upgrade...</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<?php 
-        
-        if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'trending' ) {
-            $this->apvc_top_trending_content();
         } else {
+            if ( isset( $_GET['clr'] ) && $_GET['clr'] == 'yes' ) {
+                update_option( 'apvc_notice', 'yes' );
+            }
+            ?>
+			<div class="container-scroller hidden-xs">
+				<nav class="navbar horizontal-layout col-lg-12 col-12 p-0">
+			        <div class="container d-flex flex-row nav-top">
+			          <div class="text-center navbar-brand-wrapper d-flex align-items-top">
+			            <a class="navbar-brand brand-logo" href="admin.php?page=apvc-dashboard-page">
+			              <img src="<?php 
+            echo  plugin_dir_url( __FILE__ ) . "/images/apvc-logo.svg" ;
+            ?>" alt="logo"> </a>
+			          </div>
+			        </div>
+			        <div class="nav-bottom">
+			          <div class="container">
+			            <ul class="nav page-navigation">
+			              <li class="nav-item <?php 
+            echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == '' ? "menu-active" : "" ) ;
+            ?>">
+			                <a href="<?php 
+            echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page" ) ;
+            ?>" class="nav-link">
+			                  <i class="link-icon mdi mdi-airplay"></i>
+			                  <span class="menu-title"><?php 
+            echo  __( "Dashboard", "apvc" ) ;
+            ?></span>
+			                </a>
+			              </li>
+			              <li class="nav-item <?php 
+            echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'trending' ? "menu-active" : "" ) ;
+            ?>">
+			                <a href="<?php 
+            echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=trending" ) ;
+            ?>" class="nav-link">
+			                  <i class="link-icon mdi mdi-chart-line"></i>
+			                  <span class="menu-title"><?php 
+            echo  __( "Trending", "apvc" ) ;
+            ?></span>
+			                </a>
+			              </li>
+			              <li class="nav-item <?php 
+            echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'reports' || $_GET['apvc_page'] == 'detailed-reports' ? "menu-active" : "" ) ;
+            ?>">
+			                <a href="<?php 
+            echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=reports" ) ;
+            ?>" class="nav-link">
+			                  <i class="link-icon mdi mdi-content-copy"></i>
+			                  <span class="menu-title"><?php 
+            echo  __( "Reports", "apvc" ) ;
+            ?></span>
+			                </a>
+			                <?php 
+            ?>
+			            	<div class="submenu ">
+			                  <ul class="submenu-item ">
+				                    <li class="nav-item ">
+				                      	<a href="#" class="nav-link">
+					                  		<?php 
+            echo  __( "Reports Country Wise <Br /><span style='color:red;'>Premium Only</span>", "apvc" ) ;
+            ?>
+					                	</a>
+				                    </li>
+			                  </ul>
+			                </div>
+			            	<?php 
+            ?>
+			            	
+			              </li>
+			              <li class="nav-item <?php 
+            echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'shortcode_generator' || $_GET['apvc_page'] == 'shortcode_library' ? "menu-active" : "" ) ;
+            ?>">
+			                <a href="<?php 
+            echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=shortcode_generator" ) ;
+            ?>" class="nav-link">
+			                  <i class="link-icon mdi mdi-palette"></i>
+			                  <span class="menu-title"><?php 
+            echo  __( "Shortcode Generator", "apvc" ) ;
+            ?></span>
+			                </a>
+			                <div class="submenu ">
+			                  <ul class="submenu-item ">
+			                    <li class="nav-item ">
+			                      <a href="<?php 
+            echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=shortcode_library" ) ;
+            ?>" class="nav-link">
+				                  <?php 
+            echo  __( "Shortcode Library", "apvc" ) ;
+            ?>
+				                </a>
+			                    </li>
+			                  </ul>
+			                </div>
+			              </li>
+			              <li class="nav-item <?php 
+            echo  ( $_GET['page'] == 'apvc-dashboard-page' && $_GET['apvc_page'] == 'settings' ? "menu-active" : "" ) ;
+            ?>">
+			                <a href="<?php 
+            echo  get_admin_url( get_current_blog_id(), "admin.php?page=apvc-dashboard-page&apvc_page=settings" ) ;
+            ?>" class="nav-link">
+			                  <i class="link-icon mdi mdi-settings-box"></i>
+			                  <span class="menu-title"><?php 
+            echo  __( "Settings", "apvc" ) ;
+            ?></span>
+			                </a>
+			              </li>
+			              <?php 
+            ?>
+			            </ul>
+			          </div>
+			        </div>
+			      </nav>
+			</div>
+			<?php 
             
-            if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'reports' && !isset( $_GET['article_id'] ) ) {
-                $this->apvc_reports_page_content();
+            if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'trending' ) {
+                $this->apvc_top_trending_content();
             } else {
                 
-                if ( isset( $_GET['apvc_page'] ) && isset( $_GET['article_id'] ) && $_GET['apvc_page'] === 'detailed-reports' && $_GET['article_id'] != '' ) {
-                    $this->apvc_detailed_reports_page_content();
+                if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'reports' && !isset( $_GET['article_id'] ) ) {
+                    $this->apvc_reports_page_content();
                 } else {
                     
-                    if ( isset( $_GET['apvc_page'] ) && isset( $_GET['article_id'] ) && $_GET['apvc_page'] === 'country_reports-detailed' && $_GET['article_id'] != '' ) {
-                        $this->apvc_detailed_reports_for_the_country_content__premium_only();
+                    if ( isset( $_GET['apvc_page'] ) && isset( $_GET['article_id'] ) && $_GET['apvc_page'] === 'detailed-reports' && $_GET['article_id'] != '' ) {
+                        $this->apvc_detailed_reports_page_content();
                     } else {
                         
-                        if ( isset( $_GET['apvc_page'] ) && isset( $_GET['country'] ) && $_GET['apvc_page'] === 'country_reports-list' && $_GET['country'] != '' ) {
-                            $this->country_reports_in_detailed__premium_only();
+                        if ( isset( $_GET['apvc_page'] ) && isset( $_GET['article_id'] ) && $_GET['apvc_page'] === 'detailed-reports-chart' && $_GET['article_id'] != '' ) {
+                            $this->apvc_detailed_reports_on_chart();
                         } else {
                             
-                            if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'settings' ) {
-                                $this->apvc_reports_settings_page();
+                            if ( isset( $_GET['apvc_page'] ) && isset( $_GET['article_id'] ) && $_GET['apvc_page'] === 'country_reports-detailed' && $_GET['article_id'] != '' ) {
+                                $this->apvc_detailed_reports_for_the_country_content__premium_only();
                             } else {
                                 
-                                if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'country_reports' ) {
-                                    $this->country_reports__premium_only();
+                                if ( isset( $_GET['apvc_page'] ) && isset( $_GET['country'] ) && $_GET['apvc_page'] === 'country_reports-list' && $_GET['country'] != '' ) {
+                                    $this->country_reports_in_detailed__premium_only();
                                 } else {
                                     
-                                    if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'shortcode_generator' ) {
-                                        $this->apvc_shortcode_generator_page();
+                                    if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'settings' ) {
+                                        $this->apvc_reports_settings_page();
                                     } else {
                                         
-                                        if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'export_data' ) {
-                                            $this->apvc_export_data_page__premium_only();
+                                        if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'country_reports' ) {
+                                            $this->country_reports__premium_only();
                                         } else {
                                             
-                                            if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'import_data' ) {
-                                                $this->apvc_import_data_page__premium_only();
+                                            if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'shortcode_generator' ) {
+                                                $this->apvc_shortcode_generator_page();
                                             } else {
                                                 
-                                                if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'cleanup_data' ) {
-                                                    $this->apvc_cleanup_data_page__premium_only();
+                                                if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'export_data' ) {
+                                                    $this->apvc_export_data_page__premium_only();
                                                 } else {
                                                     
-                                                    if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'shortcode_library' ) {
-                                                        $this->apvc_shortcode_library();
+                                                    if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'import_data' ) {
+                                                        $this->apvc_import_data_page__premium_only();
                                                     } else {
-                                                        $this->apvc_settings_page_content();
+                                                        
+                                                        if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'cleanup_data' ) {
+                                                            $this->apvc_cleanup_data_page__premium_only();
+                                                        } else {
+                                                            
+                                                            if ( isset( $_GET['apvc_page'] ) && $_GET['apvc_page'] === 'shortcode_library' ) {
+                                                                $this->apvc_shortcode_library();
+                                                            } else {
+                                                                $this->apvc_settings_page_content();
+                                                            }
+                                                        
+                                                        }
+                                                    
                                                     }
                                                 
                                                 }
@@ -2291,21 +2458,21 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
                 }
             
             }
-        
-        }
-        
-        ?>
+            
+            ?>
 		<footer class="footer">
 	        <div class="container clearfix">
 	          <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"><?php 
-        echo  __( "Hand-crafted & made with", "apvc" ) ;
-        ?> <i class="mdi mdi-heart text-danger"></i>&nbsp; <a class="text-danger" href="https://pagevisitcounter.com" target="_blank"><?php 
-        echo  __( "Page Visit Counter", "apvc" ) ;
-        ?></a>
+            echo  __( "Hand-crafted & made with", "apvc" ) ;
+            ?> <i class="mdi mdi-heart text-danger"></i>&nbsp; <a class="text-danger" href="https://pagevisitcounter.com" target="_blank"><?php 
+            echo  __( "Page Visit Counter", "apvc" ) ;
+            ?></a>
 	          </span>
 	        </div>
 	    </footer>
 		<?php 
+        }
+    
     }
     
     /**
@@ -2359,15 +2526,11 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
         $avc_config = (object) get_option( "apvc_configurations", true );
         ?>
 		<div class="container page-body-wrapper avpc-settings-page">
-		    <div class="main-panel container">
+		    <div class="main-panel container"><br />
 		      <div class="content-wrapper">
-		        <?php 
-        $this->apvc_get_version_info_block();
-        ?>
 			        <div class="col-lg-12 grid-margin stretch-card">
 		                <div class="card">
 		                  <div class="card-body">
-
 		                  	<ul class="nav nav-tabs tab-basic" role="tablist">
 					          <li class="nav-item">
 					            <a class="nav-link active" id="basic-tab" data-toggle="tab" href="#basicSettings" role="tab" aria-controls="basicSettings" aria-selected="true"><?php 
@@ -2971,9 +3134,6 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 		<div class="container-fluid page-body-wrapper avpc-settings-page shortcodeG">
 			<div class="main-panel container">
 				<div class="content-wrapper">
-					<?php 
-        $this->apvc_get_version_info_block();
-        ?>
 					<div class="row">
 						<div class="col-lg-5 grid-margin stretch-card">
 							<div class="card">
@@ -3477,9 +3637,6 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
 		<div class="container-fluid page-body-wrapper">
 			<div class="main-panel container">
 				<div class="content-wrapper">
-					<?php 
-        $this->apvc_get_version_info_block();
-        ?>
 					<div class="row">
 						<div class="col-lg-12 grid-margin stretch-card">
 							<div class="card">
@@ -3534,6 +3691,70 @@ class Advanced_Visit_Counter_Admin extends Advanced_Visit_Counter_Queries
             return $wpdb->get_results( "DELETE FROM {$table} WHERE date<='{$dt}' " );
         }
     
+    }
+    
+    public function apvc_upgrade_database()
+    {
+        global  $wpdb ;
+        $history_table = $wpdb->prefix . "avc_page_visit_history";
+        $article_title = $wpdb->get_results( "SELECT article_title FROM {$history_table} WHERE article_title != ''" );
+        
+        if ( empty($article_title) ) {
+            $sqlAlter = "ALTER TABLE {$history_table} DROP COLUMN article_title";
+            $wpdb->query( $sqlAlter );
+        }
+        
+        $addColumn = $wpdb->get_results( "SELECT country FROM {$history_table} WHERE country != ''" );
+        
+        if ( empty($addColumn) ) {
+            $addColumn = "ALTER TABLE {$history_table} ADD country TEXT AFTER flag";
+            $wpdb->query( $addColumn );
+        }
+        
+        return wp_send_json_success();
+        wp_die();
+    }
+    
+    public function apvc_detailed_reports_on_chart()
+    {
+        global  $wpdb ;
+        $tbl_history = APVC_DATA_TABLE;
+        ?>
+		<input type="hidden" id="current_page" value="detailed-reports-chart">
+		<input type="hidden" id="current_article" value="<?php 
+        echo  sanitize_text_field( $_GET["article_id"] ) ;
+        ?>">
+
+		<div class="container-fluid page-body-wrapper">
+			<div class="main-panel container">
+			  <div class="content-wrapper">
+			  	
+			  	<?php 
+        ?>
+					<div class="row grid-margin">
+						<div class="col-12 col-md-12 col-lg-12 stretch-card">
+							<div class="card">
+								<h6>In premium version only.</h6>
+								<img src="<?php 
+        echo  plugin_dir_url( __FILE__ ) ;
+        ?>images/filters-premium.png">
+							</div>
+						</div>
+					</div>
+				<?php 
+        ?>
+				
+			    <div class="card report_card col-md-12">
+			      <div class="card-body">
+			        <div class="row">
+	                    <canvas id="detailed_chart_single" style="position: relative; height:65vh; width:80vw"></canvas>
+			        </div>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+		</div>
+		<?php 
     }
 
 }

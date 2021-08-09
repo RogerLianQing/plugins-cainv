@@ -19,7 +19,7 @@ set_current_screen();
 <body class="pms-custom-page wp-admin wp-core-ui">
     <div class="pms-setup-wrap">
 
-        <img src="<?php echo PMS_PLUGIN_DIR_URL; ?>assets/images/pms-banner.png" alt="Paid Member Subscriptions" style="object-type:cover;height:100%;width:100%;"/>
+        <img src="<?php echo esc_url( PMS_PLUGIN_DIR_URL ); ?>assets/images/pms-banner.png" alt="Paid Member Subscriptions" style="object-type:cover;height:100%;width:100%;"/>
 
         <ul class="pms-setup-steps">
             <?php foreach( $this->steps as $step => $label ) :
@@ -45,13 +45,13 @@ set_current_screen();
 
     <div class="pms-setup-skip">
         <div class="pms-setup-skip__action">
-            <a href="<?php echo admin_url(); ?>"><?php _e( 'Skip Setup', 'paid-member-subscriptions' ); ?></a>
+            <a href="<?php echo esc_url( admin_url() ); ?>"><?php esc_html_e( 'Skip Setup', 'paid-member-subscriptions' ); ?></a>
         </div>
     </div>
 
     <?php do_action( 'wp_footer' ); ?>
     <script type="text/javascript">
-        var ajaxurl = '<?php echo admin_url( 'admin-ajax.php', 'relative' ); ?>'
+        var ajaxurl = '<?php echo esc_url( admin_url( 'admin-ajax.php', 'relative' ) ); ?>'
     </script>
 </body>
 </html>

@@ -5,8 +5,8 @@ Contributors: ultimatemember, champsupertramp, nsinelnikov
 Donate link:
 Tags: community, member, membership, user-profile
 Requires at least: 5.0
-Tested up to: 5.7
-Stable tag: 2.1.8
+Tested up to: 5.8
+Stable tag: 2.2.0
 License: GNU Version 2 or Any Later Version
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 Requires UM core at least: 2.1.0
@@ -52,6 +52,15 @@ Got a problem or need help with Ultimate Member? Head over to our [documentation
 == Changelog ==
 
 = Important: Please update to Ultimate Member 2.1 before updating the extension =
+
+= 2.2.0: 20 July, 2021 =
+
+* Added: Setting for reCAPTCHA v3 validation score
+* Added: Ability to populate score settings for different forms
+
+= 2.1.9: 8 July, 2021 =
+
+* Added: reCAPTCHA v3 validation via score
 
 = 2.1.8: 11 March, 2021 =
 

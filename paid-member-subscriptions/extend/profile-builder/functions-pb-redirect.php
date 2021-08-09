@@ -46,13 +46,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
      */
     function pms_pb_payment_redirect_link() {
 
-        if( !isset( $_GET['pmstkn'] ) || !wp_verify_nonce( $_GET['pmstkn'], 'pms_payment_redirect_link') )
+        if( !isset( $_GET['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field($_GET['pmstkn']), 'pms_payment_redirect_link') )
             return;
 
-        if (empty($_GET['pms_payment_id']))
-            return;
+        if( !empty( $_GET['pms_payment_id'] ) )
+            $payment_id = absint( $_GET['pms_payment_id'] );
 
-        $payment_id = (int)$_GET['pms_payment_id'];
+        if (empty( $payment_id ))
+            return;
 
         /**
          * Automatically logs the user in before redirecting him to the PayPal checkout page
@@ -210,7 +211,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 $message = '<meta http-equiv="Refresh" content="'. $redirect_delay .';url='. $redirect_url .'" />';
 
                 $message .= '<p>' . __( 'You are being redirected to PayPal to complete the payment...', 'paid-member-subscriptions' ) . '<br>';
-                $message .= sprintf( __( '%sClick here%s to go now.', 'paid-member-subscriptions' ), '<a href="'.$redirect_url.'">', '</a>' ) . '</p>';
+                /* translators: %s: anchor tags */
+                $message .= sprintf( __( '%1$sClick here%2$s to go now.', 'paid-member-subscriptions' ), '<a href="'.esc_url( $redirect_url ).'">', '</a>' ) . '</p>';
 
                 return $message;
 

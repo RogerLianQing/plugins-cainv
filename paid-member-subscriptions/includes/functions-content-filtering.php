@@ -233,7 +233,7 @@ function pms_add_restricted_post_preview( $message, $content, $post, $user_ID ) 
             $post_content = do_shortcode( $post_content );
 
             // Trim the preview
-            $preview = wp_trim_words( $post_content, $length, apply_filters( 'pms_restricted_post_preview_more', __( '&hellip;' ) ) );
+            $preview = wp_trim_words( $post_content, $length, apply_filters( 'pms_restricted_post_preview_more', __( '&hellip;', 'paid-member-subscriptions' ) ) );
 
         }
 
@@ -276,11 +276,11 @@ function pms_payment_error_message( $content = '' ) {
     if( ! isset( $_GET['pms_is_register'] ) )
         return $content;
 
-    $payment_id = ( !empty( $_GET['pms_payment_id'] ) ? $_GET['pms_payment_id'] : 0 );
+    $payment_id = ( !empty( $_GET['pms_payment_id'] ) ? absint( $_GET['pms_payment_id'] ) : 0 );
 
-    $error = __( 'Something went wrong while trying to process the payment.', 'paid-member-subscriptions' ) . ' ' . pms_payment_error_message_retry( $_GET['pms_is_register'], $payment_id );
+    $error = __( 'Something went wrong while trying to process the payment.', 'paid-member-subscriptions' ) . ' ' . pms_payment_error_message_retry( sanitize_text_field( $_GET['pms_is_register'] ), $payment_id );
 
-    return apply_filters( 'pms_payment_error_message', '<div class="pms-payment-error"><p>' . $error . '</p></div>', $_GET['pms_is_register'], $payment_id );
+    return apply_filters( 'pms_payment_error_message', '<div class="pms-payment-error"><p>' . $error . '</p></div>', sanitize_text_field( $_GET['pms_is_register'] ), $payment_id );
 }
 add_filter( 'pms_account_shortcode_content', 'pms_payment_error_message', 999 );
 add_filter( 'pms_member_account_not_logged_in', 'pms_payment_error_message', 999 );
@@ -342,7 +342,7 @@ function pms_payment_error_message_retry( $is_register, $payment_id = 0 ) {
 function pms_member_upgrade_subscription( $content ) {
 
     // Do nothing if we cannot validate the nonce
-    if( !isset( $_REQUEST['pmstkn'] ) || !( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_member_nonce' ) || wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_upgrade_subscription' ) ) )
+    if( !isset( $_REQUEST['pmstkn'] ) || !( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_member_nonce' ) || wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_upgrade_subscription' ) ) )
         return $content;
 
     $user_id = pms_get_current_user_id();
@@ -352,27 +352,27 @@ function pms_member_upgrade_subscription( $content ) {
     if( !$member->is_member() )
         return $content;
 
-    if( !isset( $_REQUEST['pms-action'] ) || ($_REQUEST['pms-action'] != 'upgrade_subscription') || !isset( $_REQUEST['subscription_plan'] ) )
+    if( !isset( $_REQUEST['pms-action'] ) || ($_REQUEST['pms-action'] !== 'upgrade_subscription') || !isset( $_REQUEST['subscription_plan'] ) )
         return $content;
 
     if( !in_array( trim( $_REQUEST['subscription_plan'] ), $member->get_subscriptions_ids() ) )
         return $content;
 
     // If we don't have any upgrades available, return the content
-    $subscription_plan_upgrades = pms_get_subscription_plan_upgrades( (int)trim( $_REQUEST['subscription_plan'] ) );
+    $subscription_plan_upgrades = pms_get_subscription_plan_upgrades( trim( absint( $_REQUEST['subscription_plan'] ) ) );
 
     if( empty( $subscription_plan_upgrades ) )
         return $content;
 
     // If URL parameter is set, only show that plan
     if( isset( $_GET['upgrade_subscription_plan'] ) ){
-        $plan = pms_get_subscription_plan( (int)$_GET['upgrade_subscription_plan'] );
+        $plan = pms_get_subscription_plan( absint( $_GET['upgrade_subscription_plan'] ) );
 
         if( !empty( $plan->id ) )
             $subscription_plan_upgrades = array( $plan );
     }
 
-    $subscription_plan = pms_get_subscription_plan( (int)trim( $_REQUEST['subscription_plan'] ) );
+    $subscription_plan = pms_get_subscription_plan( trim( absint( $_REQUEST['subscription_plan'] ) ) );
 
     // Output form
     $output = '<form id="pms-upgrade-subscription-form" action="" method="POST" class="pms-form">';
@@ -407,8 +407,8 @@ function pms_member_upgrade_subscription( $content ) {
         $output .= wp_nonce_field( 'pms_upgrade_subscription', 'pmstkn' );
 
         // Output submit button
-        $output .= '<input type="submit" name="pms_upgrade_subscription" value="' . apply_filters( 'pms_upgrade_subscription_button_value', __( 'Upgrade Subscription', 'paid-member-subscriptions' ) ) . '" />';
-        $output .= '<input type="submit" name="pms_redirect_back" value="' . apply_filters( 'pms_upgrade_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) . '" />';
+        $output .= '<input type="submit" name="pms_upgrade_subscription" value="' . esc_attr( apply_filters( 'pms_upgrade_subscription_button_value', __( 'Upgrade Subscription', 'paid-member-subscriptions' ) ) ) . '" />';
+        $output .= '<input type="submit" name="pms_redirect_back" value="' . esc_attr( apply_filters( 'pms_upgrade_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) ) . '" />';
 
     $output .= '</form>';
 
@@ -425,7 +425,7 @@ add_filter( 'pms_account_shortcode_content', 'pms_member_upgrade_subscription', 
 function pms_member_renew_subscription( $content ) {
 
     // Verify nonce
-    if( !isset( $_REQUEST['pmstkn'] ) || !( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_member_nonce' ) || wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_renew_subscription' ) ) )
+    if( !isset( $_REQUEST['pmstkn'] ) || !( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_member_nonce' ) || wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_renew_subscription' ) ) )
         return $content;
 
     $user_id = pms_get_current_user_id();
@@ -435,14 +435,14 @@ function pms_member_renew_subscription( $content ) {
     if( !$member->is_member() )
         return $content;
 
-    if( !isset( $_REQUEST['pms-action'] ) || ($_REQUEST['pms-action'] != 'renew_subscription') || !isset( $_REQUEST['subscription_plan'] ) )
+    if( !isset( $_REQUEST['pms-action'] ) || ($_REQUEST['pms-action'] !== 'renew_subscription') || !isset( $_REQUEST['subscription_plan'] ) )
         return $content;
 
     if( !in_array( trim( $_REQUEST['subscription_plan'] ), $member->get_subscriptions_ids() ) )
         return $content;
 
     // Get subscription plan and member subscription
-    $subscription_plan       = pms_get_subscription_plan( (int)trim( $_REQUEST['subscription_plan'] ) );
+    $subscription_plan       = pms_get_subscription_plan( trim( absint( $_REQUEST['subscription_plan'] ) ) );
     $member_subscription     = $member->get_subscription( $subscription_plan->id );
 
     // If member subscription is not in renewal period,
@@ -497,8 +497,8 @@ function pms_member_renew_subscription( $content ) {
         $output .= wp_nonce_field( 'pms_renew_subscription', 'pmstkn' );
 
         // Output submit button
-        $output .= '<input type="submit" name="pms_renew_subscription" value="' . apply_filters( 'pms_renew_subscription_button_value', __( 'Renew Subscription', 'paid-member-subscriptions' ) ) . '" />';
-        $output .= '<input type="submit" name="pms_redirect_back" value="' . apply_filters( 'pms_renew_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) . '" />';
+        $output .= '<input type="submit" name="pms_renew_subscription" value="' . esc_attr( apply_filters( 'pms_renew_subscription_button_value', __( 'Renew Subscription', 'paid-member-subscriptions' ) ) ). '" />';
+        $output .= '<input type="submit" name="pms_redirect_back" value="' . esc_attr( apply_filters( 'pms_renew_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) ) . '" />';
 
     $output .= '</form>';
 
@@ -516,15 +516,15 @@ add_filter( 'pms_account_shortcode_content', 'pms_member_renew_subscription', 11
 function pms_member_cancel_subscription( $content ) {
 
     // Verify nonce
-    if( ! isset( $_REQUEST['pmstkn'] ) || ! wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_member_nonce' ) )
+    if( ! isset( $_REQUEST['pmstkn'] ) || ! wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_member_nonce' ) )
         return $content;
 
-    if( ! isset( $_REQUEST['pms-action'] ) || ( $_REQUEST['pms-action'] != 'cancel_subscription' ) || ! isset( $_GET['subscription_id'] ) )
+    if( ! isset( $_REQUEST['pms-action'] ) || ( $_REQUEST['pms-action'] !== 'cancel_subscription' ) || ! isset( $_GET['subscription_id'] ) )
         return $content;
 
     // Get member and the member's subscription
     $member              = pms_get_member( get_current_user_id() );
-    $member_subscription = pms_get_member_subscription( (int)$_GET['subscription_id'] );
+    $member_subscription = pms_get_member_subscription( absint( $_GET['subscription_id'] ) );
 
     if( is_null( $member_subscription ) )
         return $content;
@@ -550,8 +550,8 @@ function pms_member_cancel_subscription( $content ) {
         $output .= wp_nonce_field( 'pms_cancel_subscription', 'pmstkn' );
 
         // Output submit button
-        $output .= '<input type="submit" name="pms_confirm_cancel_subscription" value="' . apply_filters( 'pms_cancel_subscription_button_value', __( 'Confirm', 'paid-member-subscriptions' ) ) . '" />';
-        $output .= '<input type="submit" name="pms_redirect_back" value="' . apply_filters( 'pms_cancel_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) . '" />';
+        $output .= '<input type="submit" name="pms_confirm_cancel_subscription" value="' . esc_attr( apply_filters( 'pms_cancel_subscription_button_value', __( 'Confirm', 'paid-member-subscriptions' ) ) ) . '" />';
+        $output .= '<input type="submit" name="pms_redirect_back" value="' . esc_attr( apply_filters( 'pms_cancel_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) ) . '" />';
 
 
     $output .= '</form>';
@@ -569,7 +569,7 @@ add_filter( 'pms_account_shortcode_content', 'pms_member_cancel_subscription', 1
 function pms_member_abandon_subscription( $content ) {
 
     // Verify nonce
-    if( ! isset( $_REQUEST['pmstkn'] ) || ! wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_member_nonce' ) )
+    if( ! isset( $_REQUEST['pmstkn'] ) || ! wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_member_nonce' ) )
         return $content;
 
     if( ! isset( $_GET['pms-action'] ) || ( $_GET['pms-action'] != 'abandon_subscription' ) || ! isset( $_GET['subscription_id'] ) )
@@ -577,7 +577,7 @@ function pms_member_abandon_subscription( $content ) {
 
     // Get member and the member's subscription
     $member              = pms_get_member( get_current_user_id() );
-    $member_subscription = pms_get_member_subscription( (int)$_GET['subscription_id'] );
+    $member_subscription = pms_get_member_subscription( absint( $_GET['subscription_id'] ) );
 
     if( is_null( $member_subscription ) )
         return $content;
@@ -600,8 +600,8 @@ function pms_member_abandon_subscription( $content ) {
     $output .= wp_nonce_field( 'pms_abandon_subscription', 'pmstkn' );
 
     // Output submit button
-    $output .= '<input type="submit" name="pms_confirm_abandon_subscription" value="' . apply_filters( 'pms_abandon_subscription_button_value', __( 'Abandon Subscription', 'paid-member-subscriptions' ) ) . '" />';
-    $output .= '<input type="submit" name="pms_redirect_back" value="' . apply_filters( 'pms_abandon_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) . '" />';
+    $output .= '<input type="submit" name="pms_confirm_abandon_subscription" value="' . esc_attr( apply_filters( 'pms_abandon_subscription_button_value', __( 'Abandon Subscription', 'paid-member-subscriptions' ) ) ). '" />';
+    $output .= '<input type="submit" name="pms_redirect_back" value="' . esc_attr( apply_filters( 'pms_abandon_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) ) . '" />';
 
     $output .= '</form>';
 
@@ -618,7 +618,7 @@ add_filter( 'pms_account_shortcode_content', 'pms_member_abandon_subscription', 
 function pms_member_retry_payment_subscription( $content ) {
 
     // Verify nonce
-    if( !isset( $_REQUEST['pmstkn'] ) || !( wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_member_nonce' ) || wp_verify_nonce( $_REQUEST['pmstkn'], 'pms_retry_payment_subscription' ) ) )
+    if( !isset( $_REQUEST['pmstkn'] ) || !( wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_member_nonce' ) || wp_verify_nonce( sanitize_text_field( $_REQUEST['pmstkn'] ), 'pms_retry_payment_subscription' ) ) )
         return $content;
 
     $user_id = pms_get_current_user_id();
@@ -628,14 +628,14 @@ function pms_member_retry_payment_subscription( $content ) {
     if( !$member->is_member() )
         return $content;
 
-    if( !isset( $_REQUEST['pms-action'] ) || ($_REQUEST['pms-action'] != 'retry_payment_subscription') || !isset( $_REQUEST['subscription_plan'] ) )
+    if( !isset( $_REQUEST['pms-action'] ) || ($_REQUEST['pms-action'] !== 'retry_payment_subscription') || !isset( $_REQUEST['subscription_plan'] ) )
         return $content;
 
     if( !in_array( trim( $_REQUEST['subscription_plan'] ), $member->get_subscriptions_ids() ) )
         return $content;
 
     // Return if the subscription is not pending
-    $member_subscription = $member->get_subscription( (int)trim( $_REQUEST['subscription_plan'] ) );
+    $member_subscription = $member->get_subscription( trim( absint( $_REQUEST['subscription_plan'] ) ) );
 
     if( $member_subscription['status'] != 'pending' )
         return $content;
@@ -654,7 +654,7 @@ function pms_member_retry_payment_subscription( $content ) {
 
 
     // Get subscription plan
-    $subscription_plan = pms_get_subscription_plan( (int)trim( $_REQUEST['subscription_plan'] ) );
+    $subscription_plan = pms_get_subscription_plan( trim( absint( $_REQUEST['subscription_plan'] ) ) );
 
     $output .= apply_filters( 'pms_retry_payment_subscription_confirmation_message', '<p>' . sprintf( __( 'Your %s subscription is still pending. Do you wish to retry the payment?', 'paid-member-subscriptions' ) . '</p>', '<strong>' . $subscription_plan->name . '</strong>' ), $subscription_plan );
 
@@ -674,8 +674,8 @@ function pms_member_retry_payment_subscription( $content ) {
     $output .= wp_nonce_field( 'pms_retry_payment_subscription', 'pmstkn' );
 
     // Output submit button
-    $output .= '<input type="submit" name="pms_confirm_retry_payment_subscription" value="' . apply_filters( 'pms_retry_payment_subscription_button_value', __( 'Retry payment', 'paid-member-subscriptions' ) ) . '" />';
-    $output .= '<input type="submit" name="pms_redirect_back" value="' . apply_filters( 'pms_retry_payment_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) . '" />';
+    $output .= '<input type="submit" name="pms_confirm_retry_payment_subscription" value="' . esc_attr( apply_filters( 'pms_retry_payment_subscription_button_value', __( 'Retry payment', 'paid-member-subscriptions' ) ) ) . '" />';
+    $output .= '<input type="submit" name="pms_redirect_back" value="' . esc_attr( apply_filters( 'pms_retry_payment_subscription_go_back_button_value', __( 'Go back', 'paid-member-subscriptions' ) ) ). '" />';
 
     $output .= '</form>';
 
@@ -731,9 +731,9 @@ function pms_comments_restrict_view( $comment, $args, $depth ) {
     if ( !$message_shown ) {
 
         if ( is_user_logged_in() )
-            printf( '<p>%s</p>', apply_filters( 'pms_comments_restriction_message_non_members', __( 'Comments are restricted for your membership level.', 'paid-member-subscriptions' ) ) );
+            printf( '<p>%s</p>', esc_html( apply_filters( 'pms_comments_restriction_message_non_members', __( 'Comments are restricted for your membership level.', 'paid-member-subscriptions' ) ) ) );
         else
-            printf( '<p>%s</p>', apply_filters( 'pms_comments_restriction_message_logged_out', __( 'You must be logged in to view the comments.', 'paid-member-subscriptions' ) ) );
+            printf( '<p>%s</p>', esc_html( apply_filters( 'pms_comments_restriction_message_logged_out', __( 'You must be logged in to view the comments.', 'paid-member-subscriptions' ) ) ) );
 
         $message_shown = true;
     }

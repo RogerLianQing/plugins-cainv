@@ -149,7 +149,7 @@ function pms_get_member_subscriptions( $args = array() ) {
     if ( ! empty($args['orderby']) ) {
 
 		// On the edit_member page, make sure abandoned subs are last
-		if( isset( $_GET['page'], $_GET['subpage'] ) && $_GET['page'] == 'pms-members-page' && $_GET['subpage'] == 'edit_member' )
+		if( isset( $_GET['page'], $_GET['subpage'] ) && $_GET['page'] === 'pms-members-page' && $_GET['subpage'] === 'edit_member' )
 			$query_order_by = " ORDER BY status = 'abandoned', status ";
 		else
 			$query_order_by = " ORDER BY " . trim( $args['orderby'] ) . ' ';

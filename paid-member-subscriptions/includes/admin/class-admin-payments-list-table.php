@@ -96,14 +96,14 @@ Class PMS_Payments_List_Table extends WP_List_Table {
     public function get_columns() {
 
         $columns = array(
-            'id'             => __( 'ID', 'paid-member-subscriptions' ),
-            'username'       => __( 'User', 'paid-member-subscriptions' ),
-            'subscriptions'  => __( 'Subscription', 'paid-member-subscriptions' ),
-            'amount'         => __( 'Amount', 'paid-member-subscriptions' ),
-            'date'           => __( 'Date / Time', 'paid-member-subscriptions' ),
-            'type'           => __( 'Type', 'paid-member-subscriptions' ),
-            'transaction_id' => __( 'Transaction ID', 'paid-member-subscriptions' ),
-            'status'         => __( 'Status', 'paid-member-subscriptions' ),
+            'id'             => esc_html__( 'ID', 'paid-member-subscriptions' ),
+            'username'       => esc_html__( 'User', 'paid-member-subscriptions' ),
+            'subscriptions'  => esc_html__( 'Subscription', 'paid-member-subscriptions' ),
+            'amount'         => esc_html__( 'Amount', 'paid-member-subscriptions' ),
+            'date'           => esc_html__( 'Date / Time', 'paid-member-subscriptions' ),
+            'type'           => esc_html__( 'Type', 'paid-member-subscriptions' ),
+            'transaction_id' => esc_html__( 'Transaction ID', 'paid-member-subscriptions' ),
+            'status'         => esc_html__( 'Status', 'paid-member-subscriptions' ),
         );
 
         return apply_filters( 'pms_payments_list_table_columns', $columns );
@@ -169,14 +169,24 @@ Class PMS_Payments_List_Table extends WP_List_Table {
 
         // Search query
         if ( !empty($_REQUEST['s']) ) {
-            $args['search'] = $_REQUEST['s'];
+            $args['search'] = sanitize_text_field( $_REQUEST['s'] );
         }
 
         // Order by query
         if( ! empty( $_REQUEST['orderby'] ) && ! empty( $_REQUEST['order'] ) ) {
 
-            $args['orderby'] = sanitize_text_field( $_REQUEST['orderby'] );
-            $args['order']   = sanitize_text_field( $_REQUEST['order'] );
+            $orderby               = sanitize_text_field( $_REQUEST['orderby'] );
+            $orderby_possibilities = array( 'id', 'status' );
+
+            if( in_array( $orderby, $orderby_possibilities ) )
+                $args['orderby'] = $orderby;
+
+            $order = strtolower( sanitize_text_field( $_REQUEST['order'] ) );
+
+            if( $order == 'asc' )
+                $args['order'] = 'ASC';
+            elseif( $order == 'desc' )
+                $args['order'] = 'DESC';
 
         }
 
@@ -201,9 +211,8 @@ Class PMS_Payments_List_Table extends WP_List_Table {
 
         $args = array();
 
-        if ( !empty($_REQUEST['s']) ) {
-            $args['search'] = $_REQUEST['s'];
-        }
+        if ( !empty($_REQUEST['s']) )
+            $args['search'] = sanitize_text_field( $_REQUEST['s'] );
 
         foreach( $views as $view_slug => $view_link) {
 
@@ -229,7 +238,7 @@ Class PMS_Payments_List_Table extends WP_List_Table {
             if( $user )
                 $username = $user->data->user_login;
             else
-                $username = __( 'User no longer exists', 'paid-member-subscriptions' );
+                $username = esc_html__( 'User no longer exists', 'paid-member-subscriptions' );
 
             // Get payment gateway data
             if( ! empty( $payment_gateways[$payment->payment_gateway]['display_name_admin'] ) )
@@ -321,10 +330,10 @@ Class PMS_Payments_List_Table extends WP_List_Table {
         $actions = array();
 
         // Edit payment row action
-        $actions['edit'] = '<a href="' . add_query_arg( array( 'pms-action' => 'edit_payment', 'payment_id' => $item['id'] ) ) . '">' . __( 'Edit Payment', 'paid-member-subscriptions' ) . '</a>';
+        $actions['edit'] = '<a href="' . add_query_arg( array( 'pms-action' => 'edit_payment', 'payment_id' => $item['id'] ) ) . '">' . esc_html__( 'Edit Payment', 'paid-member-subscriptions' ) . '</a>';
 
         // Delete row action
-        $actions['delete'] = '<a onclick="return confirm( \'' . __( "Are you sure you want to delete this Payment?", "paid-member-subscriptions" ) . ' \' )" href="' . wp_nonce_url( add_query_arg( array( 'pms-action' => 'delete_payment', 'payment_id' => $item['id'] ) ), 'pms_payment_nonce' ) . '">' . __( 'Delete', 'paid-member-subscriptions' ) . '</a>';
+        $actions['delete'] = '<a onclick="return confirm( \'' . esc_html__( "Are you sure you want to delete this Payment?", "paid-member-subscriptions" ) . ' \' )" href="' . wp_nonce_url( add_query_arg( array( 'pms-action' => 'delete_payment', 'payment_id' => $item['id'] ) ), 'pms_payment_nonce' ) . '">' . esc_html__( 'Delete', 'paid-member-subscriptions' ) . '</a>';
 
         /**
          * Filter the actions for a payment
@@ -354,7 +363,7 @@ Class PMS_Payments_List_Table extends WP_List_Table {
     public function column_subscriptions( $item ) {
 
         $subscription_plan = pms_get_subscription_plan( $item['subscription'] );
-        $output = '<span class="pms-payment-list-subscription">' . $subscription_plan->name . '</span>';
+        $output = '<span class="pms-payment-list-subscription">' . esc_html( $subscription_plan->name ) . '</span>';
 
         return $output;
 
@@ -373,12 +382,12 @@ Class PMS_Payments_List_Table extends WP_List_Table {
 
         $payment_statuses = pms_get_payment_statuses();
 
-        $output = apply_filters( 'pms_list_table_' . $this->_args['plural'] . '_show_status_dot', '<span class="pms-status-dot ' . $item['status'] . '"></span>' );
+        $output = apply_filters( 'pms_list_table_' . $this->_args['plural'] . '_show_status_dot', '<span class="pms-status-dot ' . esc_attr( $item['status'] ) . '"></span>' );
 
-        $output .= ( isset( $payment_statuses[ $item['status'] ] ) ? $payment_statuses[ $item['status'] ] : $item['status'] );
+        $output .= ( isset( $payment_statuses[ $item['status'] ] ) ? esc_html( $payment_statuses[ $item['status'] ] ) : $item['status'] );
 
         if( $item['status'] == 'failed' ){
-            $output .= ' | <a href="' . add_query_arg( array( 'pms-action' => 'edit_payment', 'payment_id' => $item['id'] ) ) . '">' . __( 'View Logs', 'paid-member-subscriptions' ) . '</a>';
+            $output .= ' | <a href="' . add_query_arg( array( 'pms-action' => 'edit_payment', 'payment_id' => $item['id'] ) ) . '">' . esc_html__( 'View Logs', 'paid-member-subscriptions' ) . '</a>';
         }
 
         return $output;
@@ -403,7 +412,7 @@ Class PMS_Payments_List_Table extends WP_List_Table {
             $output .= pms_format_price( $item['amount'], pms_get_active_currency() ) . '<span class="pms-discount-dot"> % </span>';
 
             $output .= '<div class="pms-bubble">';
-            $output .= '<div><span class="alignleft">' . __('Discount code', 'paid-member-subscriptions') . '</span><span class="alignright">' . $item['discount_code'] . '</span></div>';
+                $output .= '<div><span class="alignleft">' . esc_html__('Discount code', 'paid-member-subscriptions') . '</span><span class="alignright">' . esc_html( $item['discount_code'] ) . '</span></div>';
             $output .= '</div>';
 
             $output .= '</span>';
@@ -428,7 +437,7 @@ Class PMS_Payments_List_Table extends WP_List_Table {
         $output = $item['type'];
 
         if( ! empty( $item['payment_gateway'] ) )
-            $output .= ' (' . $item['payment_gateway'] . ')';
+            $output .= ' (' . esc_html( $item['payment_gateway'] ) . ')';
 
         return $output;
 
@@ -441,7 +450,7 @@ Class PMS_Payments_List_Table extends WP_List_Table {
      */
     public function no_items() {
 
-        echo __( 'No payments found', 'paid-member-subscriptions' );
+        echo esc_html__( 'No payments found', 'paid-member-subscriptions' );
 
     }
 

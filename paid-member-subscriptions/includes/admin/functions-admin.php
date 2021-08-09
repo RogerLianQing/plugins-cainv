@@ -38,7 +38,7 @@ function pms_reset_cron_jobs(){
     if( !isset( $_GET['pms_reset_cron_jobs'] ) || $_GET['pms_reset_cron_jobs'] != 'true' || !isset( $_GET['_wpnonce'] ) )
         return;
 
-    if( !wp_verify_nonce( $_GET['_wpnonce'], 'pms_reset_cron_jobs' ) )
+    if( !wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'pms_reset_cron_jobs' ) )
         return;
 
     // Remove all cron jobs
@@ -77,6 +77,6 @@ add_action( 'admin_notices', 'pms_show_admin_notice_success_by_get' );
 function pms_show_admin_notice_success_by_get(){
 
     if( isset( $_GET['page'] ) && $_GET['page'] == 'pms-settings-page' && isset( $_GET['sucess_notice'] ) && $_GET['sucess_notice'] == '1' )
-        echo '<div class="updated"><p>' . __( 'Completed successfully.', 'paid-member-subscriptions' ) . '</p></div>';
+        echo '<div class="updated"><p>' . esc_html__( 'Completed successfully.', 'paid-member-subscriptions' ) . '</p></div>';
 
 }

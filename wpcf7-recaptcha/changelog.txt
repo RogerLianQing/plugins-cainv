@@ -2,6 +2,25 @@
 
 This is to keep track of all changes the plugin undertakes. The readme.txt should only contain the most recent 3.
 
+= 1.3.5 =
+
+Release Date: June 21, 2021
+
+* Overview
+	* Updated support for WordPress 5.8.
+
+= 1.3.4 =
+
+Release Date: June 14, 2021
+
+* Overview
+	* Allow users to edit the reCaptcha messages via the "Messages" tab when editing a form. A fallback translation is still provided for older forms.
+	* Encapsulated the controls JS file to make it easier for optimize plugins to include our script in their script soup file.
+
+* Code Changes
+	* Encapsulated the JS in the assets/wpcf7-recaptcha-controls.js file.
+	* Added CF7 filter "wpcf7_messages" to allow users to change validation messages.
+
 = 1.3.3 =
 
 Release Date: March 01, 2021

@@ -69,6 +69,13 @@
 				}
 			}
 		}
+
+        // fix spam
+        if( get_option('drag_n_drop_fix_spam') == 'yes' ) {
+            add_filter('wpcf7_spam', function(){
+                return false;
+            });
+        }
 	}
 
 	// Remove uploaded files when item is deleted permanently.
@@ -183,6 +190,11 @@
 		if ( is_admin() || 'GET' != $_SERVER['REQUEST_METHOD'] || is_robots() || is_feed() || is_trackback() ) {
 			return;
 		}
+
+        // Disable auto delete
+        if( get_option('drag_n_drop_disable_auto_delete') == 'yes' ) {
+            return;
+        }
 
 		// Setup dirctory path
 		$upload = wp_upload_dir();
@@ -550,7 +562,7 @@
 	function dnd_upload_cf7_validation_filter( $result, $tag ) {
 		$name = $tag->name;
 		$id = $tag->get_id_option();
-		$multiple_files = ( ( isset( $_POST[ $name ] ) && count( $_POST[ $name ] ) > 0 ) ? $_POST[ $name ] : null );
+		$multiple_files = ( ( isset( $_POST[ $name ] ) && is_countable( $_POST[ $name ] ) && count( $_POST[ $name ] ) > 0 ) ? $_POST[ $name ] : null );
 		$min_file = $tag->get_option( 'min-file','', true);
 
 		// Cf7 Conditional Field
@@ -942,6 +954,8 @@
 								<option value="h4" <?php selected( get_option('drag_n_drop_heading_tag'), 'h4'); ?>>H4</option>
 								<option value="h5" <?php selected( get_option('drag_n_drop_heading_tag'), 'h5'); ?>>H5</option>
 								<option value="h6" <?php selected( get_option('drag_n_drop_heading_tag'), 'h6'); ?>>H6</option>
+                                <option value="span" <?php selected( get_option('drag_n_drop_heading_tag'), 'span'); ?>>Span</option>
+                                <option value="div" <?php selected( get_option('drag_n_drop_heading_tag'), 'div'); ?>>Div</option>
 							</select>
 						</td>
 					</tr>
@@ -985,6 +999,24 @@
 					<tr valign="top">
 						<th scope="row"><?php _e('Minimum File','drag-and-drop-multiple-file-upload-contact-form-7'); ?></th>
 						<td><input type="text" name="drag_n_drop_error_min_file" placeholder="" class="regular-text" value="<?php echo esc_attr( get_option('drag_n_drop_error_min_file') ); ?>" placeholder="" /></td>
+					</tr>
+				</table>
+
+                <h2><?php _e('Auto Delete Files','drag-and-drop-multiple-file-upload-contact-form-7'); ?></h2>
+
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row"><?php _e('Don\'t delete files','drag-and-drop-multiple-file-upload-contact-form-7'); ?></th>
+						<td><input type="checkbox" name="drag_n_drop_disable_auto_delete" value="yes" <?php checked('yes', get_option('drag_n_drop_disable_auto_delete')); ?>> Yes <br><p class="description"><em>The default will automatically delete files 1-2 hours after submissions, if you want to keep files check "Yes" above.</em></p></td>
+					</tr>
+				</table>
+
+                <h2><?php _e('Spam Filtering Issue','drag-and-drop-multiple-file-upload-contact-form-7'); ?></h2>
+
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row"><?php _e('Fix Spam','drag-and-drop-multiple-file-upload-contact-form-7'); ?></th>
+						<td><input type="checkbox" name="drag_n_drop_fix_spam" value="yes" <?php checked('yes', get_option('drag_n_drop_fix_spam')); ?>> Yes <p class="description"><em>If a “spam” answer is the response, Contact Form 7 will suspend the email and show a message saying, “There was an error trying to send your message", force to send message by checking this option..</em></p></td>
 					</tr>
 				</table>
 
@@ -1067,4 +1099,6 @@
 		register_setting( 'drag-n-drop-upload-file-cf7', 'drag_n_drop_error_max_file','sanitize_text_field' );
 		register_setting( 'drag-n-drop-upload-file-cf7', 'drag_n_drop_error_min_file','sanitize_text_field' );
 		register_setting( 'drag-n-drop-upload-file-cf7', 'drag_n_drop_disable_btn','sanitize_text_field' );
+        register_setting( 'drag-n-drop-upload-file-cf7', 'drag_n_drop_disable_auto_delete','sanitize_text_field' );
+        register_setting( 'drag-n-drop-upload-file-cf7', 'drag_n_drop_fix_spam','sanitize_text_field' );
 	}

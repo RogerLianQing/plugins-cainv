@@ -102,16 +102,16 @@ Class PMS_Custom_Post_Type {
 
         // Labels
         $labels = array(
-            'name'               => sprintf( _x( '%s', 'post type general name', 'paid-member-subscriptions' ), $this->plural_name ),
-            'singular_name'      => sprintf( _x( '%s', 'post type singular name', 'paid-member-subscriptions' ), $this->singular_name ),
-            'menu_name'          => sprintf( _x( '%s', 'admin menu', 'paid-member-subscriptions' ), $this->plural_name ),
-            'name_admin_bar'     => sprintf( _x( '%s', 'add new on admin bar', 'paid-member-subscriptions' ), $this->singular_name ),
-            'add_new'            => _x( 'Add New', 'paid-member-subscriptions' ),
+            'name'               => sprintf( _x( '%s', 'post type general name', 'paid-member-subscriptions' ), $this->plural_name ),// phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
+            'singular_name'      => sprintf( _x( '%s', 'post type singular name', 'paid-member-subscriptions' ), $this->singular_name ),// phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
+            'menu_name'          => sprintf( _x( '%s', 'admin menu', 'paid-member-subscriptions' ), $this->plural_name ),// phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
+            'name_admin_bar'     => sprintf( _x( '%s', 'add new on admin bar', 'paid-member-subscriptions' ), $this->singular_name ),// phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
+            'add_new'            => __( 'Add New', 'paid-member-subscriptions' ),
             'add_new_item'       => sprintf( __( 'Add New %s', 'paid-member-subscriptions' ), $this->singular_name ),
             'new_item'           => sprintf( __( 'New %s', 'paid-member-subscriptions' ), $this->singular_name ),
             'edit_item'          => sprintf( __( 'Edit %s', 'paid-member-subscriptions' ), $this->singular_name ),
             'view_item'          => sprintf( __( 'View %s', 'paid-member-subscriptions' ), $this->singular_name ),
-            'all_items'          => sprintf( __( '%s', 'paid-member-subscriptions' ), $this->plural_name ),
+            'all_items'          => sprintf( __( '%s', 'paid-member-subscriptions' ), $this->plural_name ),// phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
             'search_items'       => sprintf( __( 'Search %s', 'paid-member-subscriptions' ), $this->plural_name ),
             'parent_item_colon'  => sprintf( __( 'Parent %s:', 'paid-member-subscriptions' ), $this->plural_name ),
             'not_found'          => sprintf( __( 'No %s found', 'paid-member-subscriptions' ), strtolower( $this->plural_name ) ),

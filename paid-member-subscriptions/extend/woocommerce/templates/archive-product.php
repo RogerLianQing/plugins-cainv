@@ -34,7 +34,7 @@ do_action( 'woocommerce_before_main_content' );
 $post_id = wc_get_page_id( 'shop' );
 
 if ($post_id != -1)
-    echo pms_get_restricted_post_message( $post_id);
+    echo wp_kses_post( pms_get_restricted_post_message( $post_id) );
 ?>
 
 <?php

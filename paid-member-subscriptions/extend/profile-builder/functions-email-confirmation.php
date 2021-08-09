@@ -38,19 +38,19 @@ add_filter( 'wppb_add_to_user_signup_form_meta', 'pms_pb_save_subscription_plan_
  */
 function pms_pb_email_confirmation_payment_form( $message ) {
 
-    if( empty( $_GET['activation_key'] ) )
+    $activation_key = !empty( $_GET['activation_key'] ) ? sanitize_text_field( $_GET['activation_key'] ) : '';
+
+    if( empty( $activation_key ) )
         return $message;
 
     // Get cached user meta-data
-    $signup_data = wppb_get_signup_data( sanitize_text_field( $_GET['activation_key'] ) );
+    $signup_data = wppb_get_signup_data( $activation_key );
 
     if( is_null( $signup_data ) )
         return $message;
 
-
     if( empty( $signup_data->meta['subscription_plans'] ) )
         return $message;
-
 
     // Setup subscription plan
     $subscription_plan_id = (int)$signup_data->meta['subscription_plans'];
@@ -70,12 +70,10 @@ function pms_pb_email_confirmation_payment_form( $message ) {
 
         if ( empty( $subscription_plan->price ) ) {
 
-            $user_id = wppb_get_user_id_by_activation_key( $signup_data->activation_key );
-
-            if ( !empty( $user_id ) ) {
+            if ( !empty( $member->user_id ) ) {
 
                 $subscription_data = array(
-                    'user_id'              => $user_id,
+                    'user_id'              => $member->user_id,
                     'subscription_plan_id' => $subscription_plan->id,
                     'start_date'           => date('Y-m-d H:i:s'),
                     'expiration_date'      => $subscription_plan->get_expiration_date(),
@@ -94,7 +92,7 @@ function pms_pb_email_confirmation_payment_form( $message ) {
     }
 
     // Form
-    $output = '<form id="pms-register-form pms-ec-register-form" action="" method="POST" class="pms-form">';
+    $output = '<form id="pms-register-form" action="" method="POST" class="pms-form pms-ec-register-form">';
 
         $output .= pms_output_subscription_plans( array( $subscription_plan_id ), array(), false, '', 'register_email_confirmation' );
 
@@ -109,8 +107,11 @@ function pms_pb_email_confirmation_payment_form( $message ) {
         $output .= ob_get_contents();
         ob_end_clean();
 
+        // Add user email to form
+        $output .= '<input name="user_email" type="hidden" value="' . esc_attr( $member->email ) .'" />';
+
         // Submit button
-        $output .= '<input name="pms_register" type="submit" value="' . apply_filters( 'pms_register_form_email_confirmation_submit_text', __( 'Subscribe', 'paid-member-subscriptions' ) ) . '" />';
+        $output .= '<input name="pms_register" type="submit" value="' . esc_attr( apply_filters( 'pms_register_form_email_confirmation_submit_text', __( 'Subscribe', 'paid-member-subscriptions' ) ) ) . '" />';
 
     $output .= '</form>';
 
@@ -137,11 +138,12 @@ add_filter( 'wppb_register_activate_user_error_message2', 'pms_pb_email_confirma
  *
  */
 function pms_pb_remove_email_confirmation_redirect( $redirect_url ) {
+    if( !empty($_GET['activation_key']) )
+        $key = sanitize_text_field( $_GET['activation_key'] );
 
-    if( empty( $_GET['activation_key'] ) )
+    if( empty( $key ) )
         return $redirect_url;
 
-    $key = sanitize_text_field( $_GET['activation_key'] );
 
     // Get user signup data
     $signup = wppb_get_signup_data( $key );
@@ -174,7 +176,7 @@ add_filter( 'wppb_success_email_confirmation_redirect_url', 'pms_pb_remove_email
  */
 function pms_pb_email_confirmation_form_location( $location = '' ) {
 
-    if( !empty( $_POST['pmstkn'] ) && wp_verify_nonce( $_POST['pmstkn'], 'pms_register_form_email_confirmation_nonce' ) )
+    if( !empty( $_POST['pmstkn'] ) && wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_register_form_email_confirmation_nonce' ) )
         return $location = 'register_email_confirmation';
 
     return $location;
@@ -195,12 +197,13 @@ add_filter( 'pms_request_form_location', 'pms_pb_email_confirmation_form_locatio
  */
 function pms_pb_email_confirmation_redirect_url( $url = '', $location = '' ) {
 
-    if( empty( $_GET['activation_key'] ) )
+    if( !empty($_GET['activation_key']) )
+        $key = sanitize_text_field( $_GET['activation_key'] );
+
+    if( empty( $key ) )
         return $url;
 
     if( $location == 'register_email_confirmation' ) {
-
-        $key = sanitize_text_field( $_GET['activation_key'] );
 
         // Get cached redirect url
         $cached_url = get_transient( 'wppb_email_confirmation_success_redirect_url_' . $key );
@@ -240,13 +243,16 @@ add_filter( 'pms_get_redirect_url', 'pms_pb_email_confirmation_redirect_url', 10
  */
 function pms_pb_email_confirmation_handle_form_submission() {
 
-    if( empty( $_POST['pmstkn'] ) || !wp_verify_nonce( $_POST['pmstkn'], 'pms_register_form_email_confirmation_nonce' ) )
+    if( empty( $_POST['pmstkn'] ) || !wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_register_form_email_confirmation_nonce' ) )
         return;
 
-    if( empty( $_GET['activation_key'] ) )
+    if( !empty( $_GET['activation_key'] ) )
+        $activation_key = sanitize_text_field( $_GET['activation_key'] );
+
+    if( empty( $activation_key ) )
         return;
 
-    $user_id = wppb_get_user_id_by_activation_key( sanitize_text_field( $_GET['activation_key'] ) );
+    $user_id = wppb_get_user_id_by_activation_key( $activation_key );
 
     if( false === $user_id )
         return;

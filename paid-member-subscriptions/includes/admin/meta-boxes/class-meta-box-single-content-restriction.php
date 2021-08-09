@@ -33,7 +33,7 @@ Class PMS_Meta_Box_Content_Restriction extends PMS_Meta_Box {
      */
     public function save_data( $post_id, $post ) {
 
-        if( empty( $_POST['pmstkn'] ) || ! wp_verify_nonce( $_POST['pmstkn'], 'pms_meta_box_single_content_restriction_nonce' ) )
+        if( empty( $_POST['pmstkn'] ) || ! wp_verify_nonce( sanitize_text_field( $_POST['pmstkn'] ), 'pms_meta_box_single_content_restriction_nonce' ) )
             return;
 
         /**
@@ -47,7 +47,9 @@ Class PMS_Meta_Box_Content_Restriction extends PMS_Meta_Box {
         delete_post_meta( $post_id, 'pms-content-restrict-subscription-plan' );
         if( isset( $_POST['pms-content-restrict-subscription-plan'] ) ) {
 
-            foreach( $_POST['pms-content-restrict-subscription-plan'] as $subscription_plan_id ) {
+            $plans = array_map( 'sanitize_text_field', $_POST['pms-content-restrict-subscription-plan'] );
+
+            foreach( $plans as $subscription_plan_id ) {
 
                 $subscription_plan_id = (int)$subscription_plan_id;
 
@@ -84,8 +86,8 @@ Class PMS_Meta_Box_Content_Restriction extends PMS_Meta_Box {
         if( isset( $_POST['pms-content-restrict-messages-enabled'] ) )
             update_post_meta( $post_id, 'pms-content-restrict-messages-enabled', 'yes' );
 
-        update_post_meta( $post_id, 'pms-content-restrict-message-logged_out',  ( ! empty( $_POST['pms-content-restrict-message-logged_out'] )  ? $_POST['pms-content-restrict-message-logged_out'] : '' ) );
-        update_post_meta( $post_id, 'pms-content-restrict-message-non_members', ( ! empty( $_POST['pms-content-restrict-message-non_members'] ) ? $_POST['pms-content-restrict-message-non_members'] : '' ) );
+        update_post_meta( $post_id, 'pms-content-restrict-message-logged_out',  ( ! empty( $_POST['pms-content-restrict-message-logged_out'] )  ? wp_kses_post( $_POST['pms-content-restrict-message-logged_out'] ) : '' ) );
+        update_post_meta( $post_id, 'pms-content-restrict-message-non_members', ( ! empty( $_POST['pms-content-restrict-message-non_members'] ) ? wp_kses_post( $_POST['pms-content-restrict-message-non_members'] ) : '' ) );
 
     }
 
@@ -103,7 +105,7 @@ function pms_initialize_content_restrict_metabox() {
             if( in_array( $post_type, array( 'forum', 'topic', 'reply' ) ) )
                 continue;
 
-			$pms_meta_box_content_restriction = new PMS_Meta_Box_Content_Restriction( 'pms_post_content_restriction', __( 'Content Restriction', 'paid-member-subscriptions' ), $post_type, 'normal' );
+			$pms_meta_box_content_restriction = new PMS_Meta_Box_Content_Restriction( 'pms_post_content_restriction', esc_html__( 'Content Restriction', 'paid-member-subscriptions' ), $post_type, 'normal' );
 			$pms_meta_box_content_restriction->init();
 
 		}

@@ -2,14 +2,15 @@
 /**
  * Plugin Name: File Upload Types
  * Description: Easily allow WordPress to accept and upload any file type extension or MIME type, including custom file types.
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: WPForms
  * Author URI: https://wpforms.com
  * Text Domain: file-upload-types
  * Domain Path: /languages/
  */
 
-defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+// Exit if accessed directly.
 
 /**
  * The plugin requires PHP 5.6.0+.
@@ -44,21 +45,21 @@ if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 		echo esc_html__( 'The File Upload Types plugin has been deactivated. Your site is running an outdated version of PHP that is no longer supported and is not compatible with the File Upload Types plugin.', 'file-upload-types' );
 		echo '</p></div>';
 
-		if ( isset( $_GET['activate'] ) ) { // WPCS: CSRF ok.
-			unset( $_GET['activate'] ); // WPCS: CSRF ok.
+		if ( isset( $_GET['activate'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $_GET['activate'] ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 	}
 	add_action( 'admin_notices', 'file_upload_types_deactivate_msg' );
 
 	return;
-}
+}//end if
 
 /**
  * Plugin constants.
  */
 define( 'FILE_UPLOAD_TYPES_PLUGIN_FILE', __FILE__ );
 define( 'FILE_UPLOAD_TYPES_PLUGIN_PATH', dirname( __FILE__ ) );
-define( 'FILE_UPLOAD_TYPES_VERSION', '1.2.1' );
+define( 'FILE_UPLOAD_TYPES_VERSION', '1.2.2' );
 
 require_once __DIR__ . '/vendor/autoload.php';
 

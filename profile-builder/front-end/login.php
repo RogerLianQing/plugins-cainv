@@ -100,19 +100,19 @@ function wppb_process_login(){
  */
 function wppb_login_form( $args = array() ) {
 	$defaults = array(
-		'echo' => true,
+		'echo'           => true,
 		// Default 'redirect' value takes the user back to the request URI.
-		'redirect' => esc_url( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ),
-		'form_id' => 'wppb-loginform',
-		'label_username' => __( 'Username or Email Address' ),
-		'label_password' => __( 'Password' ),
-		'label_remember' => __( 'Remember Me' ),
-		'label_log_in' => __( 'Log In' ),
-		'id_username' => 'user_login',
-		'id_password' => 'user_pass',
-		'id_remember' => 'rememberme',
-		'id_submit' => 'wp-submit',
-		'remember' => true,
+		'redirect'       => esc_url( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ),
+		'form_id'        => 'wppb-loginform',
+		'label_username' => __( 'Username or Email Address', 'profile-builder' ),
+		'label_password' => __( 'Password', 'profile-builder' ),
+		'label_remember' => __( 'Remember Me', 'profile-builder' ),
+		'label_log_in'   => __( 'Log In', 'profile-builder' ),
+		'id_username'    => 'user_login',
+		'id_password'    => 'user_pass',
+		'id_remember'    => 'rememberme',
+		'id_submit'      => 'wp-submit',
+		'remember'       => true,
 		'value_username' => '',
 		// Set 'value_remember' to true to default the "Remember me" checkbox to checked.
 		'value_remember' => false,
@@ -159,10 +159,15 @@ function wppb_login_form( $args = array() ) {
 			</p>
 			<p class="login-password">
 				<label for="' . esc_attr( $args['id_password'] ) . '">' . esc_html( $args['label_password'] ) . '</label>
-				<input type="password" name="pwd" id="' . esc_attr( $args['id_password'] ) . '" class="input" value="" size="20" />
+				<input type="password" name="pwd" id="' . esc_attr( $args['id_password'] ) . '" class="input" value="" size="20" />';
+
+    /* add the HTML for the visibility toggle */
+    $form .= wppb_password_visibility_toggle_html();
+
+    $form .='
 			</p>
 			' . $login_form_middle . '
-			' . ( $args['remember'] ? '<p class="login-remember"><label><input name="rememberme" type="checkbox" id="' . esc_attr( $args['id_remember'] ) . '" value="forever"' . ( $args['value_remember'] ? ' checked="checked"' : '' ) . ' /> ' . esc_html( $args['label_remember'] ) . '</label></p>' : '' ) . '
+			' . ( $args['remember'] ? '<p class="login-remember"><input name="rememberme" type="checkbox" id="' . esc_attr( $args['id_remember'] ) . '" value="forever"' . ( $args['value_remember'] ? ' checked="checked"' : '' ) . ' /><label for="' . esc_attr( $args['id_remember'] ) . '">' . esc_html( $args['label_remember'] ) . '</label></p>' : '' ) . '
 			<p class="login-submit">
 				<input type="submit" name="wp-submit" id="' . esc_attr( $args['id_submit'] ) . '" class="'. apply_filters( 'wppb_login_submit_class', "button button-primary" ) . '" value="' . esc_attr( $args['label_log_in'] ) . '" />
 				<input type="hidden" name="redirect_to" value="' . esc_url( $args['redirect'] ) . '" />
@@ -183,8 +188,6 @@ function wppb_login_form( $args = array() ) {
 	else
 		return $form;
 }
-
-
 
 // when email login is enabled we need to change the post data for the username
 function wppb_change_login_with_email(){
@@ -314,12 +317,26 @@ function wppb_login_redirect( $redirect_to, $requested_redirect_to, $user ){
                 $LostPassURL = apply_filters('wppb_pre_login_url_filter', $LostPassURL);
 
 				/* start building the error string */
-				if( $user->get_error_code() == 'incorrect_password' || $user->get_error_code() == 'invalid_username' )
+				if( in_array( $user->get_error_code(), array( 'empty_username', 'empty_password', 'invalid_username', 'incorrect_password' ) ) )
 					$error_string = '<strong>' . __('ERROR', 'profile-builder') . '</strong>: ';
+
+
+				if ( $user->get_error_code() == 'empty_password' ) {
+					$error_string .= __( 'The password field is empty.', 'profile-builder' ) . ' ';
+				}
 
                 if ($user->get_error_code() == 'incorrect_password') {
                     $error_string .= __('The password you entered is incorrect.', 'profile-builder') . ' ';
                 }
+
+				if ( $user->get_error_code() == 'empty_username' ) {
+					if ($wppb_generalSettings['loginWith'] == 'email')// if login with email is enabled change the word username with email
+						$error_string .= __('The email field is empty.', 'profile-builder') . ' ';
+					else if( $wppb_generalSettings['loginWith'] == 'usernameemail' )// if login with username and email is enabled change the word username with username or email
+						$error_string .= __('The username/email field is empty', 'profile-builder') . ' ';
+					else
+						$error_string .= __('The username field is empty', 'profile-builder') . ' ';
+				}
 
                 if ($user->get_error_code() == 'invalid_username') {
 					if ($wppb_generalSettings['loginWith'] == 'email')// if login with email is enabled change the word username with email
@@ -334,6 +351,7 @@ function wppb_login_redirect( $redirect_to, $requested_redirect_to, $user ){
 					$error_string .= '<a href="' . esc_url( $LostPassURL ) . '" title="' . __('Password Lost and Found.', 'profile-builder') . '">' . __('Lost your password?', 'profile-builder') . '</a>';
 
             }
+
             // if the error string is empty it means that none of the fields were completed
             if (empty($error_string) || ( in_array( 'empty_username', $user->get_error_codes() ) && in_array( 'empty_password', $user->get_error_codes() ) ) ) {
                 $error_string = '<strong>' . __('ERROR', 'profile-builder') . '</strong>: ' . __('Both fields are empty.', 'profile-builder') . ' ';
@@ -375,6 +393,8 @@ add_filter( 'login_redirect', 'wppb_login_redirect', 20, 3 );
 function wppb_front_end_login( $atts ){
     global $wppb_shortcode_on_front;
     $wppb_shortcode_on_front = true;
+    global $wppb_login_shortcode_on_front;
+    $wppb_login_shortcode_on_front = true;
 	/* define a global so we now we have the shortcode login present */
 	global $wppb_login_shortcode;
 	$wppb_login_shortcode = true;
@@ -446,13 +466,13 @@ function wppb_front_end_login( $atts ){
                 $i = 0;
                 if (!empty($register_url)) {
                     if ( wppb_check_missing_http( $register_url ) ) $register_url = "http://" . $register_url;
-                    $login_form .= '<a href="' . esc_url($register_url) . '">'. apply_filters('wppb_login_register_text', __('Register','profile-builder')) .'</a>';
+                    $login_form .= '<a class="login-register" href="' . esc_url($register_url) . '">'. apply_filters('wppb_login_register_text', __('Register','profile-builder')) .'</a>';
                     $i++;
                 }
                 if (!empty($lostpassword_url)) {
                     if ($i != 0) $login_form .= ' | ';
                     if ( wppb_check_missing_http( $lostpassword_url ) ) $lostpassword_url = "http://" . $lostpassword_url;
-                    $login_form .= '<a href="'. esc_url($lostpassword_url) .'">'. apply_filters('wppb_login_lostpass_text', __('Lost your password?','profile-builder')) .'</a>';
+                    $login_form .= '<a class="login-lost-password" href="'. esc_url($lostpassword_url) .'">'. apply_filters('wppb_login_lostpass_text', __('Lost your password?','profile-builder')) .'</a>';
                 }
                 $login_form .= '</p>';
         }

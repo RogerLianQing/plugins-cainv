@@ -74,8 +74,8 @@ class PMS_Export {
 	 */
 	public function csv_cols() {
 		$cols = array(
-			'id'   => __( 'ID',   'paid-member-subscriptions' ),
-			'date' => __( 'Date', 'paid-member-subscriptions' )
+			'id'   => esc_html__( 'ID',   'paid-member-subscriptions' ),
+			'date' => esc_html__( 'Date', 'paid-member-subscriptions' )
 		);
 		return $cols;
 	}
@@ -102,7 +102,7 @@ class PMS_Export {
 		$cols = $this->get_csv_cols();
 		$i = 1;
 		foreach( $cols as $col_id => $column ) {
-			echo '"' . addslashes( $column ) . '"';
+			echo '"' . addslashes( $column ) . '"'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo $i == count( $cols ) ? '' : ',';
 			$i++;
 		}
@@ -148,7 +148,7 @@ class PMS_Export {
 			foreach ( $row as $col_id => $column ) {
 				// Make sure the column is valid
 				if ( array_key_exists( $col_id, $cols ) ) {
-					echo '"' . addslashes( $column ) . '"';
+					echo '"' . addslashes( $column ) . '"'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					echo $i == count( $cols ) ? '' : ',';
 					$i++;
 				}
@@ -169,7 +169,7 @@ class PMS_Export {
 	 */
 	public function export() {
 		if ( ! $this->can_export() )
-			wp_die( __( 'You do not have permission to export data.', 'paid-member-subscriptions' ), __( 'Error', 'paid-member-subscriptions' ), array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You do not have permission to export data.', 'paid-member-subscriptions' ), esc_html__( 'Error', 'paid-member-subscriptions' ), array( 'response' => 403 ) );
 
 		// Set headers
 		$this->headers();

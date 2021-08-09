@@ -84,7 +84,7 @@ class PMS_Elementor_Login_Widget extends \Elementor\Widget_Base {
 
 		$settings = $this->get_settings_for_display();
 
-		echo do_shortcode( '[pms-login redirect_url='.$settings['pms_after_login_redirect_url'].' logout_redirect_url='.$settings['pms_after_logout_redirect_url'].']');
+		echo do_shortcode( '[pms-login redirect_url='. esc_url( $settings['pms_after_login_redirect_url'] ).' logout_redirect_url='.esc_url( $settings['pms_after_logout_redirect_url'] ).']');
 
 	}
 

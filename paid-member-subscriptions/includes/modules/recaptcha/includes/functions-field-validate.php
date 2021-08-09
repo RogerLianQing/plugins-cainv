@@ -25,35 +25,67 @@ function pms_recaptcha_field_validate( $form_location = 'register' ) {
         return false;
     }
 
-    // Connect to Google to check if the response is valid
-    $response = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify',
-        array(
-            'timeout' => 15,
-            'body' => array(
-                'secret'    => ( !empty( $settings['secret_key'] ) ? $settings['secret_key'] : '' ),
-                'response'  => $post_data['g-recaptcha-response'],
-                'remoteip'  => pms_get_user_ip_address()
-            )
-        )
-    );
+    $already_validated = false;
 
+    if( !wp_doing_ajax() ){
+
+        $saved = get_option( 'pms_recaptcha_validations', array() );
+
+        if( isset( $saved[ $post_data['g-recaptcha-response'] ] ) && $saved[ $post_data['g-recaptcha-response'] ] == true ){
+            $already_validated = true;
+
+            unset( $saved[ $post_data['g-recaptcha-response'] ] );
+
+            update_option( 'pms_recaptcha_validations', $saved );
+
+        }
+
+    }
 
     $has_error = false;
 
-    if( wp_remote_retrieve_response_code( $response ) === 200 ) {
+    // Connect to Google to check if the response is valid
+    if( !$already_validated ){
 
-        $body = json_decode( wp_remote_retrieve_body( $response ), ARRAY_A );
+        $response = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify',
+            array(
+                'timeout' => 15,
+                'body' => array(
+                    'secret'    => ( !empty( $settings['secret_key'] ) ? $settings['secret_key'] : '' ),
+                    'response'  => $post_data['g-recaptcha-response'],
+                    'remoteip'  => pms_get_user_ip_address()
+                )
+            )
+        );
 
-        if( empty( $body['success'] ) && $body['success'] != true )
+        if( wp_remote_retrieve_response_code( $response ) === 200 ) {
+
+            $body = json_decode( wp_remote_retrieve_body( $response ), ARRAY_A );
+
+            if( empty( $body['success'] ) && $body['success'] != true )
+                $has_error = true;
+
+        } else
             $has_error = true;
 
-    } else
-        $has_error = true;
+    }
 
+    // Save valid results when they are being triggered from an ajax request
+    // made from the Stripe payment gateway
+    if( isset( $post_data['stripe_ajax_payment_intent_nonce'] ) && wp_doing_ajax() ){
+
+        $saved = get_option( 'pms_recaptcha_validations', array() );
+
+        if( $has_error === false )
+            $saved[ $post_data['g-recaptcha-response'] ] = true;
+
+        update_option( 'pms_recaptcha_validations', $saved );
+
+    }
 
     // Add errors if something went wrong
     if( $has_error )
-        pms_errors()->add( 'recaptcha-' . $form_location, __( 'Could not validate the reCaptcha. Please complete it again.', 'paid-member-subscriptions' ) );
+        pms_errors()->add( 'recaptcha-' . $form_location, esc_html__( 'Could not validate the reCaptcha. Please complete it again.', 'paid-member-subscriptions' ) );
 
     return ! $has_error;
 
@@ -112,7 +144,7 @@ function pms_recaptcha_field_validate_form_login( $user ) {
 
         if( ! $validated ) {
 
-            $user = new WP_Error( 'pms-recaptcha-' . $login_form_location, '<strong>' . __('ERROR', 'paid-member-subscriptions') . '</strong>: ' . pms_errors()->get_error_message( 'recaptcha-' . $login_form_location ) );
+            $user = new WP_Error( 'pms-recaptcha-' . $login_form_location, '<strong>' . esc_html__('ERROR', 'paid-member-subscriptions') . '</strong>: ' . pms_errors()->get_error_message( 'recaptcha-' . $login_form_location ) );
 
         }
 
@@ -139,7 +171,7 @@ function pms_recaptcha_field_validate_default_wp_register( $errors ) {
 
     if( ! $validated ) {
 
-        $errors->add( 'recaptcha-default_wp_register', '<strong>' . __('ERROR', 'paid-member-subscriptions') . '</strong>: ' . pms_errors()->get_error_message( 'recaptcha-default_wp_register' ) );
+        $errors->add( 'recaptcha-default_wp_register', '<strong>' . esc_html__('ERROR', 'paid-member-subscriptions') . '</strong>: ' . pms_errors()->get_error_message( 'recaptcha-default_wp_register' ) );
 
     }
 
@@ -158,11 +190,11 @@ function pms_recaptcha_field_validate_default_wp_recover_password_form(){
     if( empty( $_REQUEST['user_login'] ) )
         return;
 
-    $validated = pms_recaptcha_field_validate( 'default_wp_recover_password' );
+    $validated = pms_recaptcha_field_validate( 'default_wp_recover_password' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
     if( ! $validated ) {
 
-        wp_die( pms_errors()->get_error_message( 'recaptcha-default_wp_recover_password' ) . '<br />' . __( "Click the BACK button on your browser, and try again.", 'paid-member-subscriptions' ) ) ;
+        wp_die( pms_errors()->get_error_message( 'recaptcha-default_wp_recover_password' ) . '<br />' . esc_html__( "Click the BACK button on your browser, and try again.", 'paid-member-subscriptions' ) ) ;  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
     }
 

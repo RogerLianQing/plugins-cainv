@@ -78,10 +78,10 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
 
         $columns = array(
             'cb'       => '<input type="checkbox" />',
-            'user_id'  => __( 'User ID', 'paid-member-subscriptions' ),
-            'username' => __( 'Username', 'paid-member-subscriptions' ),
-            'email'    => __( 'E-mail', 'paid-member-subscriptions' ),
-            'role'     => __( 'Role', 'paid-member-subscriptions' )
+            'user_id'  => esc_html__( 'User ID', 'paid-member-subscriptions' ),
+            'username' => esc_html__( 'Username', 'paid-member-subscriptions' ),
+            'email'    => esc_html__( 'E-mail', 'paid-member-subscriptions' ),
+            'role'     => esc_html__( 'Role', 'paid-member-subscriptions' )
         );
 
         return $columns;
@@ -146,27 +146,27 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
 
             echo '<select id="pms_add_member_bulk_subscription_plan" name="subscription_plan_id">';
 
-                echo '<option value="-1">' . __( 'Select Subscription Plan...', 'paid-member-subscriptions' ) . '</option>';
+                echo '<option value="-1">' . esc_html__( 'Select Subscription Plan...', 'paid-member-subscriptions' ) . '</option>';
 
                 if( !empty( $subscription_plans ) ) {
                     foreach( $subscription_plans as $subscription_plan )
-                        echo '<option value="' . $subscription_plan->id . '">' . $subscription_plan->name . '</option>';
+                        echo '<option value="' . esc_attr( $subscription_plan->id ) . '">' . esc_html( $subscription_plan->name ) . '</option>';
                 }
 
             echo '</select>';
 
-            echo '<select id="pms_add_member_bulk_subscription_status" name="subscription_status" title="'. __( 'Select Subscription Status', 'paid-member-subscriptions' ) .'">';
+            echo '<select id="pms_add_member_bulk_subscription_status" name="subscription_status" title="'. esc_html__( 'Select Subscription Status', 'paid-member-subscriptions' ) .'">';
 
-                echo '<option value="" disabled>'. __( 'Select Subscription Status...', 'paid-member-subscriptions' ) .'</option>';
-                echo '<option value="active">' . __( 'Active', 'paid-member-subscriptions' ) . '</option>';
-                echo '<option value="pending">' . __( 'Pending', 'paid-member-subscriptions' ) . '</option>';
-                echo '<option value="expired">' . __( 'Expired', 'paid-member-subscriptions' ) . '</option>';
+                echo '<option value="" disabled>'. esc_html__( 'Select Subscription Status...', 'paid-member-subscriptions' ) .'</option>';
+                echo '<option value="active">' . esc_html__( 'Active', 'paid-member-subscriptions' ) . '</option>';
+                echo '<option value="pending">' . esc_html__( 'Pending', 'paid-member-subscriptions' ) . '</option>';
+                echo '<option value="expired">' . esc_html__( 'Expired', 'paid-member-subscriptions' ) . '</option>';
 
             echo '</select>';
 
-            echo '<label>' . __( 'Expiration Date', 'paid-member-subscriptions' ) . '<input id="pms_add_member_bulk_subscription_expiration_date" type="text" name="subscription_expiration_date" class="datepicker pms-subscription-field" value="" />' . '</label>';
+            echo '<label>' . esc_html__( 'Expiration Date', 'paid-member-subscriptions' ) . '<input id="pms_add_member_bulk_subscription_expiration_date" type="text" name="subscription_expiration_date" class="datepicker pms-subscription-field" value="" />' . '</label>';
 
-            submit_button( __( 'Assign', 'paid-member-subscriptions' ), 'secondary', 'pms_add_member_bulk_assign', false );
+            submit_button( esc_html__( 'Assign', 'paid-member-subscriptions' ), 'secondary', 'pms_add_member_bulk_assign', false );
 
         }
 
@@ -191,8 +191,8 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
                 'order'                => 'ASC',
                 'orderby'              => 'ID',
                 'offset'               => '',
-                'limit'               => '',
-                'search'               => $_REQUEST['s']
+                'limit'                => '',
+                'search'               => sanitize_text_field( $_REQUEST['s'] )
             );
         }
 
@@ -208,7 +208,7 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
             }
 
             // Get the current view to filter results
-            $selected_view = ( isset( $_GET['pms-view'] ) ? trim( $_GET['pms-view'] ) : '' );
+            $selected_view = ( isset( $_GET['pms-view'] ) ? sanitize_text_field( $_GET['pms-view'] ) : '' );
         }
 
 
@@ -216,8 +216,8 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
 
             $usr = get_userdata( $user['id'] );
 
-            $checkbox = '<label class="screen-reader-text" for="user_' . $usr->data->ID . '">' . sprintf( __( 'Select %s' ), $usr->data->user_login ) . '</label>'
-                . "<input type='checkbox' name='users[]' id='user_{$usr->data->ID}' value='{$usr->data->ID}' />";
+            $checkbox = '<label class="screen-reader-text" for="user_' . esc_attr( $usr->data->ID ) . '">' . sprintf( esc_html__( 'Select %s', 'paid-member-subscriptions' ), esc_html( $usr->data->user_login ) ) . '</label>'
+                . "<input type='checkbox' name='users[]' id='user_". esc_attr( $usr->data->ID ) ."' value='". esc_attr( $usr->data->ID ) ."' />";
 
             $data[] = array(
                 'cb'                => $checkbox,
@@ -345,10 +345,10 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
         $actions = array();
 
         // Add an edit user action for each member
-        $actions['view_user'] = '<a href="' . add_query_arg( array( 'user_id' => $item['user_id']), admin_url('user-edit.php') ) . '">' . __( 'Edit User', 'paid-member-subscriptions' ) . '</a>';
+        $actions['view_user'] = '<a href="' . add_query_arg( array( 'user_id' => $item['user_id']), admin_url('user-edit.php') ) . '">' . esc_html__( 'Edit User', 'paid-member-subscriptions' ) . '</a>';
 
         // Return value saved for username and also the row actions
-        return $item['username'] . $this->row_actions( $actions );
+        return esc_html( $item['username'] ) . $this->row_actions( $actions );
 
     }
 
@@ -371,9 +371,9 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
 
             $output .= '<span class="pms-member-list-subscription pms-has-bubble">';
 
-                $output .= apply_filters( 'pms_list_table_' . $this->_args['plural'] . '_show_status_dot', '<span class="pms-status-dot ' . $member_subscription['status'] . '"></span>' );
+                $output .= apply_filters( 'pms_list_table_' . $this->_args['plural'] . '_show_status_dot', '<span class="pms-status-dot ' . esc_attr( $member_subscription['status'] ) . '"></span>' );
 
-                $output .= ( !empty( $subscription_plan->id ) ? $subscription_plan->name : sprintf( __( 'Subscription Plan Not Found - ID: %s', 'paid-member-subscriptions' ), $member_subscription['subscription_plan_id'] ) );
+                $output .= ( !empty( $subscription_plan->id ) ? esc_html( $subscription_plan->name ) : sprintf( esc_html__( 'Subscription Plan Not Found - ID: %s', 'paid-member-subscriptions' ), $member_subscription['subscription_plan_id'] ) );
 
                 $output .= '<div class="pms-bubble">';
 
@@ -381,7 +381,7 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
 
                     $output .= '<div><span class="alignleft">' . 'Start date' . '</span><span class="alignright">' . pms_sanitize_date( $member_subscription['start_date'] ) . '</span></div>';
                     $output .= '<div><span class="alignleft">' . 'Expiration date' . '</span><span class="alignright">' . pms_sanitize_date( $member_subscription['expiration_date'] ) . '</span></div>';
-                    $output .= '<div><span class="alignleft">' . 'Status' . '</span><span class="alignright">' .( isset( $statuses[ $member_subscription['status'] ] ) ? $statuses[ $member_subscription['status'] ] : '' ) . '</span></div>';
+                    $output .= '<div><span class="alignleft">' . 'Status' . '</span><span class="alignright">' .( isset( $statuses[ $member_subscription['status'] ] ) ? esc_html( $statuses[ $member_subscription['status'] ] ) : '' ) . '</span></div>';
 
                 $output .= '</div>';
 
@@ -400,7 +400,7 @@ Class PMS_Members_Add_New_Bulk_List_Table extends WP_List_Table {
      */
     public function no_items() {
 
-        echo __( 'No users found', 'paid-member-subscriptions' );
+        echo esc_html__( 'No users found', 'paid-member-subscriptions' );
 
     }
 

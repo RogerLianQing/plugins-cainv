@@ -149,7 +149,7 @@
 }
 
 #wppb-login-wrap p,
-#select_user_to_edit_form p{
+#select_user_to_edit_form p {
 	overflow:hidden;
 	margin:0;
 	padding-bottom:14px;
@@ -178,6 +178,12 @@
     margin-left: 0;
 }
 
+.wppb-form-field.wppb-default-password,
+.wppb-form-field.wppb-default-repeat-password,
+#wppb-login-wrap .login-password {
+    position: relative;
+}
+
 .wppb-form-field label,
 #wppb-login-wrap .login-username label,
 #wppb-login-wrap .login-password label{
@@ -194,6 +200,21 @@
 #wppb-login-wrap .login-password input{
 	width:69.9%;
 	float:left;
+}
+
+#wppb-login-wrap .login-remember {
+	display: flex;
+	align-items: center;
+}
+
+#wppb-login-wrap .login-remember input {
+	cursor: pointer;
+}
+
+#wppb-login-wrap .login-remember label {
+	padding-left: 8px;
+	margin-bottom: 0px;
+	cursor: pointer;
 }
 
 .wppb-form-field.wppb-timepicker select {
@@ -844,6 +865,35 @@ li.wppb-facet-search{
 #pass-strength-result.strong {
     background-color: #c3ff88;
     border-color: #8dff1c;
+}
+
+/*--------------------------------------------------------------
+7.0 Show/Hide Password
+--------------------------------------------------------------*/
+.wppb-form-field.wppb-default-password button.wppb-toggle-pw,
+.wppb-form-field.wppb-default-repeat-password button.wppb-toggle-pw,
+#wppb-login-wrap .login-password button.wppb-toggle-pw {
+    position: absolute;
+    right: 4px;
+	/* fields bottom padding  / 2 */
+    top: -7px;
+    background: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	cursor: pointer;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.wppb-form-field.wppb-default-password button img,
+.wppb-form-field.wppb-default-repeat-password button img,
+#wppb-login-wrap .login-password button img {
+    width: 20px;
 }
 
 /**************************************************/

@@ -12,22 +12,22 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 <!-- Display Options -->
 <div class="pms-meta-box-fields-wrapper">
-    <h4><?php echo __( 'Display Options', 'paid-member-subscriptions' ); ?></h4>
+    <h4><?php echo esc_html__( 'Display Options', 'paid-member-subscriptions' ); ?></h4>
 
     <!-- Type of protection -->
     <div class="pms-meta-box-field-wrapper">
 
         <?php
-            $content_restrict_types = apply_filters( 'pms_single_post_content_restrict_types', array( 'message' => __( 'Message', 'paid-member-subscriptions' ), 'redirect' => __( 'Redirect', 'paid-member-subscriptions' ), 'template' => __( 'Template', 'paid-member-subscriptions' ) ) );
+            $content_restrict_types = apply_filters( 'pms_single_post_content_restrict_types', array( 'message' => esc_html__( 'Message', 'paid-member-subscriptions' ), 'redirect' => esc_html__( 'Redirect', 'paid-member-subscriptions' ), 'template' => esc_html__( 'Template', 'paid-member-subscriptions' ) ) );
         ?>
 
         <?php $content_restrict_type = get_post_meta( $post->ID, 'pms-content-restrict-type', true ); ?>
 
-        <label class="pms-meta-box-field-label"><?php _e( 'Type of Restriction', 'paid-member-subscriptions' ); ?></label>
+        <label class="pms-meta-box-field-label"><?php esc_html_e( 'Type of Restriction', 'paid-member-subscriptions' ); ?></label>
 
         <label class="pms-meta-box-checkbox-label" for="pms-content-restrict-type-default">
              <input type="radio" id="pms-content-restrict-type-default" value="default" <?php if( empty( $content_restrict_type ) || $content_restrict_type == 'default' ) echo 'checked="checked"'; ?> name="pms-content-restrict-type">
-             <?php echo __( 'Settings Default', 'paid-member-subscriptions' ); ?>
+             <?php esc_html_e( 'Settings Default', 'paid-member-subscriptions' ); ?>
         </label>
 
         <?php foreach( $content_restrict_types as $type_slug => $type_label ): ?>
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
     <!-- Display For options -->
     <div class="pms-meta-box-field-wrapper">
-        <label class="pms-meta-box-field-label"><?php _e( 'Display For', 'paid-member-subscriptions' ); ?></label>
+        <label class="pms-meta-box-field-label"><?php esc_html_e( 'Display For', 'paid-member-subscriptions' ); ?></label>
 
         <?php
         $user_status          = get_post_meta( $post->ID, 'pms-content-restrict-user-status', true );
@@ -51,22 +51,22 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         <label class="pms-meta-box-checkbox-label" for="pms-content-restrict-user-status">
             <input type="checkbox" value="loggedin" <?php if( ! empty( $user_status ) && $user_status == 'loggedin' ) echo 'checked="checked"'; ?> name="pms-content-restrict-user-status" id="pms-content-restrict-user-status">
-            <?php echo __( 'Logged In Users', 'paid-member-subscriptions' ); ?>
+            <?php echo esc_html__( 'Logged In Users', 'paid-member-subscriptions' ); ?>
         </label>
 
         <?php if( !empty( $subscription_plans ) ): foreach( $subscription_plans as $subscription_plan ): ?>
 
-            <label class="pms-meta-box-checkbox-label" for="pms-content-restrict-subscription-plan-<?php echo $subscription_plan->id ?>">
-                <input type="checkbox" value="<?php echo $subscription_plan->id; ?>" <?php if( in_array( $subscription_plan->id, $selected_subscription_plans ) ) echo 'checked="checked"'; ?> name="pms-content-restrict-subscription-plan[]" id="pms-content-restrict-subscription-plan-<?php echo $subscription_plan->id ?>">
+            <label class="pms-meta-box-checkbox-label" for="pms-content-restrict-subscription-plan-<?php echo esc_attr( $subscription_plan->id ) ?>">
+                <input type="checkbox" value="<?php echo esc_attr( $subscription_plan->id ); ?>" <?php if( in_array( $subscription_plan->id, $selected_subscription_plans ) ) echo 'checked="checked"'; ?> name="pms-content-restrict-subscription-plan[]" id="pms-content-restrict-subscription-plan-<?php echo esc_attr( $subscription_plan->id ) ?>">
                 <?php echo esc_html( $subscription_plan->name ); ?>
             </label>
 
         <?php endforeach; ?>
             <p class="description" style="margin-top: 10px;">
-                <?php printf( __( 'Checking only "Logged In Users" will show this %s to all logged in users, regardless of subscription plan.', 'paid-member-subscriptions' ), $post->post_type); ?>
+                <?php printf( esc_html__( 'Checking only "Logged In Users" will show this %s to all logged in users, regardless of subscription plan.', 'paid-member-subscriptions' ), esc_html( $post->post_type ) ); ?>
             </p>
             <p class="description">
-                <?php printf( __( 'Checking any subscription plan will show this %s only to users that are subscribed to those particular plans.', 'paid-member-subscriptions' ), $post->post_type); ?>
+                <?php printf( esc_html__( 'Checking any subscription plan will show this %s only to users that are subscribed to those particular plans.', 'paid-member-subscriptions' ), esc_html( $post->post_type ) ); ?>
             </p>
         <?php endif; ?>
 
@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 <!-- Restriction Redirect URL -->
 <div id="pms-meta-box-fields-wrapper-restriction-redirect-url" class="pms-meta-box-fields-wrapper <?php echo ( $content_restrict_type == 'redirect' ? 'pms-enabled' : '' ); ?>">
-    <h4><?php echo __( 'Restriction Redirect URL', 'paid-member-subscriptions' ); ?></h4>
+    <h4><?php echo esc_html__( 'Restriction Redirect URL', 'paid-member-subscriptions' ); ?></h4>
 
 
     <!-- Custom Redirect URL Enabler -->
@@ -88,11 +88,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         <?php $custom_redirect_url_enabled = get_post_meta( $post->ID, 'pms-content-restrict-custom-redirect-url-enabled', true ); ?>
 
-        <label class="pms-meta-box-field-label"><?php _e( 'Enable Custom Redirect URL', 'paid-member-subscriptions' ); ?></label>
+        <label class="pms-meta-box-field-label"><?php esc_html_e( 'Enable Custom Redirect URL', 'paid-member-subscriptions' ); ?></label>
 
         <label class="pms-meta-box-checkbox-label" for="pms-content-restrict-custom-redirect-url-enabled">
             <input type="checkbox" value="yes" <?php echo ( ! empty( $custom_redirect_url_enabled ) ? 'checked="checked"' : '' ); ?> name="pms-content-restrict-custom-redirect-url-enabled" id="pms-content-restrict-custom-redirect-url-enabled">
-            <span class="description"><?php printf( __( 'Check if you wish to add a custom redirect URL for this %s.', 'paid-member-subscriptions' ), $post->post_type); ?></span>
+            <span class="description"><?php printf( esc_html__( 'Check if you wish to add a custom redirect URL for this %s.', 'paid-member-subscriptions' ), esc_html( $post->post_type ) ); ?></span>
         </label>
     </div>
 
@@ -101,11 +101,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         <?php $custom_redirect_url = get_post_meta( $post->ID, 'pms-content-restrict-custom-redirect-url', true ); ?>
 
-        <label class="pms-meta-box-field-label" for="pms-content-restrict-custom-redirect-url"><?php _e( 'Custom Redirect URL', 'paid-member-subscriptions' ); ?></label>
+        <label class="pms-meta-box-field-label" for="pms-content-restrict-custom-redirect-url"><?php esc_html_e( 'Custom Redirect URL', 'paid-member-subscriptions' ); ?></label>
 
         <label class="pms-meta-box-checkbox-label pms-meta-box-checkbox-label-custom-redirect">
-            <input type="text" value="<?php echo ( ! empty( $custom_redirect_url ) ? $custom_redirect_url : '' ); ?>" name="pms-content-restrict-custom-redirect-url" id="pms-content-restrict-custom-redirect-url" class="widefat">
-            <p class="description"><?php printf( __( 'Add a URL where you wish to redirect users that do not have access to this %s and try to access it directly.', 'paid-member-subscriptions' ), $post->post_type ); ?></p>
+            <input type="text" value="<?php echo ( ! empty( $custom_redirect_url ) ? esc_attr( $custom_redirect_url ) : '' ); ?>" name="pms-content-restrict-custom-redirect-url" id="pms-content-restrict-custom-redirect-url" class="widefat">
+            <p class="description"><?php printf( esc_html__( 'Add a URL where you wish to redirect users that do not have access to this %s and try to access it directly.', 'paid-member-subscriptions' ), esc_html( $post->post_type ) ); ?></p>
         </label>
 
     </div>
@@ -114,12 +114,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
         <?php $custom_non_member_redirect_url = get_post_meta( $post->ID, 'pms-content-restrict-custom-non-member-redirect-url', true ); ?>
 
-        <label class="pms-meta-box-field-label" for="pms-content-restrict-custom-non-member-redirect-url"><?php _e( 'Custom Non-Member Redirect URL', 'paid-member-subscriptions' ); ?></label>
+        <label class="pms-meta-box-field-label" for="pms-content-restrict-custom-non-member-redirect-url"><?php esc_html_e( 'Custom Non-Member Redirect URL', 'paid-member-subscriptions' ); ?></label>
 
         <label class="pms-meta-box-checkbox-label pms-meta-box-checkbox-label-custom-redirect">
-            <input type="text" value="<?php echo ( ! empty( $custom_non_member_redirect_url ) ? $custom_non_member_redirect_url : '' ); ?>" name="pms-content-restrict-custom-non-member-redirect-url" id="pms-content-restrict-custom-non-member-redirect-url" class="widefat">
-            <p class="description"><?php printf( __( 'Add a URL where you wish to redirect logged-in non-members that do not have access to this %s and try to access it directly.', 'paid-member-subscriptions' ), $post->post_type ); ?></p>
-            <p class="description"><?php printf( __( 'Leave this field empty if you want all users to be redirected to the same URL.', 'paid-member-subscriptions' ) ); ?></p>
+            <input type="text" value="<?php echo ( ! empty( $custom_non_member_redirect_url ) ? esc_attr( $custom_non_member_redirect_url ) : '' ); ?>" name="pms-content-restrict-custom-non-member-redirect-url" id="pms-content-restrict-custom-non-member-redirect-url" class="widefat">
+            <p class="description"><?php printf( esc_html__( 'Add a URL where you wish to redirect logged-in non-members that do not have access to this %s and try to access it directly.', 'paid-member-subscriptions' ), esc_html( $post->post_type ) ); ?></p>
+            <p class="description"><?php printf( esc_html__( 'Leave this field empty if you want all users to be redirected to the same URL.', 'paid-member-subscriptions' ) ); ?></p>
         </label>
 
     </div>
@@ -127,17 +127,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 <!-- Restriction Messages -->
 <div class="pms-meta-box-fields-wrapper">
-    <h4><?php echo __( 'Restriction Messages', 'paid-member-subscriptions' ); ?></h4>
+    <h4><?php echo esc_html__( 'Restriction Messages', 'paid-member-subscriptions' ); ?></h4>
 
     <div class="pms-meta-box-field-wrapper">
         <?php
         $custom_messages_enabled = get_post_meta( $post->ID, 'pms-content-restrict-messages-enabled', true );
         ?>
-        <label class="pms-meta-box-field-label"><?php _e( 'Enable Custom Messages', 'paid-member-subscriptions' ); ?></label>
+        <label class="pms-meta-box-field-label"><?php esc_html_e( 'Enable Custom Messages', 'paid-member-subscriptions' ); ?></label>
 
         <label class="pms-meta-box-checkbox-label" for="pms-content-restrict-messages-enabled">
             <input type="checkbox" value="yes" <?php echo ( ! empty( $custom_messages_enabled ) ? 'checked="checked"' : '' ); ?> name="pms-content-restrict-messages-enabled" id="pms-content-restrict-messages-enabled">
-            <span class="description"><?php printf( __( 'Check if you wish to add custom messages for this %s.', 'paid-member-subscriptions' ), $post->post_type ); ?></span>
+            <span class="description"><?php printf( esc_html__( 'Check if you wish to add custom messages for this %s.', 'paid-member-subscriptions' ), esc_html( $post->post_type ) ); ?></span>
         </label>
     </div>
 
@@ -146,11 +146,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <!-- Other restriction messages -->
         <?php do_action( 'pms_view_meta_box_content_restrict_restriction_messages_top', $post->ID ); ?>
 
-        <p><strong><?php _e( 'Messages for logged-out users', 'paid-member-subscriptions' ); ?></strong></p>
-        <?php wp_editor( get_post_meta( $post->ID, 'pms-content-restrict-message-logged_out', true ), 'messages_logged_out', array( 'textarea_name' => 'pms-content-restrict-message-logged_out', 'editor_height' => 200 ) ); ?>
+        <p><strong><?php esc_html_e( 'Messages for logged-out users', 'paid-member-subscriptions' ); ?></strong></p>
+        <?php wp_editor( wp_kses_post( get_post_meta( $post->ID, 'pms-content-restrict-message-logged_out', true ) ), 'messages_logged_out', array( 'textarea_name' => 'pms-content-restrict-message-logged_out', 'editor_height' => 200 ) ); ?>
 
-        <p><strong><?php _e( 'Messages for logged-in non-member users', 'paid-member-subscriptions' ); ?></strong></p>
-        <?php wp_editor( get_post_meta( $post->ID, 'pms-content-restrict-message-non_members', true ), 'messages_non_members', array( 'textarea_name' => 'pms-content-restrict-message-non_members', 'editor_height' => 200 ) ); ?>
+        <p><strong><?php esc_html_e( 'Messages for logged-in non-member users', 'paid-member-subscriptions' ); ?></strong></p>
+        <?php wp_editor( wp_kses_post( get_post_meta( $post->ID, 'pms-content-restrict-message-non_members', true ) ), 'messages_non_members', array( 'textarea_name' => 'pms-content-restrict-message-non_members', 'editor_height' => 200 ) ); ?>
 
         <!-- Other restriction messages -->
         <?php do_action( 'pms_view_meta_box_content_restrict_restriction_messages_bottom', $post->ID ); ?>

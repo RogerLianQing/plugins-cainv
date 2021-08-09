@@ -26,8 +26,6 @@
             $(".apvc-post-types-select, .apvc_articles_list").select2();
         }
         
-/* Premium Code Stripped by Freemius */
-
 
         if ($('#apvc_exclude_counts, #apvc_ip_address, #apvc_exclude_show_counter').length) {
             $('#apvc_exclude_counts, #apvc_ip_address, #apvc_exclude_show_counter').tagsInput({

@@ -52,7 +52,7 @@ function pms_log_payment_data_changes( $payment_id, $data, $old_data ) {
  */
 add_action( 'pms_member_subscription_update', 'pms_log_admin_subscription_changes', 20, 3 );
 function pms_log_admin_subscription_changes( $subscription_id, $data, $old_data ){
-    if( !isset( $_GET['page'] ) || $_GET['page'] != 'pms-members-page' )
+    if( !isset( $_GET['page'] ) || $_GET['page'] !== 'pms-members-page' )
         return;
 
     $keys = array(

@@ -28,7 +28,7 @@
   white-space: pre-wrap;
 }
 .trending .card-title{ font-size: 16px; }
-.menu-active{ background: #0c7cd5; }
+.menu-active{ background: #004aad; }
 .report_card  .pagination{ margin: 10px 0px 10px 0px; }
 .avpc-settings-page .card{ max-width: 100% !important; margin-top: 0px !important  }
 .apvc-save-btns button{ margin: 10px; }
@@ -47,8 +47,6 @@
 
 
 
-/* Premium Code Stripped by Freemius */
-
 #ui-datepicker-div{ border: none; background-color: none; }
 .add-block .btn_rv{ width: 20%; }
 .card .nav{ display: contents !important;}
@@ -60,7 +58,7 @@
 .hm_dash_heading #apvc_update_dash { margin-left: 12px; border-radius: 30px; }
 .avpc-settings-page .tab-basic .nav-item, .shortcodeG .tab-basic .nav-item{ width: auto !important; float: left; margin-right: 5%; }
 /*.form-sample .col-md-6{ float: left; }*/
-.tab-basic .nav-item .nav-link.active{ border-bottom: 2px solid #0c7cd5; color: #2196f3; }
+.tab-basic .nav-item .nav-link.active{ border-bottom: 2px solid #004aad; color: #004aad; }
 .tab-content .tab-pane { display: none;} 
 .tab-content .active { display: block; }
 #widTemplates{ max-width: 500px; }
@@ -71,3 +69,4 @@
 #apvc_generate_shortcode .apvc-save-btns button{ padding: 15px; }
 
 .topPagesTableTag{ width: 100%; }
+/*.trending .card, .general-reports .card, .filters-list{ padding: 0px; }*/
