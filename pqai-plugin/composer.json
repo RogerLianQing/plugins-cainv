@@ -1,0 +1,17 @@
+{
+    "name": "pqai/wordpress-plugin",
+    "description": "Plugin to add PQAI search page in Wordpress websites.",
+    "type": "project",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "PQAI Team",
+            "email": "mahesh@projectpq.ai"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {"Inc\\": "./inc"}
+    }
+}
