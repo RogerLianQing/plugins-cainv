@@ -43,7 +43,9 @@
 		<button id='prev_btn' onclick=prev_page() style="display : none;">Previous</button>
 		<button id='next_btn' onclick=next_page() style="display : none;">Next</button>
 	</div>
-	
+	<div id='results_numerical_display'>
+		
+	</div>
 	<div id="output-pane">
 		<!-- results are rendered here -->
 	</div>
@@ -72,6 +74,7 @@
             enableSearchControls();
             render(results);
 			current_page('flex');
+			results_display();
 			var next = document.getElementById('next_btn').style.display = 'flex';
         });
     }
@@ -125,7 +128,15 @@
 
         xhttp.send();
     }
+	
+	function results_display() {
+		
+		var res_num = "Results " + ((results_per_page)*(current_page_num - 1) + 1).toString() + '-' + (results_per_page*current_page_num).toString()
+		document.getElementById("results_numerical_display").textContent = res_num;
+	}
+	
 	function current_page(mode) {
+		
 		var target = Array.from(document.getElementsByClassName(current_page_num.toString()));
 		target.forEach(function(item) {
 			item.style.display = mode
@@ -135,6 +146,7 @@
 	function next_page() {
 		current_page('none');
 		current_page_num++;
+		
 		if (current_page_num === 2) {
 			var prev = document.getElementById('prev_btn').style.display = 'flex'
 		}
@@ -142,6 +154,7 @@
 			var next = document.getElementById('next_btn').style.display = 'none'
 		}
 		current_page('flex');
+		results_display();
 	}
 	
 	function prev_page() {
@@ -154,6 +167,7 @@
 			var next = document.getElementById('next_btn').style.display = 'flex'
 		}
 		current_page('flex');
+		results_display();
 	}
 	
     function render(results) {
