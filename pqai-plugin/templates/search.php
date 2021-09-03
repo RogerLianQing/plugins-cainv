@@ -1,5 +1,8 @@
-<link href="/testsite/wp-content/plugins/pqai-plugin/assets/bootstrap.min.css" rel="stylesheet">
-<script src="/testsite/wp-content/plugins/pqai-plugin/assets/bootstrap.min.js"></script>
+<!--link href="/testsite/wp-content/plugins/pqai-plugin/assets/bootstrap.min.css" rel="stylesheet">
+<script src="/testsite/wp-content/plugins/pqai-plugin/assets/bootstrap.min.js"></script-->
+
+<link href="/wp-content/plugins/pqai-plugin/assets/bootstrap.min.css" rel="stylesheet">
+<script src="/wp-content/plugins/pqai-plugin/assets/bootstrap.min.js"></script>
 <style>
     .card {
         margin-top: 20px;

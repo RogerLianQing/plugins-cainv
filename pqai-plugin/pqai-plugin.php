@@ -47,7 +47,8 @@ if ( !class_exists( 'PQAIWordpressPlugin' ) ) {
 
 		public function search_link( $links ) {
 			$search_link = 
-				'<a href="/testsite/wp-content/plugins/pqai-plugin/templates/search.php">PQAI Search</a>';
+				// '<a href="/testsite/wp-content/plugins/pqai-plugin/templates/search.php">PQAI Search</a>';
+				'<a href="/wp-content/plugins/pqai-plugin/templates/search.php">PQAI Search</a>';
 			array_push( $links, $search_link );
 			return $links;
 		}
